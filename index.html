@@ -184,6 +184,13 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .shade{position:absolute;left:0;right:0;top:0;height:var(--shade,14%);background:linear-gradient(#e9e6df,#d6d2c9);box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:ns-resize;touch-action:none;z-index:2}
 .shade::after{content:"";position:absolute;left:50%;bottom:6px;width:34%;height:5px;transform:translateX(-50%);border-radius:3px;background:rgba(0,0,0,.22)}
 
+/* layover */
+#breakView{z-index:15;background:radial-gradient(ellipse at 50% 30%,#1b2233,#07080b 70%);display:grid;place-items:center;text-align:center}
+.brk{display:grid;gap:22px;justify-items:center;padding:24px}
+.ringwrap{position:relative;width:220px;height:220px}
+.ringwrap svg{width:100%;height:100%}
+.ringwrap b{position:absolute;inset:0;display:grid;place-items:center;font-size:46px;font-weight:500}
+.brk p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
 /* done & tickets */
 #doneView{background:rgba(0,0,0,.55);display:grid;place-items:center;padding:20px}
 .donecard{width:min(360px,100%);background:#1c1c1e;border-radius:26px;padding:24px;display:grid;gap:10px;text-align:center;justify-items:center;border:1px solid var(--line)}
@@ -224,10 +231,11 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <!-- HOME -->
 <div class="greet" id="greet"><h1 id="hello">좋은 오후예요</h1><p>지금 <b id="here">서울/인천</b>에 있어요</p></div>
 <div class="sheet" id="home"><div class="in">
-  <div class="stats">
+  <div class="stats" style="grid-template-columns:repeat(2,1fr)">
     <div><span class="lbl">방문 공항</span><b id="kVisited">1</b></div>
     <div><span class="lbl">비행</span><b id="kFlights">0</b></div>
     <div><span class="lbl">집중 시간</span><b id="kMinutes">0m</b></div>
+    <div><span class="lbl">비행 거리</span><b id="kKm">0 km</b></div>
   </div>
   <div class="legend"><span><i style="background:var(--visited)"></i>가 본 공항</span><span><i style="background:var(--yellow)"></i>안 가 본 공항</span><span><i style="background:#fff"></i>지금 위치</span></div>
   <button class="pill" id="goSelect">여정 시작하기</button>
@@ -336,7 +344,22 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="big" id="doneTime"></div>
     <span class="lbl" id="doneNote"></span>
     <span class="badge" id="doneBadge" hidden>새로운 공항!</span>
-    <button class="pill" id="toHome" style="width:100%;margin-top:8px">홈으로</button>
+    <button class="pill" id="layover" style="width:100%;margin-top:8px">5분 환승 휴식</button>
+    <button class="pill dark" id="toHome" style="width:100%">홈으로</button>
+  </div>
+</div>
+
+<!-- LAYOVER BREAK -->
+<div class="full" id="breakView" hidden>
+  <div class="brk">
+    <span class="lbl" style="letter-spacing:.2em">환승 라운지</span>
+    <div class="ringwrap">
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="5"/>
+        <circle id="brRing" cx="60" cy="60" r="54" fill="none" stroke="#ffd60a" stroke-width="5" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="0" transform="rotate(-90 60 60)"/></svg>
+      <b id="brTime" class="mono">5:00</b>
+    </div>
+    <p>물 한 잔 마시고 기지개를 켜 보세요.<br>휴식이 끝나면 다음 비행을 고를 수 있어요.</p>
+    <button class="pill dark sm" id="brSkip">휴식 건너뛰기</button>
   </div>
 </div>
 
@@ -635,7 +658,8 @@ function addOverlays(){
   const firstSym=baseSymbols[0];
   if(!map.hasImage('me'))map.addImage('me',planeImage('#ffd60a',96),{pixelRatio:2});
   if(!map.hasImage('tr'))map.addImage('tr',planeImage('#f2f2f7',64),{pixelRatio:2});
-  for(const id of ['night','airports','ring','preview','remain','flown','traffic','plane'])if(!map.getSource(id))map.addSource(id,{type:'geojson',data:EMPTY});
+  for(const id of ['night','history','airports','ring','preview','remain','flown','traffic','plane'])if(!map.getSource(id))map.addSource(id,{type:'geojson',data:EMPTY});
+  map.addLayer({id:'history',type:'line',source:'history',layout:{'line-cap':'round'},paint:{'line-color':'#ff9f43','line-width':1.8,'line-opacity':.7}});
   map.addLayer({id:'night',type:'fill',source:'night',paint:{'fill-color':'#020617','fill-opacity':curStyle==='light'?.22:.34,'fill-antialias':false}},firstSym);
   map.addLayer({id:'ring',type:'line',source:'ring',paint:{'line-color':'#ffd60a','line-width':1.6,'line-dasharray':[2,2],'line-opacity':.85}});
   map.addLayer({id:'airports',type:'circle',source:'airports',paint:{
@@ -651,7 +675,7 @@ function addOverlays(){
     paint:{'text-color':'#64d2ff','text-halo-color':'rgba(0,0,0,.8)','text-halo-width':1.2}});
   map.addLayer({id:'plane',type:'symbol',source:'plane',layout:{'icon-image':'me','icon-size':['interpolate',['linear'],['zoom'],1,.7,8,1.15],'icon-rotate':['get','b'],
     'icon-rotation-alignment':'map','icon-pitch-alignment':'map','icon-allow-overlap':true,'icon-ignore-placement':true}});
-  applyToggles();refreshAirports();refreshNight(true);
+  applyToggles();refreshAirports();refreshNight(true);refreshHistory();
   if(mode==='select')renderSelect(true);
   if(F){map.getSource('flown')&&updateFlightLayers(true)}
 }
@@ -672,6 +696,15 @@ function refreshNight(force){
   for(let lon=-180;lon<=180;lon+=2){const H=(lon-sl)*rad;pts.push([lon,Math.atan(-Math.cos(H)/tanD)/rad])}
   const pole=sd>0?-89.9:89.9,ring=[...pts,[180,pole],[-180,pole],pts[0]];
   map.getSource('night')&&map.getSource('night').setData({type:'Feature',geometry:{type:'Polygon',coordinates:[ring]}});
+}
+
+/* past routes: every landed flight drawn on the globe at home */
+function refreshHistory(){
+  if(!map||!map.getSource('history'))return;
+  const showIt=mode==='home'||mode==='tickets',seen=new Set();
+  const feats=showIt?S.tickets.filter(t=>t.status==='landed'&&AP[t.from]&&AP[t.to]).filter(t=>{const k=[t.from,t.to].sort().join();if(seen.has(k))return false;seen.add(k);return true})
+    .map(t=>({type:'Feature',geometry:{type:'LineString',coordinates:arc(AP[t.from].v,AP[t.to].v,0,1,64)}})):[];
+  map.getSource('history').setData({type:'FeatureCollection',features:feats});
 }
 
 /* ---------- airports on map ---------- */
@@ -707,7 +740,7 @@ function show(m){
   if(m==='home'){renderHome();setMarkers([[S.city,'dep']]);clearRoute();map.easeTo({center:AP[S.city].ll,zoom:1.7,pitch:0,bearing:0,padding:pad(),duration:1200})}
   if(m==='tickets'){renderTickets();setMarkers([])}
   if(m==='done')$('mapCtl').hidden=true;
-  refreshAirports();
+  refreshAirports();refreshHistory();
   requestAnimationFrame(()=>{const sh=[...document.querySelectorAll('.sheet')].find(s=>!s.hidden);document.documentElement.style.setProperty('--attrib-lift',(sh?sh.offsetHeight:0)+'px')});
 }
 function pad(){const sh=[...document.querySelectorAll('.sheet')].find(s=>!s.hidden);return {top:80,bottom:sh?sh.offsetHeight+10:30,left:20,right:20}}
@@ -719,6 +752,8 @@ function renderHome(){
   $('hello').textContent=h>=5&&h<12?'좋은 아침이에요':h>=12&&h<18?'좋은 오후예요':h>=18&&h<22?'좋은 저녁이에요':'좋은 밤이에요';
   $('here').textContent=AP[S.city].n;
   $('kVisited').textContent=S.visited.length;$('kFlights').textContent=S.flights;$('kMinutes').textContent=fmtHM(S.minutes);
+  const km=S.tickets.filter(t=>t.status==='landed'&&AP[t.from]&&AP[t.to]).reduce((s,t)=>s+distKm(AP[t.from],AP[t.to]),0);
+  $('kKm').textContent=Math.round(km).toLocaleString('en-US')+' km';
   $('tcount').textContent=S.tickets.length?S.tickets.length:'';
 }
 
@@ -879,9 +914,9 @@ function board(){
 }
 $('go').onclick=()=>{
   ac();F.status='flying';F.depUTC=Date.now();view='chase';northUp=false;
-  setMarkers(F.random?[[F.from,'dep']]:[[F.from,'dep'],[F.to,'arr']]);map.getSource('preview').setData(EMPTY);
+  setMarkers(F.random?[[F.from,'dep']]:[[F.from,'dep'],[F.to,'arr']]);map.getSource('preview')&&map.getSource('preview').setData(EMPTY);
   if(F.random){map.setMinZoom(6.5)}
-  show('flight');enterView(true);updateFlightLayers(true);
+  show('flight');enterView(true);updateFlightLayers(true);keepAwake(true);
   const sc=SCEN.find(s=>s.id===F.scen),dest=F.random?'알 수 없는 목적지':AP[F.to].n;
   caption([`기장입니다. 몰입 항공 ${F.no}편 ${dest}행에 오신 것을 환영합니다.`,`비행 시간은 ${fmtKo(F.min)}입니다.`,`알림은 잠시 내려 두시고 ${sc.n}에 집중해 주세요.`]);
 };
@@ -926,7 +961,7 @@ $('winView').addEventListener('dblclick',()=>$('btnWindow').click());
 $('btnPause').onclick=()=>{if(!F||F.status!=='flying')return;F.paused=true;$('pauseInfo').textContent=`남은 시간 ${fmtKo(Math.ceil((F.T-F.elapsed)/60000))} · 일시정지 중에는 비행이 멈춰요`;$('pauseSheet').hidden=false};
 $('resume').onclick=()=>{F.paused=false;$('pauseSheet').hidden=true};
 $('divert').onclick=()=>{
-  F.paused=false;F.status='diverted';setTicket('diverted');$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;
+  F.paused=false;F.status='diverted';setTicket('diverted');$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;keepAwake(false);$('layover').hidden=true;
   $('doneSub').textContent='회항';$('doneTitle').textContent=AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
   $('doneNote').textContent='이번 비행은 기록되지 않아요. 다음 비행에서 다시 도전해 보세요.';$('doneBadge').hidden=true;map.setMinZoom(0);show('done');
 };
@@ -937,13 +972,37 @@ function land(){
   winOn=false;$('winView').hidden=true;$('btnWindow').setAttribute('aria-pressed',false);map.setMinZoom(0);
   $('doneSub').textContent='도착';$('doneTitle').textContent=AP[F.to].n+'에 도착했어요';$('doneTime').textContent=fmtHM(F.min);
   $('doneNote').textContent=`${SCEN.find(s=>s.id===F.scen).n}에 집중한 시간 · 자리 비움 ${F.away}회`;$('doneBadge').hidden=!isNew;
-  setMarkers([[F.from,'dep'],[F.to,'arr']]);updateFlightLayers(true);show('done');view='route';enterView();
+  setMarkers([[F.from,'dep'],[F.to,'arr']]);updateFlightLayers(true);$('layover').hidden=false;show('done');view='route';enterView();
+  keepAwake(false);chime();updateLockScreen();
 }
 $('toHome').onclick=()=>{F=null;show('home')};
+
+/* layover: a short break between focus flights */
+let lay=null;
+$('layover').onclick=()=>{
+  const total=5*60000,end=Date.now()+total;$('doneView').hidden=true;$('breakView').hidden=false;keepAwake(true);
+  const tick=()=>{const left=Math.max(0,end-Date.now());$('brTime').textContent=`${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`;
+    $('brRing').style.strokeDashoffset=String(339.3*(left/total));
+    if(left<=0){finishBreak(true);return}lay=setTimeout(tick,250)};tick();
+};
+function finishBreak(rang){clearTimeout(lay);keepAwake(false);if(rang)chime();$('breakView').hidden=true;F=null;show('home')}
+$('brSkip').onclick=()=>finishBreak(false);
+
+/* screen stays on while flying */
+let wake=null;
+async function keepAwake(on){
+  try{if(on){if(!wake&&navigator.wakeLock&&document.visibilityState==='visible'){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}
+    else if(wake){await wake.release();wake=null}}catch(e){wake=null}
+}
+function chime(){
+  try{const a=ac(),t=a.currentTime;[[880,0],[659.25,.22]].forEach(([fq,d])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=fq;
+    g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.22,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+1.4);o.connect(g).connect(a.destination);o.start(t+d);o.stop(t+d+1.5)})}catch(e){}
+}
 
 /* away tracking */
 let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();return}
+  if(F&&F.status==='flying'&&mode==='flight')keepAwake(true);
   const s=Math.round((Date.now()-hiddenAt)/1000);if(F&&F.status==='flying'&&mode==='flight'&&hiddenAt&&s>=5){F.away++;toast(`자리 비움 ${s}초가 기록됐어요`)}});
 
 /* ---------- other aircraft (fictional traffic) ---------- */
@@ -1053,10 +1112,35 @@ function drawSky(){
 }
 
 /* ---------- ambient sound ---------- */
-let snd=null;
+/* Ambient sound plays through an <audio> element so the phone treats it as media:
+   it keeps playing with the screen locked and the lock screen shows the flight and time left. */
+let snd=null,mediaOut=null,mediaEl=null,lockT=null;
+function soundOut(){
+  const a=ac();
+  if(mediaOut===null){
+    try{const dest=a.createMediaStreamDestination();mediaEl=new Audio();mediaEl.srcObject=dest.stream;mediaEl.setAttribute('playsinline','');
+      mediaEl.play().then(()=>{}).catch(()=>{});mediaOut=dest}catch(e){mediaOut=false}
+  }
+  if(mediaEl&&mediaEl.paused)mediaEl.play().catch(()=>{});
+  return mediaOut||a.destination;
+}
+function updateLockScreen(){
+  if(!('mediaSession' in navigator))return;
+  try{
+    if(!snd){navigator.mediaSession.metadata=null;return}
+    let title='몰입 비행',artist='';
+    if(F&&F.status==='flying'){const left=Math.ceil(Math.max(0,F.T-F.elapsed)/60000);title=`${F.from} → ${F.random?'???':F.to} · ${left>=60?Math.floor(left/60)+'시간 ':''}${left%60}분 남음`;artist=F.paused?'일시정지':SCEN.find(s=>s.id===F.scen).n+'에 집중하는 중'}
+    else if(F&&F.status==='landed'){title=`${AP[F.to].n} 도착`;artist='몰입 비행'}
+    navigator.mediaSession.metadata=new MediaMetadata({title,artist,album:'몰입 비행',artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'}]});
+    navigator.mediaSession.setActionHandler('pause',()=>setSound('off'));
+    navigator.mediaSession.setActionHandler('play',()=>setSound('engine'));
+  }catch(e){}
+}
 function setSound(kind){
   document.querySelectorAll('[data-snd]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.snd===kind));
   $('btnSound').classList.toggle('hot',kind!=='off');
+  clearInterval(lockT);if(kind!=='off')lockT=setInterval(updateLockScreen,20000);setTimeout(updateLockScreen,50);
+  if(kind==='off'&&mediaEl)setTimeout(()=>{if(!snd)mediaEl.pause()},1000);
   if(snd){try{snd.g.gain.setTargetAtTime(0,audio.currentTime,.3);const old=snd;setTimeout(()=>old.nodes.forEach(n=>{try{n.stop&&n.stop();n.disconnect()}catch(e){}}),900)}catch(e){}snd=null}
   if(kind==='off')return;
   const a=ac(),len=a.sampleRate*4,buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);
@@ -1070,7 +1154,7 @@ function setSound(kind){
   if(kind==='engine'){f.type='lowpass';f.frequency.value=520;const o=a.createOscillator();o.frequency.value=92;const og=a.createGain();og.gain.value=.025;o.connect(og).connect(g);o.start();nodes.push(o)}
   if(kind==='rain'){f.type='highpass';f.frequency.value=900}
   if(kind==='waves'){f.type='lowpass';f.frequency.value=700;const l=a.createOscillator();l.frequency.value=.09;const lg=a.createGain();lg.gain.value=.22;l.connect(lg).connect(g.gain);l.start();nodes.push(l)}
-  src.connect(f).connect(g).connect(a.destination);src.start();
+  src.connect(f).connect(g).connect(soundOut());src.start();
   g.gain.setTargetAtTime(kind==='engine'?.5:kind==='rain'?.35:.3,a.currentTime,.4);
   snd={g,nodes};
 }
@@ -1098,6 +1182,7 @@ $('tTraffic').onclick=()=>{trafficOn=!trafficOn;applyToggles()};
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#layerPop,#btnLayers'))$('layerPop').hidden=true;if(!e.target.closest('#soundPop,#btnSound'))$('soundPop').hidden=true});
 
 /* ---------- start ---------- */
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 loadStyles().then(()=>{
   map=new maplibregl.Map({container:'map',style:BASE[curStyle],center:AP[S.city].ll,zoom:1.7,maxPitch:75,attributionControl:{compact:true},
     localIdeographFontFamily:"'Pretendard Variable','Apple SD Gothic Neo','Malgun Gothic',sans-serif",fadeDuration:150});
