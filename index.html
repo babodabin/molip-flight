@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="몰입 비행">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.json">
@@ -27,8 +27,8 @@
   color-scheme:dark;
 }
 /* Installed app: keep content clear of the status bar, camera hole and gesture bar */
-@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:52px;--sbmin:16px}}
-:root.app{--stmin:52px;--sbmin:16px}
+@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:12px;--sbmin:16px}}
+:root.app{--stmin:12px;--sbmin:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden;background:#000;color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased}
@@ -292,8 +292,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="legend"><span><i style="background:var(--visited)"></i>가 본 공항</span><span><i style="background:var(--yellow)"></i>안 가 본 공항</span><span><i style="background:#fff"></i>지금 위치</span></div>
   <button class="pill" id="goSelect">여정 시작하기</button>
   <div class="grid2"><button class="pill dark sm" id="goRandom">랜덤 비행</button><button class="pill dark sm" id="goTickets">티켓 모음 <span id="tcount" class="mono" style="color:var(--yellow)"></span></button></div>
-  <div class="grid2"><button class="pill dark sm" id="goWall" style="opacity:.45">배경화면 (만드는 중)</button><button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button></div>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.2.0 · 2026.11.24</div>
+  <div class="grid2"><button class="pill dark sm" id="goWall" style="opacity:.45">배경화면 (만드는 중)</button><button class="pill dark sm" id="goSettings">설정</button></div>
 </div></div>
 
 <!-- SELECT -->
@@ -418,6 +417,12 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 </div>
 
 <!-- INSTALL GUIDE -->
+<div class="sheet" id="settingsSheet" hidden style="z-index:16"><div class="in">
+  <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
+  <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.2.1 · 2026.11.24</div>
+</div></div>
+
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
   <div class="row sp"><h2>휴대폰에 앱으로 설치</h2><button class="ghost" id="installClose">닫기</button></div>
   <div class="steps" id="installSteps"></div>
@@ -1473,6 +1478,8 @@ $('goInstall').onclick=async()=>{
   $('installSheet').hidden=false;
 };
 $('installClose').onclick=()=>$('installSheet').hidden=true;
+$('goSettings').onclick=()=>{$('settingsSheet').hidden=false};
+$('settingsClose').onclick=()=>{$('settingsSheet').hidden=true};
 $('scHow').onclick=e=>{e.preventDefault();e.stopPropagation();$('scSheet').hidden=false};
 $('scClose').onclick=()=>$('scSheet').hidden=true;
 
