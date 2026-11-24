@@ -51,7 +51,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-of
 .col.r{right:calc(16px + var(--sr));top:calc(14px + var(--st))}
 
 /* sheets */
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) calc(12px + var(--sb)) calc(12px + var(--sl))}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) max(10px, calc(var(--sb) - 20px)) calc(12px + var(--sl))}
 .sheet>.in{max-width:520px;margin:0 auto;background:var(--sheet);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--line);border-radius:26px;padding:18px;display:grid;gap:14px;max-height:56vh;overflow:auto}
 #select .alist{max-height:22vh;overflow:auto}
 .pill{all:unset;cursor:pointer;text-align:center;padding:15px 18px;border-radius:999px;font-weight:600;font-size:16px;background:#fff;color:#000}
@@ -225,8 +225,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .donecard .big{font-family:var(--mono);font-size:42px;font-weight:500}
 .badge{font-size:12px;color:#000;background:var(--visited);padding:4px 10px;border-radius:999px;font-weight:600}
 .steps{display:grid;gap:10px;counter-reset:s}
-.steps div{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.05);border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.45}
-.steps div::before{counter-increment:s;content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--yellow);color:#000;font-weight:700;display:grid;place-items:center;font-size:13px}
+.steps div{position:relative;display:block;background:rgba(255,255,255,.05);border-radius:14px;padding:12px 14px 12px 52px;font-size:15px;line-height:1.45;min-height:50px}
+.steps div::before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--yellow);color:#000;font-weight:700;display:grid;place-items:center;font-size:13px}
 .steps svg{width:18px;height:18px;vertical-align:-3px;color:var(--sky)}
 /* ticket collection */
 #tickets{z-index:9;background:#050506;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -293,7 +293,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <button class="pill" id="goSelect">여정 시작하기</button>
   <div class="grid2"><button class="pill dark sm" id="goRandom">랜덤 비행</button><button class="pill dark sm" id="goTickets">티켓 모음 <span id="tcount" class="mono" style="color:var(--yellow)"></span></button></div>
   <div class="grid2"><button class="pill dark sm" id="goWall" style="opacity:.45">배경화면 (만드는 중)</button><button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button></div>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.1.1 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.2.0 · 2026.11.24</div>
 </div></div>
 
 <!-- SELECT -->
@@ -355,7 +355,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="prep">
       <label class="opt"><input type="checkbox" id="optStrict"><span><b>엄격 모드</b><small>앱을 나가 있던 시간은 비행으로 치지 않아요. 딴짓한 만큼 도착이 늦어져요.</small></span></label>
       <label class="opt"><input type="checkbox" id="optWarn" checked><span><b>착륙 10분 전 알림</b><small>안내 방송과 진동으로 알려 드려요.</small></span></label>
-      <label class="opt"><input type="checkbox" id="optDnd"><span><b>방해 금지 모드 켰어요</b><small>휴대폰 제어 센터에서 방해 금지(집중 모드)를 켜 주세요. 비행기 모드는 지도가 안 보일 수 있어요.</small></span></label>
+      <label class="opt" id="optScRow"><input type="checkbox" id="optSc"><span><b>단축어로 방해 금지 + 알람</b><small>출발하면 아이폰 단축어 '몰입 비행'을 실행해요. 방해 금지를 도착 시간까지 켜고, 착륙 10분 전에 시계 타이머가 울려요. 잠금 화면에서도 울려요. <a href="#" id="scHow" style="color:#1a5fd0;font-weight:600;text-decoration:underline">단축어 만드는 법</a></small></span></label>
+      <div class="opt" id="dndNote"><span><b>방해 금지는 직접 켜 주세요</b><small>웹앱은 방해 금지를 대신 켤 수 없어요. 빠른 설정에서 방해 금지를 켜 주세요. 비행기 모드는 지도가 안 보일 수 있어요.</small></span></div>
     </div>
     <button class="pill" id="go">출발</button>
   </div>
@@ -421,6 +422,19 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="row sp"><h2>휴대폰에 앱으로 설치</h2><button class="ghost" id="installClose">닫기</button></div>
   <div class="steps" id="installSteps"></div>
   <span class="lbl">설치하면 홈 화면 아이콘으로 바로 열리고, 주소창 없이 전체 화면으로 실행돼요.</span>
+</div></div>
+
+<div class="sheet" id="scSheet" hidden style="z-index:17"><div class="in" style="max-height:80vh;overflow:auto">
+  <div class="row sp"><h2>단축어 '몰입 비행' 만들기</h2><button class="ghost" id="scClose">닫기</button></div>
+  <div class="steps">
+    <div><b>단축어</b> 앱에서 오른쪽 위 <b>+</b>를 누르고, 이름을 <b>몰입 비행</b>으로 정해요. 띄어쓰기까지 똑같이 써 주세요.</div>
+    <div><b>계산</b> 동작을 추가해서 <b>단축어 입력 − 10</b>으로 만들어요.</div>
+    <div><b>타이머 시작</b> 동작을 추가하고 시간을 <b>계산 결과</b> <b>분</b>으로 해요. 착륙 10분 전에 울리는 알람이에요.</div>
+    <div><b>날짜 조절</b> 동작을 추가해서 <b>현재 날짜</b>에 <b>단축어 입력</b> <b>분</b>을 더해요.</div>
+    <div><b>집중 모드 설정</b> 동작을 추가하고 <b>방해 금지 켜기</b>, 끄는 때는 <b>시간 → 조절된 날짜</b>로 해요. 도착하면 저절로 꺼져요.</div>
+    <div>앱에서 <b>단축어로 방해 금지 + 알람</b>을 켜고 출발하면, 단축어 앱이 잠깐 열렸다가 실행돼요. 왼쪽 위 <b>◀</b>나 화면 아래를 쓸어 올려서 몰입 비행으로 돌아오면 돼요.</div>
+  </div>
+  <span class="lbl">앱이 보내는 값은 비행 시간(분) 숫자 하나예요. 엄격 모드여도 단축어가 도는 1분 동안은 딴짓으로 치지 않아요.</span>
 </div></div>
 
 <!-- WALLPAPER -->
@@ -1019,12 +1033,18 @@ function board(){
   S.tickets.unshift({...r,date:Date.now(),status:'flying'});S.tickets=S.tickets.slice(0,200);save();
   const A=AP[r.from].v,B=AP[r.to].v,om=angle(A,B);
   F={...r,A,B,om,T:r.min*60000,elapsed:0,dist:om*R,depUTC:Date.now(),status:'taxi',away:0,awayMs:0,breaks:0,excuse:null,paused:false};
-  const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optDnd').checked=false;
+  const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optSc').checked=isIOS&&!!pr.sc;$('optScRow').hidden=!isIOS;$('dndNote').hidden=isIOS;
   show('ready');
 }
 $('go').onclick=()=>{
   ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
-  F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;S.prefs={strict:F.strict,warn:F.warnOn};save();
+  const useSc=isIOS&&$('optSc').checked;
+  F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc};save();
+  if(useSc){
+    // Hand the flight length (minutes) to the user's own iOS Shortcut; the minute it takes doesn't count as away time.
+    F.graceUntil=Date.now()+60000;
+    setTimeout(()=>{location.href=`shortcuts://run-shortcut?name=${encodeURIComponent('몰입 비행')}&input=text&text=${F.min}`},400);
+  }
   $('strictTag').hidden=!F.strict;
   if(F.warnOn&&'Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});
   if(F.strict&&document.documentElement.requestFullscreen&&!/iPhone|iPad/.test(navigator.userAgent))document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
@@ -1122,7 +1142,7 @@ function advance(hid){
   if(F.status!=='flying'||F.paused||mode!=='flight'){F.lastWall=now;return}
   const dt=Math.max(0,now-(F.lastWall||now));F.lastWall=now;
   const hidden=hid===undefined?document.hidden:hid;let awayMs=0;
-  if(hidden&&F.strict){const exc=F.excuse?Math.max(0,Math.min(now,F.excuse.until)-(now-dt)):0;awayMs=Math.max(0,dt-exc)}
+  if(hidden&&F.strict){const ok=u=>u?Math.max(0,Math.min(now,u)-(now-dt)):0;const exc=Math.max(ok(F.excuse&&F.excuse.until),ok(F.graceUntil));awayMs=Math.max(0,dt-exc)}
   F.elapsed=Math.min(F.T,F.elapsed+(dt-awayMs)*speed);F.awayMs+=awayMs;
   checkWarn();
 }
@@ -1453,6 +1473,8 @@ $('goInstall').onclick=async()=>{
   $('installSheet').hidden=false;
 };
 $('installClose').onclick=()=>$('installSheet').hidden=true;
+$('scHow').onclick=e=>{e.preventDefault();e.stopPropagation();$('scSheet').hidden=false};
+$('scClose').onclick=()=>$('scSheet').hidden=true;
 
 /* ---------- start ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
