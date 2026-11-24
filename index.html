@@ -292,7 +292,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="legend"><span><i style="background:var(--visited)"></i>가 본 공항</span><span><i style="background:var(--yellow)"></i>안 가 본 공항</span><span><i style="background:#fff"></i>지금 위치</span></div>
   <button class="pill" id="goSelect">여정 시작하기</button>
   <div class="grid2"><button class="pill dark sm" id="goRandom">랜덤 비행</button><button class="pill dark sm" id="goTickets">티켓 모음 <span id="tcount" class="mono" style="color:var(--yellow)"></span></button></div>
-  <div class="grid2"><button class="pill dark sm" id="goWall">배경화면 만들기</button><button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button></div>
+  <div class="grid2"><button class="pill dark sm" id="goWall" style="opacity:.45">배경화면 (만드는 중)</button><button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button></div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.1.0 · 2026.11.24</div>
 </div></div>
 
 <!-- SELECT -->
@@ -1381,7 +1382,8 @@ async function makeWall(){
   return new Promise(r=>c.toBlob(b=>r(b),'image/png'));
 }
 async function renderWall(){wallBlob=await makeWall();const u=URL.createObjectURL(wallBlob);const img=$('wallImg');if(img.dataset.u)URL.revokeObjectURL(img.dataset.u);img.dataset.u=u;img.src=u}
-$('goWall').onclick=()=>{$('wallView').hidden=false;renderWall()};
+// Wallpaper is parked until a live version is possible; the generator code stays for later.
+$('goWall').onclick=()=>toast('배경화면은 아직 만드는 중이에요');
 $('wallClose').onclick=()=>$('wallView').hidden=true;
 document.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{wallKind=b.dataset.wk;document.querySelectorAll('[data-wk]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderWall()});
 document.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{wallTheme=b.dataset.wt;document.querySelectorAll('[data-wt]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderWall()});
