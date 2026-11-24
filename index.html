@@ -54,6 +54,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-of
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) max(10px, calc(var(--sb) - 20px)) calc(12px + var(--sl))}
 .sheet>.in{max-width:520px;margin:0 auto;background:var(--sheet);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--line);border-radius:26px;padding:18px;display:grid;gap:14px;max-height:56vh;overflow:auto}
 #home>.in{max-height:60vh}
+#toSeat{position:sticky;bottom:0;z-index:2}#toSeat[disabled]{opacity:1;background:#4a4a4f;color:#98989f}
+@media (max-height:720px){#home>.in,#select>.in{max-height:72vh;padding:14px;gap:9px}#home .stats div{padding:7px 12px}#home .pill{padding:12px 16px}#home .pill.sm{padding:9px 12px}.tbig{font-size:32px}#select .alist{height:max(92px,calc(72vh - 320px))}#readyView .rv{gap:14px}#readyView h1{font-size:20px}}
+@media (max-width:350px){#testBar{font-size:11px;gap:3px;padding:5px 6px}#testBar span{display:none}#testBar button{padding:7px}}
 #select .alist{height:max(96px,calc(56vh - 354px));overflow:auto;align-content:start}
 .pill{all:unset;cursor:pointer;text-align:center;padding:15px 18px;border-radius:999px;font-weight:600;font-size:16px;background:#fff;color:#000}
 .pill.dark{background:rgba(255,255,255,.1);color:var(--fg)}
@@ -289,7 +292,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .dopt[aria-pressed="true"]{background:#fffaf0;box-shadow:0 0 0 2px #b88a3a inset}
 #menuSheet .pill{background:#2b241a;color:#f7f0e0}
 /* seat in front, its screen, and the fold-down table */
-#mealView{--fab:#34507a;--fab2:#22375a;z-index:11;overflow:auto;background:linear-gradient(90deg,#101318,#1b2028 50%,#101318);display:grid;align-content:center;justify-items:center;gap:14px;padding:calc(14px + var(--st)) 12px calc(18px + var(--sb));text-align:center}
+#mealView{--fab:#34507a;--fab2:#22375a;z-index:11;overflow:auto;background:linear-gradient(90deg,#101318,#1b2028 50%,#101318);display:grid;align-content:center;align-content:safe center;justify-items:center;gap:14px;padding:calc(14px + var(--st)) 12px calc(18px + var(--sb));text-align:center}
 #mealView.biz{--fab:#5b4a73;--fab2:#3b2f4e}#mealView.first{--fab:#7b603a;--fab2:#4f3c22}
 .seatback{position:relative;width:min(340px,92%);box-sizing:border-box;padding:26px 30px 60px;margin-bottom:-58px;border-radius:64px 64px 18px 18px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 5px),linear-gradient(var(--fab),var(--fab2));box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -30px 40px rgba(0,0,0,.35),0 14px 30px rgba(0,0,0,.5)}
 .seatback::before{content:"";position:absolute;left:50%;top:8px;width:34%;height:7px;transform:translateX(-50%);border-radius:6px;background:rgba(255,255,255,.12)}
@@ -324,7 +327,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .cut svg{width:78%;height:84%}
 @media (max-height:700px){.seatback{padding-top:20px}.dish.main{min-height:124px}.ife .tm{font-size:32px}}
 .excuse button{all:unset;cursor:pointer;background:var(--yellow);color:#000;font-weight:600;font-size:12px;padding:5px 10px;border-radius:999px}
-#testBar{position:fixed;left:50%;bottom:calc(150px + var(--sb));transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:5px;padding:6px 8px 6px 11px;border-radius:999px;background:rgba(20,20,23,.82);border:1px solid var(--line);font-size:12px;white-space:nowrap}
+#testBar{position:fixed;left:50%;bottom:calc(162px + var(--sb));transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:5px;padding:6px 8px 6px 11px;border-radius:999px;background:rgba(20,20,23,.82);border:1px solid var(--line);font-size:12px;white-space:nowrap}
 #testBar span{color:var(--muted);margin-right:2px;font-size:11px}
 #testBar button{all:unset;cursor:pointer;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.1)}
 #testBar button[aria-pressed="true"]{background:var(--yellow);color:#000}
@@ -341,14 +344,14 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 @keyframes recoil{30%{transform:translateX(-7px) rotate(-.8deg)}70%{transform:translateX(2px) rotate(.3deg)}}
 
 /* ready */
-#readyView{overflow:auto;background:radial-gradient(ellipse at 50% 40%,rgba(235,244,255,.84),rgba(250,250,252,.95) 70%);color:#111;display:grid;place-items:center;text-align:center}
-#readyView .rv{display:grid;gap:26px;justify-items:center;padding:20px}
+#readyView{align-content:normal;overflow:auto;background:radial-gradient(ellipse at 50% 40%,rgba(235,244,255,.84),rgba(250,250,252,.95) 70%);color:#111;display:grid;text-align:center}
+#readyView .rv{margin:auto;display:grid;gap:26px;justify-items:center;padding:20px}
 #readyView svg{width:38px;height:38px}
 #readyView h1{font-size:24px;line-height:1.35;font-weight:600}
 #readyView .pill{background:#000;color:#fff;padding:13px 34px}
 
 /* captions */
-.caption{position:fixed;left:50%;bottom:calc(112px + var(--sb));transform:translateX(-50%);z-index:7;width:min(460px,calc(100vw - 32px));text-align:center;font-size:15px;line-height:1.55;padding:10px 14px;border-radius:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .5s}
+.caption{pointer-events:none;position:fixed;left:50%;bottom:calc(112px + var(--sb));transform:translateX(-50%);z-index:7;width:min(460px,calc(100vw - 32px));text-align:center;font-size:15px;line-height:1.55;padding:10px 14px;border-radius:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .5s}
 .caption small{display:block;font-size:10px;letter-spacing:.18em;color:var(--yellow);margin-bottom:4px}
 
 /* flight HUD */
@@ -717,7 +720,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="privOpen">개인정보 안내</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.6.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.6.1 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -782,7 +785,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 </div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
@@ -1032,7 +1035,9 @@ function typeFor(om){const km=om*R,r=Math.random();if(r<.014)return 'gold';if(r<
 
 /* ---------- saved progress ---------- */
 let S={city:'ICN',visited:['ICN'],flights:0,minutes:0,tickets:[],style:'sat'};
-try{const s=JSON.parse(localStorage.getItem('mf-v2')||localStorage.getItem('mf-v1'));if(s&&AP[s.city]&&Array.isArray(s.visited))S=Object.assign(S,s)}catch(e){}
+/* newest first; if it can't be read, fall back to the records kept aside by test mode, and never throw the unreadable copy away */
+{const ok=x=>x&&AP[x.city]&&Array.isArray(x.visited),read=k=>{try{const r=localStorage.getItem(k);if(!r)return null;try{const x=JSON.parse(r);if(ok(x))return x}catch(e){}if(k!=='mf-broken')localStorage.setItem('mf-broken',r)}catch(e){}return null};
+  const s=read('mf-v2')||read('mf-real')||read('mf-v1');if(s)S=Object.assign(S,s)}
 if(!Array.isArray(S.tickets))S.tickets=[];
 if(!Number.isFinite(S.miles)||S.miles<0)S.miles=1200;
 
@@ -1054,7 +1059,7 @@ const REAL='mf-real';
 function topUp(){if(S.test){S.miles=Math.max(S.miles,99999);S.gold=Math.max(S.gold,9999)}}
 function startTest(){
   if(S.test||S.live)return false;
-  try{localStorage.setItem(REAL,JSON.stringify({...S,testDone:true}));if(!localStorage.getItem(REAL))return false}catch(e){return false}
+  try{const old=localStorage.getItem(REAL);if(old)localStorage.setItem('mf-real-old',old);localStorage.setItem(REAL,JSON.stringify({...S,testDone:true}));if(!localStorage.getItem(REAL))return false}catch(e){return false}
   S.test=true;topUp();save();return true;
 }
 function stopTest(){
@@ -1113,7 +1118,7 @@ async function loadStyles(){
 
 /* ---------- state ---------- */
 let mode='home',F=null,plan={},target=120,view='chase',northUp=false,winOn=false,v3=null,speed=1;
-let map,markers=[],lastInteract=0,mapReady=false;
+let map,markers=[],lastInteract=0,mapReady=false,styleOk=false;
 
 /* ---------- map setup ---------- */
 function planeImage(fill,size,pts){
@@ -1125,6 +1130,7 @@ function planeImage(fill,size,pts){
 }
 const EMPTY={type:'FeatureCollection',features:[]};
 function addOverlays(){
+  styleOk=true;
   baseSymbols=map.getStyle().layers.filter(l=>l.type==='symbol').map(l=>l.id);
   const firstSym=baseSymbols[0];
   if(!map.hasImage('me'))map.addImage('me',planeImage(skin()[1],96),{pixelRatio:2});
@@ -1164,7 +1170,7 @@ function applyToggles(){
   $('tLabels').setAttribute('aria-pressed',showLabels);$('tTraffic').setAttribute('aria-pressed',trafficOn);
 }
 function paintPlane(){if(!map||!mapReady)return;const im=planeImage(skin()[1],96);if(map.hasImage('me'))map.updateImage('me',im);else map.addImage('me',im,{pixelRatio:2});paintMe();if(F)updateFlightLayers(true)}
-function setStyle(k){if(!BASE[k]||k===curStyle)return;curStyle=k;S.style=k;save();map.setStyle(BASE[k],{diff:false})}
+function setStyle(k){if(!BASE[k]||k===curStyle)return;curStyle=k;S.style=k;save();styleOk=false;map.setStyle(BASE[k],{diff:false})}
 
 /* ---------- weather: made up, but the same everywhere in the app ----------
    Smooth noise on the globe that drifts with the hours, so the map, the window and the boards agree. */
@@ -1196,7 +1202,7 @@ function wxImage(){
 }
 let wxOn=!!S.wx;
 function drawWeather(){
-  if(!map||!mapReady&&!map.getSource('airports'))return;
+  $('tWeather').setAttribute('aria-pressed',wxOn);if(!map||!styleOk)return;
   if(wxOn&&!map.getSource('weather')){map.addSource('weather',{type:'image',url:wxImage(),coordinates:WXC});map.addLayer({id:'weather',type:'raster',source:'weather',paint:{'raster-opacity':.85,'raster-fade-duration':0,'raster-resampling':'linear'}},map.getLayer('history')?'history':undefined)}
   else if(wxOn&&Date.now()-wxTime>300000)map.getSource('weather').updateImage({url:wxImage(),coordinates:WXC});
   if(map.getLayer('weather'))map.setLayoutProperty('weather','visibility',wxOn?'visible':'none');
@@ -1525,7 +1531,7 @@ function renderPass(){
   if(document.fonts&&document.fonts.load)Promise.all(['400 12px "Pretendard Variable"','600 16px "Pretendard Variable"','500 44px "JetBrains Mono"','400 12px "JetBrains Mono"'].map(x=>document.fonts.load(x,all))).then(drawPass).catch(()=>{});
 }
 addEventListener('resize',()=>requestAnimationFrame(drawPass));
-$('passBack').onclick=()=>{show('seat');renderSeats()};
+$('passBack').onclick=()=>{if(tearing)return;show('seat');renderSeats()};
 
 let tearing=false;
 /* tearing: a short pull to the side is enough; the stub hinges at its bottom corner */
@@ -1560,7 +1566,7 @@ function tear(a){
   let x=10,y=a.y*6,r=a.r,vx=Math.max(1.2,a.x*3.6),vy=-2.2+a.y*2.4,vr=a.r<0?-1.7:1.7,o=1;st.style.transition='none';
   const fall=()=>{vy+=.6;x+=vx;y+=vy;r+=vr;o-=.02;st.style.transform=`translate(${x}px,${y}px) rotate(${r}deg)`;st.style.opacity=Math.max(0,o);if(o>0)requestAnimationFrame(fall)};
   requestAnimationFrame(fall);
-  setTimeout(()=>{tearing=false;board()},900);
+  setTimeout(()=>{tearing=false;if(mode==='pass')board()},900);
 }
 $('checkIn').onclick=()=>tear();
 
