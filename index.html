@@ -242,6 +242,10 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 /* ready options */
 .prep{display:grid;gap:8px;width:min(360px,88vw);text-align:left}
 .opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.05);cursor:pointer}
+.restRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:-2px}
+.restRow button{all:unset;cursor:pointer;text-align:center;font-size:13px;padding:9px 4px;border-radius:12px;background:rgba(0,0,0,.05)}
+.restRow button[aria-pressed="true"]{background:#111;color:#fff}
+.restRow button:focus-visible{outline:2px solid #1a5fd0}
 .opt input{width:20px;height:20px;margin:2px 0 0;accent-color:#000;flex:none}
 .opt b{display:block;font-size:15px}
 .opt small{display:block;font-size:12px;color:#555;margin-top:2px;line-height:1.45}
@@ -514,7 +518,8 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
     <div class="prep">
       <label class="opt"><input type="checkbox" id="optStrict"><span><b>엄격 모드</b><small>앱을 나가 있던 시간은 비행으로 치지 않아요. 딴짓한 만큼 도착이 늦어져요.</small></span></label>
       <label class="opt"><input type="checkbox" id="optWarn" checked><span><b>착륙 10분 전 알림</b><small>안내 방송과 진동으로 알려 드려요.</small></span></label>
-      <label class="opt" id="optMealRow"><input type="checkbox" id="optMeal" checked><span><b>기내식과 간식</b><small id="optMealInfo"></small></span></label>
+      <label class="opt" id="optMealRow"><input type="checkbox" id="optMeal" checked><span><b>기내식과 음료 쉬는 시간</b><small id="optMealInfo"></small></span></label>
+      <div class="restRow" id="restRow" role="group" aria-label="쉬는 시간 비율"></div>
       <label class="opt" id="optScRow"><input type="checkbox" id="optSc"><span><b>단축어로 방해 금지 + 알람</b><small>출발하면 아이폰 단축어 '몰입 비행'을 실행해요. 방해 금지를 도착 시간까지 켜고, 착륙 10분 전에 시계 타이머가 울려요. 잠금 화면에서도 울려요. <a href="#" id="scHow" style="color:#1a5fd0;font-weight:600;text-decoration:underline">단축어 만드는 법</a></small></span></label>
       <div class="opt" id="dndNote"><span><b>방해 금지는 직접 켜 주세요</b><small>웹앱은 방해 금지를 대신 켤 수 없어요. 빠른 설정에서 방해 금지를 켜 주세요. 비행기 모드는 지도가 안 보일 수 있어요.</small></span></div>
     </div>
@@ -682,7 +687,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <button class="pill dark sm" id="logOpen">내 비행 기록과 비행기 도감</button>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.2.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.3.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1492,12 +1497,19 @@ function tear(a){
 $('checkIn').onclick=()=>tear();
 
 /* ---------- board, ready, takeoff ---------- */
+function drawRest(){
+  const sv=services(F.min,F.restK),on=$('optMeal').checked;$('optMealRow').hidden=!sv.length;$('restRow').hidden=!sv.length||!on;if(!sv.length)return;
+  $('optMealInfo').textContent=on?serviceText(sv):'쉬지 않고 날아요.';
+  $('restRow').innerHTML=Object.entries(REST).map(([k,[n]])=>`<button data-rest="${k}" aria-pressed="${F.restK===k}">${n} · ${services(F.min,k).reduce((a,x)=>a+x.dur,0)}분</button>`).join('');
+  $('restRow').querySelectorAll('[data-rest]').forEach(b=>b.onclick=()=>{F.restK=b.dataset.rest;drawRest()});
+}
+$('optMeal').onchange=()=>{if(F)drawRest()};
 function board(){
   const r={no:plan.no,from:S.city,to:plan.to,min:plan.min,random:plan.random,scen:plan.scen,seat:plan.seat,cls:plan.cls&&!seatBlock(plan.min,plan.cls)?plan.cls:'eco'};
   S.tickets.unshift({...r,date:Date.now(),status:'flying'});S.tickets=S.tickets.slice(0,200);save();
   const A=AP[r.from].v,B=AP[r.to].v,om=angle(A,B);
   F={...r,A,B,om,T:r.min*60000,elapsed:0,dist:om*R,depUTC:Date.now(),status:'taxi',away:0,awayMs:0,breaks:0,excuse:null,paused:false};
-  const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optSc').checked=isIOS&&!!pr.sc;const sv=services(r.min);$('optMealRow').hidden=!sv.length;$('optMeal').checked=pr.meal!==false;$('optMealInfo').textContent=serviceText(sv);$('optScRow').hidden=!isIOS;$('dndNote').hidden=isIOS;
+  const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optSc').checked=isIOS&&!!pr.sc;$('optMeal').checked=pr.meal!==false;F.restK=REST[pr.restK]?pr.restK:'mid';drawRest();$('optScRow').hidden=!isIOS;$('dndNote').hidden=isIOS;
   const st=stakeFor(r.min);
   const rc=clsOf(r.cls);
   $('readyMiles').innerHTML=st?`보증금 <b>${fmtMi(st)}마일</b>을 걸어요. 도착하면 <b>${fmtMi(st+bonusFor(r.min,r.cls))}마일</b>을 받아요.<br>${rc.fee?`${rc.n} 좌석 값은 <b>${rc.fee}마일</b>이고 돌려받지 않아요.<br>`:''}회항하면 보증금 절반을 잃어요. 1분 안 취소는 무료예요.`:`보증금 없는 <b>무료 비행</b>이에요. 도착하면 <b>${fmtMi(price(r.min)*.2)}마일</b>을 받아요.`;
@@ -1508,7 +1520,7 @@ $('go').onclick=()=>{
   F.stake=stakeFor(F.min);F.fee=clsOf(F.cls).fee;S.miles-=F.stake+F.fee;
   ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
   const useSc=isIOS&&$('optSc').checked;
-  F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;F.mealOn=$('optMeal').checked;F.svc=0;F.offer=null;F.foods=[];F.rest=0;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc,meal:F.mealOn};snap();
+  F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;F.mealOn=$('optMeal').checked;F.svc=0;F.offer=null;F.foods=[];F.rest=0;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc,meal:F.mealOn,restK:F.restK};snap();
   if(useSc){
     // Hand the flight length (minutes) to the user's own iOS Shortcut; the minute it takes doesn't count as away time.
     F.graceUntil=Date.now()+60000;
@@ -1525,7 +1537,7 @@ $('go').onclick=()=>{
 };
 /* the flight in progress is kept in storage, so a killed app picks it up again */
 let snapAt=0;
-const LIVE=['no','from','to','min','random','scen','seat','elapsed','depUTC','lastWall','away','awayMs','breaks','excuse','graceUntil','paused','strict','warnOn','warned','stake','cls','fee','mealOn','svc','offer','foods','rest'];
+const LIVE=['no','from','to','min','random','scen','seat','elapsed','depUTC','lastWall','away','awayMs','breaks','excuse','graceUntil','paused','strict','warnOn','warned','stake','cls','fee','mealOn','svc','offer','foods','rest','restK'];
 function snap(){if(F&&F.status==='flying'){S.live={};LIVE.forEach(k=>S.live[k]=F[k]);snapAt=Date.now();save()}}
 function resumeFlight(){
   const L=S.live;
@@ -1636,16 +1648,16 @@ $('reasonGo').onclick=()=>{
   $('doneGold').hidden=true;$('doneSub').textContent=cancel?'취소':'회항';$('doneTitle').textContent=cancel?'비행을 취소했어요':AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
   $('doneNote').textContent=`이유: ${reasonName(why)} · 집중 시간에는 더해지지 않아요. 다음 비행에서 다시 도전해 보세요.`;$('doneBadge').hidden=true;map.setMinZoom(0);show('done');
 };
-function setTicket(st,mi,why){const t=S.tickets.find(x=>x.no===F.no&&x.status==='flying');if(t){t.status=st;t.miles=mi;if(F.foods&&F.foods.length)t.food=F.foods;if(why){t.reason=why;t.flown=Math.floor(F.elapsed/60000)}}save()}
+function setTicket(st,mi,why){const t=S.tickets.find(x=>x.no===F.no&&x.status==='flying');if(t){t.status=st;t.miles=mi;const rs=Math.min(F.min,Math.round((F.rest||0)/60000));if(rs)t.rest=rs;if(F.foods&&F.foods.length)t.food=F.foods;if(why){t.reason=why;t.flown=Math.floor(F.elapsed/60000)}}save()}
 function land(){
   dropExcuse();F.status='landed';const isNew=!S.visited.includes(F.to);clearTimeout(capT);$('caption').hidden=true;
-  S.city=F.to;if(isNew)S.visited.push(F.to);S.flights++;S.minutes+=F.min;
+  S.city=F.to;if(isNew)S.visited.push(F.to);S.flights++;const rested=Math.min(F.min,Math.round((F.rest||0)/60000)),focus=F.min-rested;S.minutes+=focus;
   const bonus=bonusFor(F.min,F.cls),fee=F.fee||0;S.miles+=(F.stake||0)+bonus;const gold=goldFor(F.min,isNew);S.gold+=gold;S.live=null;setTicket('landed',bonus-fee);
   $('doneGold').hidden=false;$('doneGold').innerHTML=`<i class="coin"></i>+${gold}골드${isNew?' (새 공항 +5)':''} · 보유 ${fmtMi(S.gold)}골드`;
   $('doneMiles').textContent=`${fee?clsOf(F.cls).n+' 보너스 ':''}+${fmtMi(bonus)}마일${fee?` · 좌석 값 -${fee}`:''} · 보유 ${fmtMi(S.miles)}마일`;
   winOn=false;$('winView').hidden=true;$('btnWindow').setAttribute('aria-pressed',false);map.setMinZoom(0);
   $('doneSub').textContent='도착';$('doneTitle').textContent=AP[F.to].n+'에 도착했어요';$('doneTime').textContent=fmtHM(F.min);
-  $('doneNote').textContent=`${SCEN.find(s=>s.id===F.scen).n}에 집중한 시간 · 자리 비움 ${F.away}회 · 기내 활동 ${F.breaks}회`+(F.strict&&F.awayMs>30000?` · 딴짓으로 ${fmtKo(Math.round(F.awayMs/60000))} 늦게 도착`:'')+(F.rest>30000?` · 쉬는 시간 ${fmtKo(Math.max(1,Math.round(F.rest/60000)))}`:'');$('doneBadge').hidden=!isNew;
+  $('doneNote').textContent=`${SCEN.find(s=>s.id===F.scen).n} ${fmtKo(focus)} 집중${rested?` · ${fmtKo(rested)} 휴식`:''} · 자리 비움 ${F.away}회 · 기내 활동 ${F.breaks}회`+(F.strict&&F.awayMs>30000?` · 딴짓으로 ${fmtKo(Math.round(F.awayMs/60000))} 늦게 도착`:'')+'';$('doneBadge').hidden=!isNew;
   endFlightExtras();
   setMarkers([[F.from,'dep'],[F.to,'arr']]);updateFlightLayers(true);$('layover').hidden=false;show('done');view='route';enterView();
   keepAwake(false);chime();updateLockScreen();
@@ -1839,29 +1851,34 @@ function regionOf(a){const [x,y]=a.ll;
   if(KRS.includes(a.c))return 'KR';if(JPS.includes(a.c))return 'JP';if(x<-25&&!(x<-140&&y<0)||x>172&&y>0)return 'AM';
   if(x<-140||y<-10&&x>110||x>150&&y<15)return 'OC';if(x>92&&y<22)return 'SEA';if(x>97&&y<46)return 'CN';if(x>=34&&x<=97&&y>0&&y<44)return 'ME';return y<36?'AF':'EU'}
 /* when the cart comes, in minutes after takeoff */
-function services(m){
-  if(m<50)return [];if(m<120)return [{at:Math.round(m*.5),kind:'snack'}];if(m<240)return [{at:Math.round(m*.5),kind:'meal'}];
-  const out=[];for(let t=90,i=0;t<=m-45;t+=100,i++)out.push({at:t,kind:i%2?'snack':'meal'});return out;
+const REST={low:['적게',.1],mid:['보통',1/6],high:['많이',.25]};
+const restRate=k=>(REST[k]||REST.mid)[1];
+/* total rest is a share of the flight; meals get two parts, drinks one, spread evenly over the trip */
+function services(m,k){
+  if(m<30)return [];
+  const n=m<100?1:Math.max(1,Math.round(m/95)),kinds=[];for(let i=0;i<n;i++)kinds.push(n===1?(m<100?'snack':'meal'):i%2?'snack':'meal');
+  const parts=kinds.reduce((a,x)=>a+(x==='meal'?2:1),0),unit=m*restRate(k)/parts,gap=m/(n+1);
+  return kinds.map((kind,i)=>{const dur=Math.max(3,Math.round(unit*(kind==='meal'?2:1)));return {at:Math.round(gap*(i+1)),kind,dur,wait:Math.max(2,Math.min(20,Math.floor(gap-dur-3)))}});
 }
-const SERVE={meal:{n:'기내식',m:15},snack:{n:'간식',m:5}};
-function serviceText(l){return (l.length>3?`${fmtKo(l[0].at)} 뒤부터 ${l.length}번`:l.map(x=>`${fmtKo(x.at)} 뒤 ${SERVE[x.kind].n}`).join(', '))+' 카트가 와요. 받으면 쉬는 시간이고, 안 받아도 돼요.'}
+const SERVE={meal:{n:'기내식'},snack:{n:'음료와 간식'}};
+function serviceText(l){return (l.length>3?`${fmtKo(l[0].at)} 뒤부터 ${l.length}번, 기내식 ${l[0].dur}분과 음료 ${l[1].dur}분`:l.map(x=>`${fmtKo(x.at)} 뒤 ${SERVE[x.kind].n} ${x.dur}분`).join(', '))+`. 모두 ${fmtKo(l.reduce((a,x)=>a+x.dur,0))} 쉬어요. 안 받아도 돼요.`}
 function checkService(){
-  if(!F||!F.mealOn||F.status!=='flying')return;const L=services(F.min);
+  if(!F||!F.mealOn||F.status!=='flying')return;const L=services(F.min,F.restK);
   while(F.svc<L.length&&F.elapsed>=L[F.svc].at*60000){
-    const v=L[F.svc],room=SERVE[v.kind].m+10,end=Math.min((v.at+20)*60000,F.T-room*60000);
-    F.offer=F.elapsed<end?{kind:v.kind,i:F.svc,end}:null;F.svc++;
-    if(F.offer){if(speed>1)setSpd(1);announceMeal(v.kind)}
+    const v=L[F.svc],end=Math.min((v.at+v.wait)*60000,F.T-(v.dur+1)*60000);
+    F.offer=F.elapsed<end?{kind:v.kind,i:F.svc,end,dur:v.dur}:null;F.svc++;
+    if(F.offer){if(speed>1)setSpd(1);announceMeal(v.kind,v.dur)}
   }
   if(F.offer&&F.elapsed>F.offer.end){F.offer=null;$('menuSheet').hidden=true}
 }
-function announceMeal(kind){
+function announceMeal(kind,dur){
   const n=SERVE[kind].n;caption([`승무원입니다. ${n} 카트가 왔어요.`,`집중을 이어 가셔도 괜찮아요. 잠시 기다릴게요.`]);chime();buzz([80,60,80]);
   if(document.hidden&&'Notification' in window&&Notification.permission==='granted'&&navigator.serviceWorker)
-    navigator.serviceWorker.ready.then(r=>r.showNotification(n+' 시간',{body:`${n} 카트가 왔어요. ${SERVE[kind].m}분 쉬어 갈까요?`,icon:'icon-192.png',badge:'icon-192.png',tag:'mf-meal'})).catch(()=>{});
+    navigator.serviceWorker.ready.then(r=>r.showNotification(n+' 시간',{body:`${n} 카트가 왔어요. ${dur}분 쉬어 갈까요?`,icon:'icon-192.png',badge:'icon-192.png',tag:'mf-meal'})).catch(()=>{});
 }
 function tickOffer(){
   const on=F&&F.offer&&!F.excuse&&!F.paused;$('offer').hidden=!on;
-  if(on)$('offText').textContent=`${SERVE[F.offer.kind].n}이 왔어요`;
+  if(on)$('offText').textContent=`${F.offer.kind==='meal'?'기내식':'음료·간식'} ${F.offer.dur}분`;
 }
 $('offNo').onclick=()=>{if(F)F.offer=null;$('offer').hidden=true;if(F)snap()};
 let pickMeal=null,tray=null;
@@ -1877,7 +1894,7 @@ function menuFor(o){
 }
 $('offYes').onclick=()=>{
   if(!F||!F.offer)return;const o=F.offer,m=menuFor(o),c=clsOf(F.cls);pickMeal={...m,main:null,drink:0};
-  $('menuTitle').textContent=SERVE[o.kind].n;$('menuInfo').textContent=`${c.fee?c.n+' 메뉴예요. ':''}받으면 ${SERVE[o.kind].m}분 동안 쉬어요. 비행은 계속되고, 앱을 나가도 자리 비움이 아니에요.`;
+  $('menuTitle').textContent=SERVE[o.kind].n;$('menuInfo').textContent=`${c.fee?c.n+' 메뉴예요. ':''}비행 ${fmtKo(F.min)}에 맞춘 쉬는 시간 ${o.dur}분이에요. 앱을 나가도 자리 비움이 아니고, 쉰 만큼은 집중 시간에서 빼요.`;
   $('menuMain').innerHTML=m.opts.map(k=>`<button class="mopt" data-food="${k}" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>${FOOD[k][0]}</span><small>${S.foods&&S.foods[k]?'':'처음'}</small></button>`).join('');
   $('menuDrink').innerHTML=DRINKS.map((d,i)=>`<button class="dopt" data-drink="${i}" aria-pressed="${i===0}"><canvas aria-hidden="true"></canvas>${d[0]}</button>`).join('');
   $('menuMain').querySelectorAll('canvas').forEach((c,i)=>paint(c,104,70,g=>ART.dish(g,m.opts[i],104,70)));
@@ -1888,12 +1905,12 @@ $('offYes').onclick=()=>{
 };
 $('menuClose').onclick=()=>$('menuSheet').hidden=true;
 $('menuGo').onclick=()=>{
-  if(!F||!F.offer||F.excuse||!pickMeal||!pickMeal.main)return;const p=pickMeal,o=F.offer,sv=SERVE[o.kind],k=p.main;pickMeal=null;
+  if(!F||!F.offer||F.excuse||!pickMeal||!pickMeal.main)return;const p=pickMeal,o=F.offer,sv={n:SERVE[o.kind].n,m:o.dur||10},k=p.main;pickMeal=null;
   S.foods=S.foods||{};const isNew=!S.foods[k];S.foods[k]=(S.foods[k]||0)+1;F.offer=null;F.foods=[...(F.foods||[]),k];
-  F.excuse={k:'meal',n:sv.n+' 시간',m:sv.m,start:Date.now(),until:Date.now()+sv.m*60000};
+  F.excuse={k:'meal',n:(o.kind==='meal'?'기내식':'음료')+' 시간',m:sv.m,start:Date.now(),until:Date.now()+sv.m*60000};
   const meal=o.kind==='meal',c=clsOf(F.cls).fee?F.cls:'';
   tray=[{n:FOOD[k][0],k,t:'main',max:7,b:0,lid:meal&&!c}];if(meal)tray.push({n:p.side[0],k:p.side[0],t:'a',max:4,b:0},{n:p.sweet[0],k:p.sweet[0],t:'b',max:4,b:0});tray.push({n:DRINKS[p.drink][0],k:DRINKS[p.drink][0],t:'drink',max:4,b:0});
-  $('tray').className='mealtray '+c+(meal?'':' snack');$('mealView').className='full '+c;$('mealTitle').textContent=sv.n+' 시간'+(isNew?' · 처음 먹어요!':'');$('mealRoute').textContent=F.from+' → '+(F.random?'???':F.to);
+  $('tray').className='mealtray '+c+(meal?'':' snack');$('mealView').className='full '+c;$('mealTitle').textContent=(o.kind==='meal'?'기내식':'음료')+' 시간'+(isNew?' · 처음 먹어요!':'');$('mealRoute').textContent=F.from+' → '+(F.random?'???':F.to);
   $('mealHint').textContent=tray[0].lid?'은박 뚜껑을 눌러서 열어 주세요':'음식을 눌러서 드세요';$('mealTime').textContent=sv.m+':00';$('mealBar').style.width='100%';$('mealEnd').textContent='자리로 돌아가기';
   $('offer').hidden=$('menuSheet').hidden=true;$('mealView').hidden=false;drawTray();snap();
 };
@@ -1976,7 +1993,8 @@ function setSpd(v){speed=v;document.querySelectorAll('[data-tsp]').forEach(b=>b.
 document.querySelectorAll('[data-tsp]').forEach(b=>b.onclick=()=>{if(F&&F.status==='flying')advance();setSpd(+b.dataset.tsp)});
 function callCart(kind){
   if(!F||F.status!=='flying'||!S.test)return;if(F.excuse&&F.excuse.k==='meal'){toast('지금 먹고 있어요');return}
-  dropExcuse();setSpd(1);F.offer={kind,i:Math.floor(Math.random()*8),end:F.T};announceMeal(kind);tickOffer();snap();
+  const L=services(F.min,F.restK),hit=L.find(x=>x.kind===kind),dur=hit?hit.dur:L[0]?Math.max(3,Math.round(L[0].dur*(kind==='meal'?2:.5))):10;
+  dropExcuse();setSpd(1);F.offer={kind,i:Math.floor(Math.random()*8),end:F.T,dur};announceMeal(kind,dur);tickOffer();snap();
 }
 $('tMeal').onclick=()=>callCart('meal');$('tSnack').onclick=()=>callCart('snack');
 $('tLand').onclick=()=>{if(F&&F.status==='flying'&&S.test){setSpd(1);F.elapsed=Math.max(F.elapsed,F.T-20000);toast('20초 뒤에 착륙해요')}};
@@ -2048,8 +2066,8 @@ function openLog(){
   const box=(k,v,x)=>`<div><small>${k}</small><b>${v}</b><i>${x||'&nbsp;'}</i></div>`;
   const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const e=new Date(d);e.setDate(e.getDate()+1);days.push({d,m:L.filter(t=>t.date>=+d&&t.date<+e).reduce((s,t)=>s+t.min,0)})}
   const top=Math.max(1,...days.map(x=>x.m)),wd='일월화수목금토',sum=days.reduce((s,x)=>s+x.m,0);
-  const sc=SCEN.map(x=>({x,m:L.filter(t=>t.scen===x.id).reduce((s,t)=>s+t.min,0)})).filter(v=>v.m).sort((a,b)=>b.m-a.m),sm=sc.length?sc[0].m:1,seen=Object.keys(TYPES).filter(k=>S.seen[k]);
-  $('logBody').innerHTML=`<div class="logGrid">${box('비행 거리',Math.round(tot).toLocaleString('en-US')+' km',`지구 ${(tot/40075).toFixed(tot<40075?2:1)}바퀴`)}${box('가 본 공항',S.visited.length+' / '+AIRPORTS.length,`${(S.visited.length/AIRPORTS.length*100).toFixed(1)}%`)}${box('가장 긴 비행',far?fmtKo(far.min):'-',far?`${AP[far.from].n} → ${AP[far.to].n}`:'')}${box('가장 자주 간 곳',fav?AP[fav[0]].n:'-',fav?fav[1]+'번':'')}${box('도착 성공',ended?Math.round(L.length/ended*100)+'%':'-',`${L.length}번 도착, ${ended-L.length}번 회항`)}${box('1등석 · 비즈니스',`${L.filter(t=>t.cls==='first').length} · ${L.filter(t=>t.cls==='biz').length}번`,`음식 ${Object.keys(FOOD).filter(k=>S.foods&&S.foods[k]).length}/${Object.keys(FOOD).length}가지`)}</div>
+  const sc=SCEN.map(x=>({x,m:L.filter(t=>t.scen===x.id).reduce((s,t)=>s+t.min-(t.rest||0),0)})).filter(v=>v.m).sort((a,b)=>b.m-a.m),sm=sc.length?sc[0].m:1,seen=Object.keys(TYPES).filter(k=>S.seen[k]);
+  $('logBody').innerHTML=`<div class="logGrid">${box('비행 거리',Math.round(tot).toLocaleString('en-US')+' km',`지구 ${(tot/40075).toFixed(tot<40075?2:1)}바퀴`)}${box('가 본 공항',S.visited.length+' / '+AIRPORTS.length,`${(S.visited.length/AIRPORTS.length*100).toFixed(1)}%`)}${box('가장 긴 비행',far?fmtKo(far.min):'-',far?`${AP[far.from].n} → ${AP[far.to].n}`:'')}${box('가장 자주 간 곳',fav?AP[fav[0]].n:'-',fav?fav[1]+'번':'')}${box('쉰 시간',fmtKo(L.reduce((a,t)=>a+(t.rest||0),0)),`집중 ${fmtKo(L.reduce((a,t)=>a+t.min-(t.rest||0),0))}`)}${box('도착 성공',ended?Math.round(L.length/ended*100)+'%':'-',`${L.length}번 도착, ${ended-L.length}번 회항`)}${box('비행 횟수',L.length+'번','도착한 비행')}${box('1등석 · 비즈니스',`${L.filter(t=>t.cls==='first').length} · ${L.filter(t=>t.cls==='biz').length}번`,`음식 ${Object.keys(FOOD).filter(k=>S.foods&&S.foods[k]).length}/${Object.keys(FOOD).length}가지`)}</div>
     <section><h3>최근 7일 비행 시간<small>모두 ${fmtKo(sum)}</small></h3><div class="wk" style="margin-top:12px">${days.map((x,i)=>`<button data-wk="${i}" aria-pressed="${i===6}" aria-label="${x.d.getMonth()+1}월 ${x.d.getDate()}일 ${fmtKo(x.m)}"><span>${fmtHM(x.m)}</span><i style="height:${x.m?Math.max(4,x.m/top*112):0}px"></i></button>`).join('')}</div><div class="wkx">${days.map((x,i)=>`<span>${i===6?'오늘':wd[x.d.getDay()]}</span>`).join('')}</div></section>
     ${sc.length?`<section style="display:grid;gap:9px"><h3>무엇에 집중했나요</h3>${sc.map(v=>`<div class="sbar"><span>${icon(v.x)}${v.x.n}</span><u><i style="width:${v.m/sm*100}%"></i></u><b>${fmtHM(v.m)}</b></div>`).join('')}</section>`:''}
     <section style="display:grid;gap:10px"><h3>비행기 도감<small>${seen.length}/${Object.keys(TYPES).length} · 지도에서 다른 비행기를 눌러 찾아요</small></h3><div class="fgrid">${Object.entries(TYPES).map(([k,t])=>`<div class="fopt${S.seen[k]?'':' no'}" style="cursor:default"><canvas data-ty="${k}" style="width:56px;height:56px" aria-hidden="true"></canvas>${S.seen[k]?t.n:'???'}<small>${S.seen[k]?(t.rare?'희귀 · ':'')+S.seen[k]+'번':t.rare?'희귀':''}</small></div>`).join('')}</div></section>
@@ -2399,7 +2417,7 @@ $('wallSave').onclick=async()=>{
 let tkFilter='all';
 function renderTickets(){
   const all=S.tickets,landed=all.filter(t=>t.status==='landed');
-  const mins=landed.reduce((s,t)=>s+t.min,0);
+  const mins=landed.reduce((s,t)=>s+t.min-(t.rest||0),0);
   $('tkSum').innerHTML=`<div><small>모은 티켓</small><b>${all.length}</b></div><div><small>도착</small><b>${landed.length}</b></div><div><small>집중 시간</small><b>${fmtHM(mins)}</b></div>`;
   const list=all.filter(t=>tkFilter==='all'||(tkFilter==='landed'?t.status==='landed':t.status!=='landed'));
   const el=$('tlist');
@@ -2419,7 +2437,7 @@ function renderTickets(){
         <div class="mm">
           <div class="codes">${t.from}<svg viewBox="-12 -12 24 24"><path d="${plane}" transform="rotate(90)"/></svg>${to}</div>
           <div class="cities">${AP[t.from]?AP[t.from].n:''} → ${hide?'미공개':(AP[t.to]?AP[t.to].n:'')}${t.random?' · 랜덤':''}</div>
-          <div class="meta"><span><i>날짜</i>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span><span><i>시간</i>${fmtHM(t.min)}</span><span><i>${clsOf(t.cls).fee?clsOf(t.cls).n:'좌석'}</i>${t.seat}</span>${km?`<span><i>거리</i>${km}</span>`:''}${t.food&&t.food.length?`<span><i>식사</i>${t.food.map(k=>FOOD[k]?FOOD[k][0]:'').filter(Boolean).join(', ')}</span>`:''}${reasonName(t.reason)?`<span><i>이유</i>${reasonName(t.reason)}</span>`:''}${Number.isFinite(t.miles)&&t.miles?`<span><i>마일</i>${t.miles>0?'+':'-'}${fmtMi(Math.abs(t.miles))}</span>`:''}</div>
+          <div class="meta"><span><i>날짜</i>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span><span><i>시간</i>${fmtHM(t.min)}</span><span><i>${clsOf(t.cls).fee?clsOf(t.cls).n:'좌석'}</i>${t.seat}</span>${km?`<span><i>거리</i>${km}</span>`:''}${t.rest?`<span><i>휴식</i>${fmtHM(t.rest)}</span>`:''}${t.food&&t.food.length?`<span><i>식사</i>${t.food.map(k=>FOOD[k]?FOOD[k][0]:'').filter(Boolean).join(', ')}</span>`:''}${reasonName(t.reason)?`<span><i>이유</i>${reasonName(t.reason)}</span>`:''}${Number.isFinite(t.miles)&&t.miles?`<span><i>마일</i>${t.miles>0?'+':'-'}${fmtMi(Math.abs(t.miles))}</span>`:''}</div>
         </div>
         <div class="stub">${icon(sc)}<b>${sc.n}</b><span class="stamp ${t.status}">${ST[t.status]||''}</span></div>
       </div>`}).join('');
