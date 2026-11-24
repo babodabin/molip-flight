@@ -23,12 +23,12 @@
   --yellow:#ffd60a; --visited:#ff9f43; --sky:#64d2ff; --green:#30d158; --red:#ff6b5a;
   --f:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --st:max(env(safe-area-inset-top,0px),var(--stmin,0px)); --sb:max(env(safe-area-inset-bottom,0px),var(--sbmin,0px)); --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
+  --st:max(env(safe-area-inset-top,0px),var(--stmin,28px)); --sb:max(env(safe-area-inset-bottom,0px),var(--sbmin,0px)); --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
   color-scheme:dark;
 }
 /* Installed app: keep content clear of the status bar, camera hole and gesture bar */
-@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:40px;--sbmin:16px}}
-:root.app{--stmin:40px;--sbmin:16px}
+@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:52px;--sbmin:16px}}
+:root.app{--stmin:52px;--sbmin:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden;background:#000;color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased}
@@ -293,7 +293,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <button class="pill" id="goSelect">여정 시작하기</button>
   <div class="grid2"><button class="pill dark sm" id="goRandom">랜덤 비행</button><button class="pill dark sm" id="goTickets">티켓 모음 <span id="tcount" class="mono" style="color:var(--yellow)"></span></button></div>
   <div class="grid2"><button class="pill dark sm" id="goWall" style="opacity:.45">배경화면 (만드는 중)</button><button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button></div>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.1.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.1.1 · 2026.11.24</div>
 </div></div>
 
 <!-- SELECT -->
