@@ -454,6 +454,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <hr>
   <button id="tLabels" aria-pressed="true">라벨</button>
   <button id="tTraffic" aria-pressed="true">다른 비행기</button>
+  <button id="tWeather" aria-pressed="false">날씨</button>
 </div>
 
 <!-- HOME -->
@@ -665,6 +666,19 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="spds"><button class="spd" id="rpPlay" aria-label="재생"></button><button class="spd" data-spd="1">실시간</button><button class="spd" data-spd="40">×40</button><button class="spd" data-spd="400">×400</button></div>
 </div></div>
 
+<!-- PRIVACY -->
+<div class="sheet" id="privSheet" hidden style="z-index:17"><div class="in" style="max-height:78vh">
+  <div class="row sp"><h2>개인정보 안내</h2><button class="ghost" id="privClose">닫기</button></div>
+  <div style="display:grid;gap:12px;font-size:14px;line-height:1.6;color:#d8d8de">
+    <p style="margin:0"><b style="color:#fff">기록은 이 기기에만 있어요.</b><br>티켓, 마일, 골드, 설정은 휴대폰 브라우저 안에 저장돼요. 저희 서버로 보내지 않고, 서버도 없어요. 앱을 지우거나 사이트 데이터를 지우면 함께 사라져요.</p>
+    <p style="margin:0"><b style="color:#fff">회원가입, 위치, 광고, 방문 분석이 없어요.</b><br>이름, 이메일, 위치, 연락처, 사진을 묻거나 모으지 않아요. 지도 위의 내 위치는 게임 속 위치예요.</p>
+    <p style="margin:0"><b style="color:#fff">지도와 글꼴을 불러올 때</b><br>GitHub Pages, OpenFreeMap, Esri, unpkg, jsDelivr, Google Fonts에 접속해요. 이때 인터넷 주소(IP) 같은 접속 정보가 그 회사들에 전달될 수 있고, 각 회사의 방침을 따라요.</p>
+    <p style="margin:0"><b style="color:#fff">알림과 단축어</b><br>알림은 허락했을 때만, 이 기기 안에서 보내요. 아이폰 단축어를 켜면 비행 시간(분) 숫자 하나만 단축어 앱에 넘겨요.</p>
+    <p style="margin:0"><b style="color:#fff">배경화면 만들기와 공유</b><br>이미지는 기기 안에서 만들고, 직접 공유할 때만 밖으로 나가요.</p>
+    <span class="lbl">2026년 11월 24일부터 · 비행, 날씨, 전광판은 게임 속 정보예요.</span>
+  </div>
+</div></div>
+
 <!-- MILES -->
 <div class="sheet" id="milesSheet" hidden style="z-index:16"><div class="in">
   <div class="row sp"><h2>마일</h2><button class="ghost" id="milesClose">닫기</button></div>
@@ -688,8 +702,9 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <span class="lbl" id="testInfo"></span>
   <button class="pill dark sm" id="logOpen">내 비행 기록과 비행기 도감</button>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
+  <button class="pill dark sm" id="privOpen">개인정보 안내</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.4.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.5.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1125,7 +1140,7 @@ function addOverlays(){
     paint:{'text-color':'#64d2ff','text-halo-color':'rgba(0,0,0,.8)','text-halo-width':1.2}});
   map.addLayer({id:'plane',type:'symbol',source:'plane',layout:{'icon-image':'me','icon-size':['interpolate',['linear'],['zoom'],1,.7,8,1.15],'icon-rotate':['get','b'],
     'icon-rotation-alignment':'map','icon-pitch-alignment':'map','icon-allow-overlap':true,'icon-ignore-placement':true}});
-  applyToggles();refreshAirports();refreshNight(true);refreshHistory();
+  drawWeather();applyToggles();refreshAirports();refreshNight(true);refreshHistory();
   if(mode==='select')renderSelect(true);
   if(F){map.getSource('flown')&&updateFlightLayers(true)}
 }
@@ -1137,6 +1152,44 @@ function applyToggles(){
 }
 function paintPlane(){if(!map||!mapReady)return;const im=planeImage(skin()[1],96);if(map.hasImage('me'))map.updateImage('me',im);else map.addImage('me',im,{pixelRatio:2});paintMe();if(F)updateFlightLayers(true)}
 function setStyle(k){if(!BASE[k]||k===curStyle)return;curStyle=k;S.style=k;save();map.setStyle(BASE[k],{diff:false})}
+
+/* ---------- weather: made up, but the same everywhere in the app ----------
+   Smooth noise on the globe that drifts with the hours, so the map, the window and the boards agree. */
+function wxHash(x,y,z){let n=Math.imul(x,374761393)^Math.imul(y,668265263)^Math.imul(z,2147483647);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295}
+function wxNoise(x,y,z){const X=Math.floor(x),Y=Math.floor(y),Z=Math.floor(z),e=a=>a*a*(3-2*a),u=e(x-X),v=e(y-Y),w=e(z-Z),m=(a,b,t)=>a+(b-a)*t,g=(i,j,k)=>wxHash(X+i,Y+j,Z+k);
+  return m(m(m(g(0,0,0),g(1,0,0),u),m(g(0,1,0),g(1,1,0),u),v),m(m(g(0,0,1),g(1,0,1),u),m(g(0,1,1),g(1,1,1),u),v),w)}
+const wxStep=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)};
+function wxAt(lon,lat,t){
+  const v=vec(lon,lat),h=(t===undefined?Date.now():t)/3600000%100000,q=2.6;let c=0,a=.5,k=q;
+  for(let i=0;i<4;i++){c+=a*wxNoise(v[0]*k+h*.045+i*19,v[1]*k+i*7,v[2]*k*1.35-h*.02+i*31);a*=.5;k*=2.05}
+  c=c/.9375+.05*Math.exp(-lat*lat/120)-.05*Math.exp(-Math.pow(Math.abs(lat)-25,2)/60);
+  return {cover:wxStep(.4,.62,c),rain:wxStep(.555,.66,c),storm:wxStep(.65,.74,c)};
+}
+function tempAt(lon,lat,t){
+  const d=new Date(t===undefined?Date.now():t),doy=(d-Date.UTC(d.getUTCFullYear(),0,1))/86400000,season=-Math.cos((doy-15)/365*2*Math.PI),hour=(d.getUTCHours()+d.getUTCMinutes()/60+lon/15+48)%24;
+  return 28-Math.pow(Math.abs(lat)/90,1.35)*44+season*13*Math.sign(lat)*Math.min(1,Math.abs(lat)/45)+4*Math.cos((hour-15)/24*2*Math.PI)-3*wxAt(lon,lat,t).cover;
+}
+function wxText(lon,lat,t){const w=wxAt(lon,lat,t),c=Math.round(tempAt(lon,lat,t)),cold=c<=0;
+  return {w,c,cold,n:w.storm>.45&&!cold?'천둥번개':w.rain>.35?(cold?'눈':'비'):w.cover>.75?'흐림':w.cover>.35?'구름 조금':'맑음'}}
+const WXC=[[-180,85.051],[180,85.051],[180,-85.051],[-180,-85.051]];
+let wxUrl='',wxTime=0;
+function wxImage(){
+  if(wxUrl&&Date.now()-wxTime<300000)return wxUrl;wxTime=Date.now();
+  const W=360,H=360,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),im=g.createImageData(W,H),d=im.data;
+  for(let y=0;y<H;y++){const lat=Math.atan(Math.sinh(Math.PI*(1-2*(y+.5)/H)))/rad;
+    for(let x=0;x<W;x++){const w=wxAt((x+.5)/W*360-180,lat,wxTime),i=(y*W+x)*4,r=w.rain,s=w.storm,m=(a,b,k)=>a+(b-a)*k;
+      d[i]=m(m(255,96,r),38,s);d[i+1]=m(m(255,170,r),92,s);d[i+2]=m(m(255,255,r),235,s);d[i+3]=255*Math.max(w.cover*.5,r*.72,s*.85)}}
+  g.putImageData(im,0,0);return wxUrl=c.toDataURL();
+}
+let wxOn=!!S.wx;
+function drawWeather(){
+  if(!map||!mapReady&&!map.getSource('airports'))return;
+  if(wxOn&&!map.getSource('weather')){map.addSource('weather',{type:'image',url:wxImage(),coordinates:WXC});map.addLayer({id:'weather',type:'raster',source:'weather',paint:{'raster-opacity':.85,'raster-fade-duration':0,'raster-resampling':'linear'}},map.getLayer('history')?'history':undefined)}
+  else if(wxOn&&Date.now()-wxTime>300000)map.getSource('weather').updateImage({url:wxImage(),coordinates:WXC});
+  if(map.getLayer('weather'))map.setLayoutProperty('weather','visibility',wxOn?'visible':'none');
+  $('tWeather').setAttribute('aria-pressed',wxOn);
+}
+setInterval(()=>{if(wxOn&&!document.hidden&&map&&mapReady)drawWeather()},60000);
 
 /* night side of the planet, computed from the flight's own clock */
 let nightAt=0;
@@ -1535,7 +1588,7 @@ $('go').onclick=()=>{
   if(F.random){map.setMinZoom(6.5)}
   show('flight');enterView(true);updateFlightLayers(true);keepAwake(true);
   const sc=SCEN.find(s=>s.id===F.scen),dest=F.random?'알 수 없는 목적지':AP[F.to].n;
-  caption([`기장입니다. 몰입 항공 ${F.no}편 ${dest}행에 오신 것을 환영합니다.`,`비행 시간은 ${fmtKo(F.min)}입니다.`,`알림은 잠시 내려 두시고 ${sc.n}에 집중해 주세요.`]);
+  caption([`기장입니다. 몰입 항공 ${F.no}편 ${dest}행에 오신 것을 환영합니다.`,`비행 시간은 ${fmtKo(F.min)}입니다.`,...(F.random?[]:[`도착지 날씨는 ${wxText(...AP[F.to].ll).n}, 기온은 ${wxText(...AP[F.to].ll).c}도입니다.`]),`알림은 잠시 내려 두시고 ${sc.n}에 집중해 주세요.`]);
 };
 /* the flight in progress is kept in storage, so a killed app picks it up again */
 let snapAt=0;
@@ -2067,7 +2120,7 @@ function renderCard(){
         <path d="${path}L${W} ${H}L0 ${H}Z" fill="#ffd60a" opacity=".12"/><path d="${path}" fill="none" stroke="#ffd60a" stroke-width="2" stroke-linejoin="round"/>
         <line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="#fff" stroke-opacity=".18"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#ffd60a" stroke="#161619" stroke-width="2"/>
         <text x="0" y="${H+12}" font-size="10" fill="#8e8e93">이륙</text><text x="${W}" y="${H+12}" font-size="10" fill="#8e8e93" text-anchor="end">착륙</text></svg>
-      <dl><dt>높이</dt><dd>${(Math.round(a.alt/100)*100).toLocaleString('en-US')} ft</dd><dt>속도</dt><dd>${flySpeed(Tm,s.p)} km/h</dd><dt>방향</dt><dd>${dirOf(s.hdg)}</dd>${hide?'':`<dt>위치</dt><dd>${Math.abs(s.pos[1]).toFixed(1)}°${s.pos[1]<0?'S':'N'} ${Math.abs(((s.pos[0]+540)%360)-180).toFixed(1)}°${((s.pos[0]+540)%360)-180<0?'W':'E'}</dd>`}${F.replay?'':`<dt>도착 예정</dt><dd>${F.paused?'멈춤':clockAt(Date.now()+left)}</dd>`}</dl>`;
+      <dl><dt>높이</dt><dd>${(Math.round(a.alt/100)*100).toLocaleString('en-US')} ft</dd><dt>속도</dt><dd>${flySpeed(Tm,s.p)} km/h</dd><dt>방향</dt><dd>${dirOf(s.hdg)}</dd>${hide?'':`<dt>위치</dt><dd>${Math.abs(s.pos[1]).toFixed(1)}°${s.pos[1]<0?'S':'N'} ${Math.abs(((s.pos[0]+540)%360)-180).toFixed(1)}°${((s.pos[0]+540)%360)-180<0?'W':'E'}</dd>`}${hide?'':`<dt>이곳 날씨</dt><dd>${(w=>w.n+' '+w.c+'°')(wxText(s.pos[0],s.pos[1],F.depUTC+F.elapsed))}</dd>`}${F.replay?'':`<dt>도착 예정</dt><dd>${F.paused?'멈춤':clockAt(Date.now()+left)}</dd>`}</dl>`;
   }
   $('icX').onclick=closeCard;
 }
@@ -2077,7 +2130,8 @@ function openAirport(c){
   const a=AP[c];closeCard();const here=c===S.city&&mode==='home',local=new Date(Date.now()+a.tz*3600000),hh=n=>String(n).padStart(2,'0');
   const been=S.tickets.filter(t=>t.status==='landed'&&t.to===c).length,m=flightMin(AP[S.city],a);
   $('apName').innerHTML=`${a.n} <span class="mono" style="color:var(--yellow);font-size:15px">${c}</span>`;
-  $('apInfo').textContent=`현지 시각 ${hh(local.getUTCHours())}:${hh(local.getUTCMinutes())} · ${here?'지금 있는 곳':been?`${been}번 갔어요`:S.visited.includes(c)?'가 본 공항':'아직 안 가 봤어요'}${here||c===S.city?'':` · ${fmtKo(m)}, ${Math.round(distKm(AP[S.city],a)).toLocaleString('en-US')}km`}`;
+  const wx=wxText(a.ll[0],a.ll[1]);
+  $('apInfo').textContent=`${wx.n} ${wx.c}° · 현지 시각 ${hh(local.getUTCHours())}:${hh(local.getUTCMinutes())} · ${here?'지금 있는 곳':been?`${been}번 갔어요`:S.visited.includes(c)?'가 본 공항':'아직 안 가 봤어요'}${here||c===S.city?'':` · ${fmtKo(m)}, ${Math.round(distKm(AP[S.city],a)).toLocaleString('en-US')}km`}`;
   let z=Math.floor(Date.now()/3600000);for(const ch of c)z=(z*31+ch.charCodeAt(0))%2147483647;z=z||1;const rnd=()=>(z=(z*16807)%2147483647)/2147483647;
   const row=(i,live)=>{let b;do b=AIRPORTS[Math.floor(rnd()*AIRPORTS.length)];while(b===a);const d=new Date(local.getTime()+(8+i*17+Math.floor(rnd()*9))*60000),late=rnd()<.18;
     return `<div><span>${hh(d.getUTCHours())}:${hh(d.getUTCMinutes())}</span><b>${b.n}</b><span>${PREF[Math.floor(rnd()*PREF.length)]}${100+Math.floor(rnd()*900)}</span><span class="${late?'late':'ok'}">${late?'지연':i===0&&live?live:'정시'}</span></div>`};
@@ -2107,6 +2161,8 @@ function openLog(){
   $('logBody').querySelectorAll('[data-ty]').forEach(c=>{const t=TYPES[c.dataset.ty],im=planeImage(t.c||'#f2f2f7',112,t.p);c.width=c.height=112;c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(im.data),112,112),0,0)});
   $('logView').hidden=false;
 }
+$('privOpen').onclick=()=>{$('settingsSheet').hidden=true;$('privSheet').hidden=false};
+$('privClose').onclick=()=>$('privSheet').hidden=true;
 $('logClose').onclick=()=>$('logView').hidden=true;
 $('logOpen').onclick=()=>{$('settingsSheet').hidden=true;openLog()};
 document.querySelector('#home .stats').onclick=openLog;
@@ -2149,9 +2205,9 @@ function hud(s){
 /* ---------- window: what the seat would see, drawn live ----------
    Real sun direction, the real coastline below, clouds you climb through, city lights at night. Distances are in km, east/north. */
 let gl=null,prog=null,uni={},skyRun=false;
-const SK={sun:[0,.3,1],moon:[0,.3,1],day:1,alt:1,t:0,last:0,off:[0,0],coff:[0,0],yaw:0,az:0,hdg:0,side:1,cover:.6,tilt:0,frost:0,aur:0,rw:0,pink:0,met:0,lat:0,lon:0,vel:.2,q:1.5,slow:0,n:0,key:''};
+const SK={sun:[0,.3,1],moon:[0,.3,1],day:1,alt:1,t:0,last:0,off:[0,0],coff:[0,0],yaw:0,az:0,hdg:0,side:1,cover:.6,tilt:0,frost:0,aur:0,rw:0,pink:0,met:0,rain:0,snow:0,flash:0,storm:0,lat:0,lon:0,vel:.2,q:1.5,slow:0,n:0,key:''};
 const SKY_FS=`precision highp float;
-uniform vec2 res,off,coff,fwd;uniform float t,day,alt,cover,lat,lon,az,tilt,frost,aur,rw,pink,met;uniform vec3 sun,moon;uniform sampler2D mask;
+uniform vec2 res,off,coff,fwd;uniform float t,day,alt,cover,lat,lon,az,tilt,frost,aur,rw,pink,met,rain,snow,flash;uniform vec3 sun,moon;uniform sampler2D mask;
 const float DECK=2.2;
 float h(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
@@ -2238,6 +2294,17 @@ void main(){
     float hz=1.-exp(-dc/(18.+abs(above)*12.));
     col=mix(col,mix(cl,hor,clamp(hz,0.,1.)),cov*(1.-.35*hz*step(above,0.)));
   }
+  float under=smoothstep(.15,-.15,above);
+  col=mix(col,mix(vec3(.035,.04,.055),mix(vec3(.55,.58,.63),vec3(.6,.48,.45),sunset),day),rain*under*.42);
+  col+=vec3(.72,.78,1.)*flash*(.25+.75*n(en*3.+floor(t*3.)))*(rd.y<.12?1.:.45);
+  if(rain*under>.02){
+    for(int i=0;i<2;i++){
+      float fi=float(i);vec2 k=w*vec2(20.,8.)*(1.+fi*.7);k.y+=t*mix(6.5,1.1,snow)*(1.+fi*.4);k.x+=k.y*mix(.22,.1,snow)+fi*3.7+sin(t*.8+k.y)*.12*snow;
+      vec2 id=floor(k),q2=fract(k)-.5;float r=h(id+fi*17.),on=step(1.-rain*.62,h(id*1.7+fi*5.));
+      float d=mix(smoothstep(.05,0.,abs(q2.x-(r-.5)*.8))*smoothstep(.48,.05,abs(q2.y)),smoothstep(.15,.04,length((q2-(vec2(r,fract(r*7.3))-.5)*.6)*vec2(1.,1.15))),snow);
+      col+=d*on*under*mix(vec3(.16,.18,.2),vec3(.5),snow)*(.25+.75*day);
+    }
+  }
   float fog=exp(-above*above/.11)*smoothstep(.2,.5,cover)*.99;
   if(fog>.01){float sk=n(vec2(w.x*3.+t*2.5,w.y*5.))*.5+n(vec2(w.x*9.+t*5.,w.y*11.))*.3;col=mix(col,mix(vec3(.05,.055,.075),mix(vec3(.86,.89,.93),vec3(.95,.7,.55),sunset*.7),day)*(.86+.2*sk),fog);}
   if(frost>.01){
@@ -2257,7 +2324,7 @@ function startSky(){
     gl=g;gl.useProgram(prog);
     const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    ['res','off','coff','fwd','t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','pink','met','sun','moon','mask'].forEach(k=>uni[k]=gl.getUniformLocation(prog,k));
+    ['res','off','coff','fwd','t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','pink','met','rain','snow','flash','sun','moon','mask'].forEach(k=>uni[k]=gl.getUniformLocation(prog,k));
     gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
     const MW=1024,MH=512;let px=new Uint8Array(MW*MH);
     if(worldTopo){const d=landMask(MW,MH);for(let i=0;i<px.length;i++)px[i]=d[i*4+3];delete maskCache[MW+'x'+MH]}
@@ -2274,7 +2341,7 @@ $('sky').addEventListener('webglcontextlost',e=>{e.preventDefault();gl=null;skyR
 $('sky').addEventListener('webglcontextrestored',()=>{if(winOn&&(mode==='flight'||mode==='replay'))startSky()});
 /* which side, and where the wing is from this seat */
 function seatWindow(){
-  const key=F.no+F.seat;if(SK.key===key)return;SK.key=key;SK.yaw=0;SK.off=[0,0];SK.coff=[0,0];
+  const key=F.no+F.seat;if(SK.key===key)return;SK.key=key;SK.wxInit=false;SK.yaw=0;SK.off=[0,0];SK.coff=[0,0];
   const row=parseInt(F.seat,10)||1,l=String(F.seat||'A').slice(-1),P=planeFor(F.min),cab=P.cabins.find(c=>row>=c.a&&row<=c.b)||P.cabins[P.cabins.length-1],all=cab.c.replace(/ /g,''),i=all.indexOf(l);
   SK.side=i<0?('ABCD'.includes(l)?-1:1):i<all.length/2?-1:1;
   const wr=P.cabins[P.cabins.length-1].wing,mid=(wr[0]+wr[1])/2;SK.wing=-SK.side*Math.max(-1.35,Math.min(1.35,(row-mid)/(wr[1]-wr[0])))*26;
@@ -2297,7 +2364,7 @@ function skyState(s){
   const tm=F.elapsed/60000,left=(F.T-F.elapsed)/60000,sm=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)};
   const pr=profile(s.p),km=pr.alt*.3048/1000*sm(25,110,tm*60)*sm(6,50,left*60); // a takeoff run first, wheels down at the end
   SK.alt=Math.max(.012,km);SK.lat=s.pos[1];SK.lon=((s.pos[0]+180)%360+360)%360-180;
-  SK.cover=.5+.36*Math.sin(tm/11+SK.seed*6.28)+.1*Math.sin(tm/3.7+SK.seed*20);
+  const wx=wxText(s.pos[0],s.pos[1],when),ez=(a,b)=>a+(b-a)*(SK.wxInit?.04:1);SK.cover=ez(SK.cover,.16+.74*wx.w.cover+.06*Math.sin(tm/3.7+SK.seed*20));SK.rain=ez(SK.rain,wx.w.rain);SK.snow=wx.cold?1:0;SK.storm=wx.cold?0:wx.w.storm;SK.wxInit=true;
   const ramp=Math.min(1,Math.min(tm,left)/6);SK.kmh=Math.round(Math.min(tm*60<25?20+tm*60*9.6:1e4,left*60<12?60+left*60*17:1e4,260+500*ramp));SK.vel=SK.kmh/3600;
   SK.tilt=SK.side*D2(pr.phase==='climb'?6*sm(22,34,tm*60):pr.phase==='descent'?-2.5:0)+D2(.35)*Math.sin(tm*.5+SK.seed*9);
   SK.frost=Math.max(0,Math.min(1,(km-6)/4))*.8;SK.aur=Math.max(0,Math.min(1,(Math.abs(SK.lat)-56)/9));SK.rw=Math.max(0,1-km/.35);const sk=skyPick();if(sk==='aurora')SK.aur=2;SK.met=sk==='meteor'?1:0;SK.pink=sk==='rose'?1:0;
@@ -2305,7 +2372,7 @@ function skyState(s){
   $('wing').style.transform=`translateX(${(SK.wing-SK.yaw/rad)/35*100/1.8}%)`;
   if(now-infoAt>900){infoAt=now;
     const temp=Math.round(15-6.5*Math.min(km,11)),mode0=SK.day>.75?'낮':SK.day>.04?'노을':'밤',land=overLand(SK.lon,SK.lat);
-    $('winInfo').innerHTML=`<b>${(Math.round(km/.03048)*100).toLocaleString('en-US')}</b> ft · 시속 <b>${SK.kmh}</b> km · 바깥 <b>${temp}</b>°C\n${SK.side<0?'왼쪽':'오른쪽'} 창 · ${mode0} · 지금 아래는 ${land?'육지':'바다'}`;
+    $('winInfo').innerHTML=`<b>${(Math.round(km/.03048)*100).toLocaleString('en-US')}</b> ft · 시속 <b>${SK.kmh}</b> km · 바깥 <b>${temp}</b>°C\n${SK.side<0?'왼쪽':'오른쪽'} 창 · ${mode0} · ${wxText(SK.lon,SK.lat,when).n} · 지금 아래는 ${land?'육지':'바다'}`;
     const g=$('wingG').style;g.filter=`brightness(${(.1+.9*Math.max(SK.day,.06)).toFixed(2)})`;
     const v=$('winView').style,mix=(a,b)=>'rgb('+a.map((x,i)=>Math.round(x+(b[i]-x)*SK.day)).join()+')';
     v.setProperty('--amb',mix([17,18,28],[74,73,71]));v.setProperty('--zen',mix([3,5,12],[40,90,180]));v.setProperty('--hor',mix([10,14,28],[190,215,240]));v.setProperty('--low',mix([8,10,18],[205,215,226]));
@@ -2318,11 +2385,12 @@ function drawSky(now){
   if(SK.last&&now-SK.last<30)return;                       // 30 frames a second is plenty and kinder to the battery
   const dt=SK.last?Math.min(.2,(now-SK.last)/1000):0;SK.last=now;
   SK.n++;if(dt>.055&&dt<.19)SK.slow++;if(SK.n>=60){if(SK.slow>35&&SK.q>.6)SK.q*=.75;SK.n=SK.slow=0}
+  SK.flash*=Math.pow(.02,dt);if(!F.paused&&SK.storm>.4&&Math.random()<dt*.22*SK.storm)SK.flash=.35+.5*Math.random();
   if(!F.paused){SK.t+=dt;const e=Math.sin(SK.hdg),n=Math.cos(SK.hdg),v=SK.vel*dt;SK.off[0]+=e*v;SK.off[1]+=n*v;SK.coff[0]+=e*v*2;SK.coff[1]+=n*v*2}
   const c=$('sky'),dpr=Math.min(SK.q,devicePixelRatio||1),w=c.clientWidth*dpr|0,h=c.clientHeight*dpr|0;if(!w||!h)return;
   if(c.width!==w||c.height!==h){c.width=w;c.height=h;gl.viewport(0,0,w,h)}
   gl.uniform2f(uni.res,w,h);gl.uniform2fv(uni.off,SK.off);gl.uniform2fv(uni.coff,SK.coff);gl.uniform2f(uni.fwd,Math.sin(SK.hdg),Math.cos(SK.hdg));
-  for(const k of ['t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','pink','met'])gl.uniform1f(uni[k],SK[k]);
+  for(const k of ['t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','pink','met','rain','snow','flash'])gl.uniform1f(uni[k],SK[k]);
   gl.uniform3fv(uni.sun,SK.sun);gl.uniform3fv(uni.moon,SK.moon);
   gl.drawArrays(gl.TRIANGLES,0,3);
 }
@@ -2553,6 +2621,7 @@ $('goTickets').onclick=()=>show('tickets');$('ticketsBack').onclick=()=>show('ho
 $('btnLayers').onclick=e=>{e.stopPropagation();$('layerPop').hidden=!$('layerPop').hidden};
 document.querySelectorAll('[data-style]').forEach(b=>b.onclick=()=>{setStyle(b.dataset.style);$('layerPop').hidden=true});
 $('tLabels').onclick=()=>{showLabels=!showLabels;applyToggles()};
+$('tWeather').onclick=()=>{wxOn=!wxOn;S.wx=wxOn;save();drawWeather();toast(wxOn?'흰색은 구름, 파란색은 비예요. 진할수록 많이 와요':'날씨를 껐어요')};
 $('tTraffic').onclick=()=>{trafficOn=!trafficOn;applyToggles()};
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#layerPop,#btnLayers'))$('layerPop').hidden=true;if(!e.target.closest('#soundPop,#btnSound'))$('soundPop').hidden=true});
 
