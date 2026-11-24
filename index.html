@@ -23,9 +23,12 @@
   --yellow:#ffd60a; --visited:#ff9f43; --sky:#64d2ff; --green:#30d158; --red:#ff6b5a;
   --f:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px); --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
+  --st:max(env(safe-area-inset-top,0px),var(--stmin,0px)); --sb:max(env(safe-area-inset-bottom,0px),var(--sbmin,0px)); --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
   color-scheme:dark;
 }
+/* Installed app: keep content clear of the status bar, camera hole and gesture bar */
+@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:40px;--sbmin:16px}}
+:root.app{--stmin:40px;--sbmin:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden;background:#000;color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased}
@@ -1430,6 +1433,8 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('#layerPop,#btn
 /* ---------- install as an app ---------- */
 let installEvt=null;
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+const markApp=()=>{document.documentElement.classList.toggle('app',isStandalone()||!!document.fullscreenElement);if(mapReady)map.resize()};
+markApp();document.addEventListener('fullscreenchange',markApp);
 const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 addEventListener('appinstalled',()=>{installEvt=null;$('goInstall').hidden=true;$('installSheet').hidden=true;toast('앱이 설치됐어요. 홈 화면에서 열어 보세요')});

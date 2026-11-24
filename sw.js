@@ -1,7 +1,7 @@
-// App files: network first so new versions show up right away, cache as fallback.
+﻿// App files: network first so new versions show up right away, cache as fallback.
 // Libraries and fonts: cache first, they never change at a pinned version.
 // Map tiles are left to the browser's own cache.
-const CACHE = 'molip-v2';
+const CACHE = 'molip-v3';
 const SHELL = ['./', 'index.html', 'manifest.json', 'world.json', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 const LIBS = /^(https:\/\/unpkg\.com\/maplibre-gl@|https:\/\/cdn\.jsdelivr\.net\/(npm\/topojson-client@|gh\/orioncactus\/pretendard@)|https:\/\/fonts\.(googleapis|gstatic)\.com\/)/;
 const STYLES = /^https:\/\/tiles\.openfreemap\.org\/(styles|fonts)\//;
