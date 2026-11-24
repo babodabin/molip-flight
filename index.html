@@ -53,7 +53,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-of
 /* sheets */
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) max(10px, calc(var(--sb) - 20px)) calc(12px + var(--sl))}
 .sheet>.in{max-width:520px;margin:0 auto;background:var(--sheet);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--line);border-radius:26px;padding:18px;display:grid;gap:14px;max-height:56vh;overflow:auto}
-#select .alist{height:max(96px,calc(56vh - 324px));overflow:auto;align-content:start}
+#select .alist{height:max(96px,calc(56vh - 354px));overflow:auto;align-content:start}
 .pill{all:unset;cursor:pointer;text-align:center;padding:15px 18px;border-radius:999px;font-weight:600;font-size:16px;background:#fff;color:#000}
 .pill.dark{background:rgba(255,255,255,.1);color:var(--fg)}
 .pill[disabled]{opacity:.35;cursor:not-allowed}
@@ -77,6 +77,11 @@ h2{font-size:19px}
 .stats b{display:block;font-family:var(--mono);font-size:19px;font-weight:500;margin-top:2px;white-space:nowrap}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+
+.mrow{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:rgba(255,214,10,.1);border-radius:16px;padding:10px 12px}
+.mrow b{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--yellow)}
+.mcost{font-size:13px;line-height:18px;height:18px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mcost b{color:var(--yellow);font-weight:600}.mcost.no{color:#ff8a80}
+.mrules{display:grid;gap:8px;font-size:14px;line-height:1.45}.mrules div{display:flex;justify-content:space-between;gap:14px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.mrules span:last-child{text-align:right;color:var(--yellow)}
 
 /* time select */
 .tbig{font-family:var(--mono);font-size:40px;font-weight:500;letter-spacing:-.03em}
@@ -254,7 +259,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .mini .stub svg{width:22px;height:22px}
 .mini .stub b{font-size:11px;font-weight:600}
 .stamp{font-size:10px;font-weight:700;letter-spacing:.1em;padding:2px 6px;border:1.5px solid currentColor;border-radius:5px;transform:rotate(-8deg)}
-.stamp.landed{color:var(--green)}.stamp.diverted{color:var(--red)}.stamp.flying{color:var(--dim)}
+.stamp.landed{color:var(--green)}.stamp.canceled{color:var(--dim)}.stamp.diverted{color:var(--red)}.stamp.flying{color:var(--dim)}
 .tkEmpty{padding:40px 10px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
 .toast{position:fixed;left:50%;top:calc(70px + var(--st));transform:translateX(-50%);z-index:20;background:rgba(30,30,33,.95);border:1px solid var(--line);padding:10px 16px;border-radius:14px;font-size:14px}
 #loading{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:#000;color:var(--muted);font-size:14px;transition:opacity .6s}
@@ -289,6 +294,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div><span class="lbl">집중 시간</span><b id="kMinutes">0m</b></div>
     <div><span class="lbl">비행 거리</span><b id="kKm">0 km</b></div>
   </div>
+  <button class="mrow" id="goMiles"><span class="lbl">마일 · <span id="kReach"></span></span><b id="kMiles"></b></button>
   <div class="legend"><span><i style="background:var(--visited)"></i>가 본 공항</span><span><i style="background:var(--yellow)"></i>안 가 본 공항</span><span><i style="background:#fff"></i>지금 위치</span></div>
   <button class="pill" id="goSelect">여정 시작하기</button>
   <div class="grid2"><button class="pill dark sm" id="goRandom">랜덤 비행</button><button class="pill dark sm" id="goTickets">티켓 모음 <span id="tcount" class="mono" style="color:var(--yellow)"></span></button></div>
@@ -299,6 +305,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <div class="sheet" id="select" hidden><div class="in">
   <div class="row sp"><h2 id="selTitle">얼마나 집중할까요?</h2><button class="ghost" id="selBack">닫기</button></div>
   <div class="row sp" style="align-items:flex-end"><span class="tbig" id="tval">2h 00m</span><span class="lbl" id="selFrom"></span></div>
+  <div class="mcost" id="selCost"></div>
   <div><input type="range" id="tslider" min="0" max="1000" step="1" value="200" aria-label="집중 시간"><div class="ticks" id="ticks"></div></div>
   <div id="destPart" style="display:grid;gap:8px">
     <input class="search" id="search" type="search" placeholder="공항 코드나 도시로 검색" autocomplete="off">
@@ -357,6 +364,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       <label class="opt" id="optScRow"><input type="checkbox" id="optSc"><span><b>단축어로 방해 금지 + 알람</b><small>출발하면 아이폰 단축어 '몰입 비행'을 실행해요. 방해 금지를 도착 시간까지 켜고, 착륙 10분 전에 시계 타이머가 울려요. 잠금 화면에서도 울려요. <a href="#" id="scHow" style="color:#1a5fd0;font-weight:600;text-decoration:underline">단축어 만드는 법</a></small></span></label>
       <div class="opt" id="dndNote"><span><b>방해 금지는 직접 켜 주세요</b><small>웹앱은 방해 금지를 대신 켤 수 없어요. 빠른 설정에서 방해 금지를 켜 주세요. 비행기 모드는 지도가 안 보일 수 있어요.</small></span></div>
     </div>
+    <p id="readyMiles" style="margin:0;font-size:14px;line-height:1.5;color:#333;text-align:center"></p>
     <button class="pill" id="go">출발</button>
   </div>
 </div>
@@ -410,17 +418,32 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <h2 id="doneTitle"></h2>
     <div class="big" id="doneTime"></div>
     <span class="lbl" id="doneNote"></span>
+    <span id="doneMiles" style="font-size:15px;color:var(--yellow);text-align:center;line-height:1.45"></span>
     <span class="badge" id="doneBadge" hidden>새로운 공항!</span>
     <button class="pill" id="layover" style="width:100%;margin-top:8px">5분 환승 휴식</button>
     <button class="pill dark" id="toHome" style="width:100%">홈으로</button>
   </div>
 </div>
 
+<!-- MILES -->
+<div class="sheet" id="milesSheet" hidden style="z-index:16"><div class="in">
+  <div class="row sp"><h2>마일</h2><button class="ghost" id="milesClose">닫기</button></div>
+  <span class="lbl">비행할 때 1분에 10마일을 보증금으로 걸어요. 마일이 많을수록 멀리 갈 수 있어요. 진짜 돈이 아니에요.</span>
+  <div class="mrules">
+    <div><span>도착</span><span>보증금 전부 + 20%</span></div>
+    <div><span>회항</span><span>보증금 절반을 잃음</span></div>
+    <div><span>출발 1분 안에 취소</span><span>전부 돌려받음</span></div>
+    <div><span>마일이 부족할 때</span><span>1시간까지 무료</span></div>
+    <div><span>앱이 꺼졌을 때</span><span>다시 열면 이어서 비행</span></div>
+  </div>
+  <span class="lbl">1시간 안에 갈 공항이 없는 곳에서는 가장 가까운 공항까지 무료예요.</span>
+</div></div>
+
 <!-- INSTALL GUIDE -->
 <div class="sheet" id="settingsSheet" hidden style="z-index:16"><div class="in">
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.2.2 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.3.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -722,6 +745,15 @@ const ARR_SVG='<svg viewBox="0 0 24 24"><path d="M2.5 19h19v2h-19zM9.68 13.27l4.
 let S={city:'ICN',visited:['ICN'],flights:0,minutes:0,tickets:[],style:'sat'};
 try{const s=JSON.parse(localStorage.getItem('mf-v2')||localStorage.getItem('mf-v1'));if(s&&AP[s.city]&&Array.isArray(s.visited))S=Object.assign(S,s)}catch(e){}
 if(!Array.isArray(S.tickets))S.tickets=[];
+if(!Number.isFinite(S.miles)||S.miles<0)S.miles=1200;
+
+/* ---------- miles ----------
+   A flight holds a deposit of 10 per minute: landing returns it plus 20%, diverting costs half.
+   Short hops are free when miles run out, and so is the nearest airport, so nobody gets stranded. */
+const price=m=>m*10,fmtMi=n=>Math.round(n).toLocaleString('en-US'),CANCEL_MS=60000;
+function freeMax(){const from=AP[S.city];return Math.max(60,Math.min(...AIRPORTS.filter(a=>a!==from).map(a=>flightMin(from,a)).filter(m=>m>=30)))}
+function maxMin(){return Math.max(freeMax(),Math.floor(S.miles/10))}
+function stakeFor(m){return S.miles>=price(m)?price(m):0}
 function save(){try{localStorage.setItem('mf-v2',JSON.stringify(S))}catch(e){}}
 
 const fmtHM=m=>{m=Math.round(m);const h=Math.floor(m/60),mm=m%60;return h?`${h}h ${String(mm).padStart(2,'0')}m`:`${mm}m`};
@@ -777,15 +809,15 @@ function addOverlays(){
   map.addLayer({id:'history',type:'line',source:'history',layout:{'line-cap':'round'},paint:{'line-color':'#ff9f43','line-width':1.8,'line-opacity':.7}});
   map.addLayer({id:'night',type:'fill',source:'night',paint:{'fill-color':'#020617','fill-opacity':curStyle==='light'?.22:.34,'fill-antialias':false}},firstSym);
   map.addLayer({id:'apglow',type:'circle',source:'airports',filter:['==',['get','hot'],2],paint:{
-    'circle-radius':['interpolate',['linear'],['zoom'],1,11,6,18],'circle-color':'#ffd60a','circle-opacity':.28,'circle-blur':.4}});
+    'circle-radius':['interpolate',['linear'],['zoom'],1,11,6,18],'circle-color':['match',['get','st'],'lock','#8e8e93','#ffd60a'],'circle-opacity':.28,'circle-blur':.4}});
   map.addLayer({id:'airports',type:'circle',source:'airports',paint:{
     'circle-radius':['interpolate',['linear'],['zoom'],1,['match',['get','hot'],2,6,1,3.4,0,1.6,['match',['get','st'],'here',5,2.6]],6,['match',['get','hot'],2,9,1,6,0,3,['match',['get','st'],'here',7,5]]],
-    'circle-color':['match',['get','st'],'here','#ffffff','visited','#ff9f43','#ffd60a'],
+    'circle-color':['match',['get','st'],'here','#ffffff','visited','#ff9f43','lock','#8e8e93','#ffd60a'],
     'circle-opacity':['match',['get','hot'],1,.75,0,.28,1],
     'circle-stroke-color':'rgba(0,0,0,.8)','circle-stroke-width':['match',['get','hot'],0,0,1]}});
   map.addLayer({id:'aplabel',type:'symbol',source:'airports',filter:['==',['get','hot'],2],layout:{'text-field':['get','n'],'text-font':['Noto Sans Bold'],'text-size':13,
     'text-variable-anchor':['top','bottom','left','right'],'text-radial-offset':.8,'text-optional':true,'symbol-sort-key':['get','o']},
-    paint:{'text-color':'#ffd60a','text-halo-color':'rgba(0,0,0,.9)','text-halo-width':1.6}});
+    paint:{'text-color':['match',['get','st'],'lock','#b0b0b6','#ffd60a'],'text-halo-color':'rgba(0,0,0,.9)','text-halo-width':1.6}});
   map.addLayer({id:'preview',type:'line',source:'preview',layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':2.4}});
   map.addLayer({id:'remain',type:'line',source:'remain',layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':2,'line-dasharray':[1.5,2],'line-opacity':.8}});
   map.addLayer({id:'flown',type:'line',source:'flown',layout:{'line-cap':'round'},paint:{'line-color':'#ffd60a','line-width':3.2}});
@@ -832,12 +864,14 @@ let candidates=[],nearSet=new Set();
 function refreshAirports(){
   if(!map||!map.getSource('airports'))return;
   const order=new Map(candidates.map((a,i)=>[a.c,i])),picking=mode==='select'&&!plan.random,secret=F&&F.random&&mode==='flight';
+  const lim=mode==='select'?maxMin():1e9,here=AP[S.city];
   map.getSource('airports').setData({type:'FeatureCollection',features:AIRPORTS.map(a=>{
     let st=S.visited.includes(a.c)?'visited':'new';
     if(a.c===S.city&&mode!=='flight')st='here';
     let hot=-1;
     if(picking&&st!=='here')hot=(plan.to?a.c===plan.to:order.has(a.c))?2:order.has(a.c)||nearSet.has(a.c)?1:0;
     if(mode==='select'&&plan.random&&st!=='here')hot=nearSet.has(a.c)?1:0;
+    if(st!=='here'&&mode==='select'&&flightMin(here,a)>lim)st='lock';
     if(secret&&a.c===F.to)st='new';
     return {type:'Feature',properties:{st,c:a.c,n:a.n,hot,o:order.has(a.c)?order.get(a.c):99},geometry:{type:'Point',coordinates:a.ll}}})});
 }
@@ -878,6 +912,7 @@ function renderHome(){
   const km=S.tickets.filter(t=>t.status==='landed'&&AP[t.from]&&AP[t.to]).reduce((s,t)=>s+distKm(AP[t.from],AP[t.to]),0);
   $('kKm').textContent=Math.round(km).toLocaleString('en-US')+' km';
   $('tcount').textContent=S.tickets.length?S.tickets.length:'';
+  $('kMiles').textContent=fmtMi(S.miles);$('kReach').textContent='지금 '+fmtKo(Math.min(840,maxMin()))+'까지';
 }
 
 /* select */
@@ -890,10 +925,16 @@ function renderSelect(keepCam){
   if(!q&&!list.length)list=all.filter(x=>x.m>=30).sort((x,y)=>Math.abs(x.m-target)-Math.abs(y.m-target)).slice(0,4);
   candidates=list.map(x=>x.a);
   const band=Math.max(30,target*.1);nearSet=new Set(all.filter(x=>x.m>=30&&Math.abs(x.m-target)<=band).map(x=>x.a.c));
+  const lim=maxMin(),m0=plan.to&&!plan.random?plan.min:target,cost=$('selCost'),ok=m0<=lim;
+  cost.classList.toggle('no',!ok);
+  cost.innerHTML=!ok?`${fmtMi(price(m0))}마일 필요 · 지금은 ${fmtKo(lim)}까지`
+    :stakeFor(m0)?`보유 ${fmtMi(S.miles)} · 보증금 <b>${fmtMi(price(m0))}</b> · 도착하면 <b>+${fmtMi(price(m0)*.2)}</b>`
+    :`보유 ${fmtMi(S.miles)} · <b>무료 비행</b> · 도착하면 <b>+${fmtMi(price(m0)*.2)}</b>`;
+  if(plan.random)$('toSeat').disabled=!ok;
   const el=$('alist');el.innerHTML=list.length?'':'<span class="lbl" style="padding:8px">이 시간에 맞는 공항이 없어요. 시간을 바꾸거나 검색해 보세요.</span>';
   for(const {a,m} of list){
-    const b=document.createElement('button');b.className='arow';b.disabled=m<30;b.setAttribute('aria-pressed',plan.to===a.c);
-    b.innerHTML=`<b>${a.c}</b><span>${a.n}${S.visited.includes(a.c)?'<em>가 봄</em>':''}</span><i>${m<30?'&lt;30m':fmtHM(m)}</i>`;
+    const b=document.createElement('button');b.className='arow';b.disabled=m<30||m>lim;b.setAttribute('aria-pressed',plan.to===a.c);
+    b.innerHTML=`<b>${a.c}</b><span>${a.n}${S.visited.includes(a.c)?'<em>가 봄</em>':''}</span><i>${m<30?'&lt;30m':m>lim?'마일 부족 · '+fmtHM(m):fmtHM(m)}</i>`;
     b.onclick=()=>pickCity(a,m);
     el.appendChild(b);
   }
@@ -940,17 +981,18 @@ let camT=0;
 const settleCam=()=>{clearTimeout(camT);if(mode==='select'&&!plan.to||mode==='select'&&plan.random)frameCities()};
 $('tslider').onchange=()=>{clearTimeout(camT);camT=setTimeout(settleCam,150)};
 $('search').oninput=()=>renderSelect(true);
-$('goSelect').onclick=()=>{plan={to:null,min:0,random:false};$('search').value='';$('toSeat').disabled=true;$('selTitle').textContent='얼마나 집중할까요?';$('destPart').hidden=false;show('select');camKey='';renderSelect()};
-$('goRandom').onclick=()=>{plan={to:null,min:0,random:true};$('search').value='';$('selTitle').textContent='랜덤 비행 · 시간만 정하세요';$('destPart').hidden=true;$('toSeat').disabled=false;show('select');camKey='';renderSelect()};
+function fitTarget(){const top=Math.max(30,Math.floor(Math.min(840,maxMin())/5)*5);if(target>top)target=top;$('tslider').value=m2s(target)}
+$('goSelect').onclick=()=>{fitTarget();plan={to:null,min:0,random:false};$('search').value='';$('toSeat').disabled=true;$('selTitle').textContent='얼마나 집중할까요?';$('destPart').hidden=false;show('select');camKey='';renderSelect()};
+$('goRandom').onclick=()=>{fitTarget();plan={to:null,min:0,random:true};$('search').value='';$('selTitle').textContent='랜덤 비행 · 시간만 정하세요';$('destPart').hidden=true;$('toSeat').disabled=false;show('select');camKey='';renderSelect()};
 $('selBack').onclick=()=>show('home');
 $('toSeat').onclick=()=>{
   if(plan.random){
-    const from=AP[S.city],pool=AIRPORTS.filter(a=>a.c!==from.c).map(a=>({a,m:flightMin(from,a)})).filter(x=>x.m>=30);
+    const from=AP[S.city],pool=AIRPORTS.filter(a=>a.c!==from.c).map(a=>({a,m:flightMin(from,a)})).filter(x=>x.m>=30&&x.m<=maxMin());
     let near=pool.filter(x=>Math.abs(x.m-target)<=5);
     if(!near.length){const best=Math.min(...pool.map(x=>Math.abs(x.m-target)));near=pool.filter(x=>Math.abs(x.m-target)===best)}
     const pick=near[Math.floor(Math.random()*near.length)];plan.to=pick.a.c;plan.min=pick.m;
   }
-  if(!plan.to)return;
+  if(!plan.to||plan.min>maxMin())return;
   plan.no='MF '+(100+Math.floor(Math.random()*8900));plan.seat=null;plan.scen=null;renderSeats();show('seat');
 };
 
@@ -1061,12 +1103,16 @@ function board(){
   const A=AP[r.from].v,B=AP[r.to].v,om=angle(A,B);
   F={...r,A,B,om,T:r.min*60000,elapsed:0,dist:om*R,depUTC:Date.now(),status:'taxi',away:0,awayMs:0,breaks:0,excuse:null,paused:false};
   const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optSc').checked=isIOS&&!!pr.sc;$('optScRow').hidden=!isIOS;$('dndNote').hidden=isIOS;
+  const st=stakeFor(r.min);
+  $('readyMiles').innerHTML=st?`보증금 <b>${fmtMi(st)}마일</b>을 걸어요. 도착하면 <b>${fmtMi(st+price(r.min)*.2)}마일</b>을 받아요.<br>회항하면 절반을 잃어요. 1분 안 취소는 무료예요.`:`보증금 없는 <b>무료 비행</b>이에요. 도착하면 <b>${fmtMi(price(r.min)*.2)}마일</b>을 받아요.`;
   show('ready');
 }
 $('go').onclick=()=>{
+  if(!F||F.status!=='taxi')return;
+  F.stake=stakeFor(F.min);S.miles-=F.stake;
   ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
   const useSc=isIOS&&$('optSc').checked;
-  F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc};save();
+  F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc};snap();
   if(useSc){
     // Hand the flight length (minutes) to the user's own iOS Shortcut; the minute it takes doesn't count as away time.
     F.graceUntil=Date.now()+60000;
@@ -1081,6 +1127,23 @@ $('go').onclick=()=>{
   const sc=SCEN.find(s=>s.id===F.scen),dest=F.random?'알 수 없는 목적지':AP[F.to].n;
   caption([`기장입니다. 몰입 항공 ${F.no}편 ${dest}행에 오신 것을 환영합니다.`,`비행 시간은 ${fmtKo(F.min)}입니다.`,`알림은 잠시 내려 두시고 ${sc.n}에 집중해 주세요.`]);
 };
+/* the flight in progress is kept in storage, so a killed app picks it up again */
+let snapAt=0;
+const LIVE=['no','from','to','min','random','scen','seat','elapsed','depUTC','lastWall','away','awayMs','breaks','excuse','graceUntil','paused','strict','warnOn','warned','stake'];
+function snap(){if(F&&F.status==='flying'){S.live={};LIVE.forEach(k=>S.live[k]=F[k]);snapAt=Date.now();save()}}
+function resumeFlight(){
+  const L=S.live;
+  if(!L||!AP[L.from]||!AP[L.to]||!SCEN.some(x=>x.id===L.scen)||!(L.min>0)){if(L){S.live=null;save()}return false}
+  const A=AP[L.from].v,B=AP[L.to].v,om=angle(A,B),gap=Date.now()-(L.lastWall||Date.now()),covered=L.excuse&&L.excuse.until>=Date.now();
+  F={...L,A,B,om,T:L.min*60000,dist:om*R,status:'flying'};
+  view='chase';northUp=false;setMarkers(F.random?[[F.from,'dep']]:[[F.from,'dep'],[F.to,'arr']]);
+  if(F.random)map.setMinZoom(6.5);
+  show('flight');advance(true);$('strictTag').hidden=!F.strict;
+  if(gap>=5000&&!covered&&!F.paused)F.away++;
+  enterView(true);updateFlightLayers(true);keepAwake(true);snap();
+  if(F.paused)showPause();else toast('비행을 이어서 해요');
+  return true;
+}
 let capT=null;
 function caption(lines){let i=0;clearTimeout(capT);const el=$('caption');
   const next=()=>{if(i>=lines.length){el.style.opacity=0;capT=setTimeout(()=>el.hidden=true,500);return}el.hidden=false;el.style.opacity=1;$('capText').textContent=lines[i++];capT=setTimeout(next,3200)};next()}
@@ -1119,17 +1182,25 @@ $('btnWindow').onclick=()=>{winOn=!winOn;$('btnWindow').setAttribute('aria-press
 $('winView').addEventListener('dblclick',()=>$('btnWindow').click());
 
 /* pause & divert */
-$('btnPause').onclick=()=>{if(!F||F.status!=='flying')return;F.paused=true;$('pauseInfo').textContent=`남은 시간 ${fmtKo(Math.ceil((F.T-F.elapsed)/60000))} · 일시정지 중에는 비행이 멈춰요`;$('pauseSheet').hidden=false};
-$('resume').onclick=()=>{F.paused=false;$('pauseSheet').hidden=true};
+const canCancel=()=>F&&Date.now()-F.depUTC<CANCEL_MS;
+function divertLabel(){if(!F)return;$('divert').textContent=canCancel()?'비행 취소하기 · 보증금 전부 돌려받기':F.stake?`회항하기 · ${fmtMi(F.stake/2)}마일 잃음`:'회항하기'}
+$('btnPause').onclick=()=>{if(!F||F.status!=='flying')return;F.paused=true;snap();showPause()};
+function showPause(){divertLabel();clearTimeout(showPause.t);if(canCancel())showPause.t=setTimeout(divertLabel,CANCEL_MS-(Date.now()-F.depUTC)+50);$('pauseInfo').textContent=`남은 시간 ${fmtKo(Math.ceil((F.T-F.elapsed)/60000))} · 일시정지 중에는 비행이 멈춰요`;$('pauseSheet').hidden=false}
+$('resume').onclick=()=>{advance();F.paused=false;snap();$('pauseSheet').hidden=true};
 $('divert').onclick=()=>{
-  F.paused=false;F.status='diverted';setTicket('diverted');$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;keepAwake(false);$('layover').hidden=true;endFlightExtras();
-  $('doneSub').textContent='회항';$('doneTitle').textContent=AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
+  if(!F||F.status!=='flying')return;
+  const cancel=canCancel(),lost=cancel?0:Math.round(F.stake/2);
+  F.paused=false;F.status='diverted';S.miles+=F.stake-lost;S.live=null;setTicket(cancel?'canceled':'diverted',-lost);$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;keepAwake(false);$('layover').hidden=true;endFlightExtras();
+  $('doneMiles').textContent=cancel?`1분 안에 취소해서 보증금을 모두 돌려받았어요 · 보유 ${fmtMi(S.miles)}마일`:lost?`-${fmtMi(lost)}마일 · 보유 ${fmtMi(S.miles)}마일`:`잃은 마일 없음 · 보유 ${fmtMi(S.miles)}마일`;
+  $('doneSub').textContent=cancel?'취소':'회항';$('doneTitle').textContent=cancel?'비행을 취소했어요':AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
   $('doneNote').textContent='이번 비행은 기록되지 않아요. 다음 비행에서 다시 도전해 보세요.';$('doneBadge').hidden=true;map.setMinZoom(0);show('done');
 };
-function setTicket(st){const t=S.tickets.find(x=>x.no===F.no&&x.status==='flying');if(t)t.status=st;save()}
+function setTicket(st,mi){const t=S.tickets.find(x=>x.no===F.no&&x.status==='flying');if(t){t.status=st;t.miles=mi}save()}
 function land(){
   F.status='landed';const isNew=!S.visited.includes(F.to);clearTimeout(capT);$('caption').hidden=true;
-  S.city=F.to;if(isNew)S.visited.push(F.to);S.flights++;S.minutes+=F.min;setTicket('landed');
+  S.city=F.to;if(isNew)S.visited.push(F.to);S.flights++;S.minutes+=F.min;
+  const bonus=Math.round(price(F.min)*.2);S.miles+=(F.stake||0)+bonus;S.live=null;setTicket('landed',bonus);
+  $('doneMiles').textContent=`+${fmtMi(bonus)}마일 · 보유 ${fmtMi(S.miles)}마일`;
   winOn=false;$('winView').hidden=true;$('btnWindow').setAttribute('aria-pressed',false);map.setMinZoom(0);
   $('doneSub').textContent='도착';$('doneTitle').textContent=AP[F.to].n+'에 도착했어요';$('doneTime').textContent=fmtHM(F.min);
   $('doneNote').textContent=`${SCEN.find(s=>s.id===F.scen).n}에 집중한 시간 · 자리 비움 ${F.away}회 · 기내 활동 ${F.breaks}회`+(F.strict&&F.awayMs>30000?` · 딴짓으로 ${fmtKo(Math.round(F.awayMs/60000))} 늦게 도착`:'');$('doneBadge').hidden=!isNew;
@@ -1171,7 +1242,7 @@ function advance(hid){
   const hidden=hid===undefined?document.hidden:hid;let awayMs=0;
   if(hidden&&F.strict){const ok=u=>u?Math.max(0,Math.min(now,u)-(now-dt)):0;const exc=Math.max(ok(F.excuse&&F.excuse.until),ok(F.graceUntil));awayMs=Math.max(0,dt-exc)}
   F.elapsed=Math.min(F.T,F.elapsed+(dt-awayMs)*speed);F.awayMs+=awayMs;
-  checkWarn();
+  checkWarn();if(hidden||now-snapAt>5000)snap();
 }
 setInterval(()=>{if(document.hidden)advance()},10000);
 
@@ -1216,7 +1287,7 @@ function endFlightExtras(){
 /* away tracking */
 let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){advance(false);hiddenAt=Date.now();return}
+  if(document.hidden){advance(false);snap();hiddenAt=Date.now();return}
   advance(true);
   if(F&&F.status==='flying'&&mode==='flight')keepAwake(true);
   const s=Math.round((Date.now()-hiddenAt)/1000),covered=F&&F.excuse&&F.excuse.until>=Date.now();
@@ -1449,7 +1520,7 @@ function renderTickets(){
   const list=all.filter(t=>tkFilter==='all'||(tkFilter==='landed'?t.status==='landed':t.status!=='landed'));
   const el=$('tlist');
   if(!list.length){el.innerHTML=`<div class="tkEmpty">${all.length?'이 분류에는 티켓이 없어요.':'아직 모은 티켓이 없어요.<br>첫 비행을 떠나면 탑승권이 여기에 모여요.'}</div>`;return}
-  const ST={landed:'도착',diverted:'회항',flying:'미완료'},plane='M'+planePts.map(p=>p.join(',')).join('L')+'Z';
+  const ST={landed:'도착',diverted:'회항',flying:'미완료',canceled:'취소'},plane='M'+planePts.map(p=>p.join(',')).join('L')+'Z';
   const groups=new Map();
   list.forEach(t=>{const d=new Date(t.date),k=`${d.getFullYear()}년 ${d.getMonth()+1}월`;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
   let h='';
@@ -1462,7 +1533,7 @@ function renderTickets(){
         <div class="mm">
           <div class="codes">${t.from}<svg viewBox="-12 -12 24 24"><path d="${plane}" transform="rotate(90)"/></svg>${to}</div>
           <div class="cities">${AP[t.from]?AP[t.from].n:''} → ${hide?'미공개':(AP[t.to]?AP[t.to].n:'')}${t.random?' · 랜덤':''}</div>
-          <div class="meta"><span><i>날짜</i>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span><span><i>시간</i>${fmtHM(t.min)}</span><span><i>좌석</i>${t.seat}</span>${km?`<span><i>거리</i>${km}</span>`:''}</div>
+          <div class="meta"><span><i>날짜</i>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span><span><i>시간</i>${fmtHM(t.min)}</span><span><i>좌석</i>${t.seat}</span>${km?`<span><i>거리</i>${km}</span>`:''}${Number.isFinite(t.miles)&&t.miles?`<span><i>마일</i>${t.miles>0?'+':'-'}${fmtMi(Math.abs(t.miles))}</span>`:''}</div>
         </div>
         <div class="stub">${icon(sc)}<b>${sc.n}</b><span class="stamp ${t.status}">${ST[t.status]||''}</span></div>
       </div>`}).join('');
@@ -1500,6 +1571,8 @@ $('goInstall').onclick=async()=>{
   $('installSheet').hidden=false;
 };
 $('installClose').onclick=()=>$('installSheet').hidden=true;
+$('goMiles').onclick=()=>{$('milesSheet').hidden=false};
+$('milesClose').onclick=()=>{$('milesSheet').hidden=true};
 $('goSettings').onclick=()=>{$('settingsSheet').hidden=false};
 $('settingsClose').onclick=()=>{$('settingsSheet').hidden=true};
 $('scHow').onclick=e=>{e.preventDefault();e.stopPropagation();$('scSheet').hidden=false};
@@ -1512,7 +1585,7 @@ loadStyles().then(()=>{
     localIdeographFontFamily:"'Pretendard Variable','Apple SD Gothic Neo','Malgun Gothic',sans-serif",fadeDuration:150});
   map.on('style.load',addOverlays);
   ['dragstart','zoomstart','rotatestart','pitchstart'].forEach(ev=>map.on(ev,e=>{if(e.originalEvent)lastInteract=performance.now()}));
-  map.once('style.load',()=>{mapReady=true;document.querySelectorAll('.maplibregl-ctrl-attrib').forEach(e=>e.classList.remove('maplibregl-compact-show'));$('loading').style.opacity=0;setTimeout(()=>$('loading').hidden=true,600);show('home')});
+  map.once('style.load',()=>{mapReady=true;document.querySelectorAll('.maplibregl-ctrl-attrib').forEach(e=>e.classList.remove('maplibregl-compact-show'));$('loading').style.opacity=0;setTimeout(()=>$('loading').hidden=true,600);if(!resumeFlight())show('home')});
   requestAnimationFrame(loop);
 }).catch(()=>{$('loading').textContent='지도를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.'});
 </script>
