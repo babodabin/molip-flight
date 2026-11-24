@@ -345,6 +345,8 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 
 /* flight HUD */
 .hudb{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:60px calc(20px + var(--sr)) calc(18px + var(--sb)) calc(20px + var(--sl));background:linear-gradient(transparent,rgba(0,0,0,.7));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.hudb button{all:unset;pointer-events:auto;cursor:pointer;padding:8px 10px;margin:-8px -10px}
+.hudb button:focus-visible{outline:2px solid #fff;border-radius:10px}
 .hudb small{display:block;font-size:12px;color:#c7c7cc}
 .hudb b{font-family:var(--f);font-size:30px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .hudb b u{text-decoration:none;font-size:17px;font-weight:500;color:#c7c7cc;margin-left:4px}
@@ -545,7 +547,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="excuse" id="excuse" hidden><span id="exText">화장실 · 4:59</span><button id="exEnd">돌아왔어요</button></div>
   <div id="testBar" hidden><span>테스트</span><button data-tsp="1">×1</button><button data-tsp="60">×60</button><button data-tsp="400">×400</button><button id="tMeal">기내식</button><button id="tSnack">간식</button><button id="tLand">착륙</button></div>
   <div class="strictTag" id="strictTag" hidden>엄격 모드</div>
-  <div class="hudb"><div><small>남은 시간</small><b id="hTime">30<u>min</u></b></div><div class="r"><small>남은 거리</small><b id="hDist">190<u>km</u></b></div></div>
+  <div class="hudb"><button id="hudTime" aria-label="시간 바꿔 보기"><small id="hTimeL">남은 시간</small><b id="hTime">30<u>min</u></b></button><button class="r" id="hudDist" aria-label="거리 바꿔 보기"><small id="hDistL">남은 거리</small><b id="hDist">190<u>km</u></b></button></div>
 </div>
 <div class="pop left" id="soundPop" hidden>
   <button data-snd="off" aria-pressed="true">소리 끔</button>
@@ -687,7 +689,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <button class="pill dark sm" id="logOpen">내 비행 기록과 비행기 도감</button>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.3.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.4.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1083,7 +1085,7 @@ async function loadStyles(){
 
 /* ---------- state ---------- */
 let mode='home',F=null,plan={},target=120,view='chase',northUp=false,winOn=false,speed=1;
-let map,markers=[],lastInteract=0,camBusy=false,mapReady=false;
+let map,markers=[],lastInteract=0,mapReady=false;
 
 /* ---------- map setup ---------- */
 function planeImage(fill,size,pts){
@@ -1518,7 +1520,7 @@ function board(){
 $('go').onclick=()=>{
   if(!F||F.status!=='taxi')return;
   F.stake=stakeFor(F.min);F.fee=clsOf(F.cls).fee;S.miles-=F.stake+F.fee;
-  ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
+  hudT1=hudD1='left';ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
   const useSc=isIOS&&$('optSc').checked;
   F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;F.mealOn=$('optMeal').checked;F.svc=0;F.offer=null;F.foods=[];F.rest=0;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc,meal:F.mealOn,restK:F.restK};snap();
   if(useSc){
@@ -1598,12 +1600,41 @@ function updateFlightLayers(force){
   return s;
 }
 const VIEWS=['chase','top','route'];
+/* Following: every frame puts the camera on the plane, also while the view changes, so no touch can pull it away.
+   The map's own gestures rest meanwhile; pinch and wheel only change the distance. */
+let cam=null,followZ=8.6,followOn=false;
+const following=()=>!!F&&(mode==='flight'||mode==='replay')&&view!=='route';
+function setFollow(on){
+  if(on===followOn||!map)return;followOn=on;
+  ['dragPan','dragRotate','scrollZoom','touchZoomRotate','touchPitch','doubleClickZoom','boxZoom','keyboard'].forEach(h=>map[h]&&map[h][on?'disable':'enable']());
+}
 function enterView(first){
-  if(!F)return;const s=planeState();camBusy=true;
-  if(view==='route'&&!(F.random&&F.status==='flying'))fitLine(arc(F.A,F.B,0,1,64),{padding:{top:110,bottom:120,left:40,right:70},duration:1000});
-  else map.easeTo({center:s.pos,zoom:view==='chase'?8.6:6.2,pitch:view==='chase'?62:0,bearing:northUp?0:s.hdg,padding:{top:0,bottom:view==='chase'?innerHeight*.28:0,left:0,right:0},duration:first?2200:1000});
-  map.once('moveend',()=>camBusy=false);
+  if(!F)return;
+  if(view==='route'&&F.random&&F.status==='flying')view='chase';
   $('btnView').setAttribute('aria-label',{chase:'따라가기',top:'위에서',route:'전체 항로'}[view]);
+  if(view==='route'||mode==='done'){cam=null;setFollow(false);if(!(F.random&&F.status==='flying'))fitLine(arc(F.A,F.B,0,1,64),{padding:{top:110,bottom:120,left:40,right:70},duration:1000});return}
+  const c=map.getCenter(),lock=followOn&&!first;map.stop();followZ=view==='chase'?8.6:6.2;
+  cam={lock,t0:performance.now(),d:first?2200:900,z:map.getZoom(),p:map.getPitch(),b:map.getBearing(),pad:(map.getPadding().bottom||0),padT:(map.getPadding().top||0),padL:(map.getPadding().left||0),padR:(map.getPadding().right||0),c:vec(c.lng,c.lat)};
+  setFollow(true);
+}
+function followPlane(s,now){
+  const pitch=view==='chase'?62:0,pad=view==='chase'?innerHeight*.28:0,brg=northUp?0:s.hdg;
+  let o={center:s.pos,zoom:followZ,pitch,bearing:brg,padding:{top:0,bottom:pad,left:0,right:0}};
+  if(cam){
+    let k=Math.min(1,(now-cam.t0)/cam.d);k=k<0?0:k*k*(3-2*k);const mix=(a,b)=>a+(b-a)*k,om=angle(cam.c,s.v);
+    if(k<1)o={center:!cam.lock&&om>1e-4?ll(slerp(cam.c,s.v,k,om)):s.pos,zoom:mix(cam.z,followZ),pitch:mix(cam.p,pitch),bearing:cam.b+(((brg-cam.b+540)%360+360)%360-180)*k,padding:{top:mix(cam.padT,0),bottom:mix(cam.pad,pad),left:mix(cam.padL,0),right:mix(cam.padR,0)}};
+    else cam=null;
+  }
+  map.jumpTo(o);
+}
+{ const el=$('map'),pts=new Map();let base=0,z0=0;
+  const gap=()=>{const [a,b]=[...pts.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
+  const lim=z=>Math.max(F&&F.random&&F.status==='flying'?6.5:2.2,Math.min(13,z));
+  el.addEventListener('pointerdown',e=>{if(!following())return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===2){base=gap();z0=followZ}});
+  el.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(following()&&pts.size===2&&base>20)followZ=lim(z0+Math.log2(gap()/base))});
+  for(const n of ['pointerup','pointercancel'])addEventListener(n,e=>pts.delete(e.pointerId));
+  el.addEventListener('wheel',e=>{if(following()){e.preventDefault();followZ=lim(followZ-e.deltaY*.002)}},{passive:false});
+  el.style.touchAction='none';
 }
 $('btnView').onclick=()=>{const list=F&&F.random&&F.status==='flying'?['chase','top']:VIEWS;view=list[(list.indexOf(view)+1)%list.length];enterView()};
 $('btnNorth').onclick=()=>{northUp=!northUp;$('btnNorth').setAttribute('aria-pressed',northUp);enterView()};
@@ -2091,21 +2122,26 @@ function loop(now){
   updateTraffic(dt,flying?speed:1);
   if(F&&(mode==='flight'||mode==='done'||mode==='replay')){
     const s=updateFlightLayers();
-    if(s&&(mode==='flight'||mode==='replay')&&!camBusy&&view!=='route'){
-      const o={center:s.pos};if(!northUp)o.bearing=s.hdg;map.jumpTo(o);
-    }
+    const fo=following();if(fo!==followOn)setFollow(fo);if(s&&fo)followPlane(s,now);
     if(now-hudT>250){hudT=now;hud(s||planeState())}
     if(winOn)skyState(s||planeState());
-  }else if(mode==='home'&&!sel&&now-lastInteract>4000&&!map.isMoving()){
+  }else{if(followOn)setFollow(false)}
+  if(mode==='home'&&!F&&!sel&&now-lastInteract>4000&&!map.isMoving()){
     const c=map.getCenter();map.jumpTo({center:[c.lng+dt*2.2,c.lat]});
   }
   if(sel&&now-selT>1000){selT=now;renderCard()}
   refreshNight();
 }
+let hudT1='left',hudD1='left';
+const nextOf=(a,v)=>a[(a.indexOf(v)+1)%a.length];
+$('hudTime').onclick=()=>{hudT1=nextOf(['left','dep','arr','gone'],hudT1);if(F)hud(planeState())};
+$('hudDist').onclick=()=>{hudD1=nextOf(['left','gone','all'],hudD1);if(F)hud(planeState())};
 function hud(s){
   const pr=profile(s.p),left=Math.max(0,F.T-F.elapsed)/60000;
-  $('hTime').innerHTML=(left>=60?Math.floor(left/60)+'<u>h</u> '+Math.floor(left%60):Math.ceil(left))+'<u>min</u>';
-  $('hDist').innerHTML=F.random&&F.status==='flying'?'???':Math.round(F.dist*(1-s.p)).toLocaleString('en-US')+'<u>km</u>';
+  const span=m=>(m>=60?Math.floor(m/60)+'<u>h</u> '+Math.floor(m%60):Math.ceil(m))+'<u>min</u>',hide=F.random&&F.status==='flying',kms=v=>Math.round(v).toLocaleString('en-US')+'<u>km</u>';
+  const T={left:['남은 시간',()=>span(left)],dep:['출발 시각',()=>clockAt(F.depUTC)],arr:['도착 예정',()=>F.paused?'멈춤':clockAt(Date.now()+left*60000)],gone:['날아온 시간',()=>span(F.elapsed/60000)]}[hudT1];
+  const D={left:['남은 거리',()=>hide?'???':kms(F.dist*(1-s.p))],gone:['날아온 거리',()=>kms(F.dist*s.p)],all:['전체 거리',()=>hide?'???':kms(F.dist)]}[hudD1];
+  $('hTimeL').textContent=T[0];$('hTime').innerHTML=T[1]();$('hDistL').textContent=D[0];$('hDist').innerHTML=D[1]();
   $('hFrom').textContent=F.from;$('hTo').textContent=F.random&&F.status==='flying'?'???':F.to;$('hBar').style.width=(s.p*100)+'%';
   $('hPhase').textContent=F.paused?'일시정지':PHASE[pr.phase];tickExcuse();tickOffer();
 }
