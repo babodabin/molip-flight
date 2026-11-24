@@ -111,18 +111,46 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .full{position:fixed;inset:0;z-index:8}
 
 /* seat */
-#seatView{background:#0a0a0b;overflow:auto;padding:calc(64px + var(--st)) 16px calc(120px + var(--sb))}
-.fuse{position:relative;width:min(340px,92vw);margin:0 auto;padding:150px 26px 40px;border-radius:170px 170px 40px 40px;background:linear-gradient(#1c1c1f,#161618);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
-.fuse::before{content:"";position:absolute;left:50%;top:58px;width:58%;height:46px;transform:translateX(-50%);border-radius:60px 60px 6px 6px;background:linear-gradient(90deg,#2b2b30 0 47%,transparent 47% 53%,#2b2b30 53%);opacity:.9}
-.srow{display:grid;grid-template-columns:1fr 1fr 42px 1fr 1fr;gap:9px;align-items:center;margin-bottom:9px}
-.srow .rn{font-family:var(--mono);font-size:13px;color:var(--dim);text-align:center}
-.srow .ch{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center}
-.seat{all:unset;cursor:pointer;aspect-ratio:1;border-radius:12px;background:#232327;display:grid;place-items:center;transition:transform .12s}
-.seat:active{transform:scale(.94)}
-.seat[disabled]{background:repeating-linear-gradient(135deg,#121214 0 5px,#19191c 5px 10px);cursor:not-allowed}
-.seat svg{width:46%;height:46%}
-.seat.sel{box-shadow:0 0 0 2px #fff inset}
-.focuscard{position:fixed;left:50%;top:calc(50% - 30px);transform:translate(-50%,-50%);width:min(340px,90vw);z-index:9;background:rgba(40,40,44,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#seatView{background:#0a0a0b;overflow-x:hidden;overflow-y:auto;padding:calc(124px + var(--st)) 12px calc(300px + var(--sb))}
+.seattop{position:fixed;left:0;right:0;top:0;z-index:9;padding:calc(14px + var(--st)) calc(16px + var(--sr)) 12px calc(76px + var(--sl));background:linear-gradient(#0a0a0b 78%,transparent);display:grid;gap:8px}
+#seatBackCol{z-index:10}
+.seattop h2{font-size:17px;margin:0}.seattop h2 small{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted);margin-left:6px}
+.seatjump{display:flex;gap:6px}
+.seatjump button{all:unset;cursor:pointer;white-space:nowrap;font-size:13px;padding:6px clamp(7px,2.6vw,12px);border-radius:999px;background:rgba(255,255,255,.08);display:flex;align-items:center;gap:6px}
+.seatjump i{width:9px;height:9px;border-radius:3px;background:var(--k)}
+.seatkey{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin:0 0 16px}
+.seatkey span{display:flex;align-items:center;gap:6px}
+.seatkey i{width:14px;height:14px;border-radius:4px;background:#4b6288}
+.hull{overflow:hidden;margin:0 -12px;padding:0 12px}
+.fuse{--pad:16px;position:relative;width:var(--fw);max-width:100%;box-sizing:border-box;margin:0 auto;padding:176px var(--pad) 120px;border-radius:50% 50% 50% 50%/250px 250px 170px 170px;background:linear-gradient(90deg,#151517,#222226 12%,#242428 50%,#222226 88%,#151517);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.fuse::before{content:"";position:absolute;left:50%;top:54px;width:46%;height:38px;transform:translateX(-50%);border-radius:80px 80px 8px 8px;background:linear-gradient(90deg,#0c0c0e 0 31%,transparent 31% 35%,#0c0c0e 35% 65%,transparent 65% 69%,#0c0c0e 69%);box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+.cabin{--k:#4b6288;scroll-margin-top:150px}
+.cabin.first{--k:#b08d57}.cabin.biz{--k:#7a5a8c}
+.cabname{display:flex;justify-content:center;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin:4px 0 8px}
+.cabname b{color:color-mix(in srgb,var(--k) 55%,#fff);font-weight:600}
+.srow{display:grid;grid-template-columns:var(--cols);gap:var(--gap,3px);align-items:center;justify-content:center;margin-bottom:var(--pitch,7px);position:relative;z-index:1}
+.srow .rn{font-family:var(--mono);font-size:10px;color:#8a8a92;text-align:center}
+.srow .ch{font-family:var(--mono);font-size:11px;color:#8a8a92;text-align:center}
+.seat{all:unset;box-sizing:border-box;cursor:pointer;position:relative;width:100%;aspect-ratio:1/1.14;border-radius:26% 26% 18% 18%;background:linear-gradient(color-mix(in srgb,var(--k) 82%,#fff),var(--k) 62%);box-shadow:inset 0 -.32em 0 rgba(0,0,0,.28),inset 2px 0 0 rgba(0,0,0,.16),inset -2px 0 0 rgba(0,0,0,.16);display:grid;place-items:center;transition:transform .12s;font-size:16px}
+.seat:active{transform:scale(.92)}
+.seat:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.seat svg{width:62%;height:62%}
+.seat[disabled]{cursor:not-allowed;background:radial-gradient(circle at 50% 40%,#4a4a50 0 24%,transparent 25%),radial-gradient(ellipse at 50% 92%,#3c3c42 0 42%,transparent 43%),#1b1b1e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.seat.lock{opacity:.5}
+.seat.sel{background:var(--sc,#fff);box-shadow:0 0 0 2px #fff;transform:scale(1.06)}
+.cabin.first .seat,.cabin.biz .seat{aspect-ratio:1/1.5;border-radius:24% 24% 14% 14%}
+.cabin.first .seat::before,.cabin.biz .seat::before{content:"";position:absolute;left:14%;right:14%;top:10%;height:22%;border-radius:4px;background:rgba(0,0,0,.18)}
+.exitrow::before,.exitrow::after{content:"";position:absolute;top:0;bottom:0;width:4px;border-radius:3px;background:#30d158}
+.exitrow::before{left:calc(var(--pad)*-1 + 3px)}.exitrow::after{right:calc(var(--pad)*-1 + 3px)}
+.exitrow{margin-top:16px}
+.wing{position:relative}
+.wing::before,.wing::after{content:"";position:absolute;top:0;bottom:-70px;width:220px;background:linear-gradient(90deg,#1b1b1e,#2a2a2e)}
+.wing::before{right:calc(100% + var(--pad));clip-path:polygon(100% 0,100% 72%,0 100%,0 86%)}
+.wing::after{left:calc(100% + var(--pad));clip-path:polygon(0 0,0 72%,100% 100%,100% 86%);transform:scaleX(1)}
+.service{display:flex;justify-content:space-between;gap:6px;margin:12px 0 14px}
+.service span{flex:1;display:grid;place-items:center;height:34px;border-radius:8px;background:rgba(255,255,255,.045);color:#85858c}
+.service svg{width:17px;height:17px}
+.focuscard{position:fixed;left:50%;bottom:calc(92px + var(--sb));transform:translateX(-50%);width:min(380px,92vw);box-sizing:border-box;z-index:9;background:rgba(40,40,44,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{all:unset;cursor:pointer;display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;font-size:14px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent)}
 .chip svg{width:16px;height:16px}
@@ -310,8 +338,10 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 
 <!-- SEAT -->
 <div class="full" id="seatView" hidden>
-  <div class="fuse" id="fuse"></div>
+  <div class="seatkey"><span><i></i>고를 수 있음</span><span><i style="background:radial-gradient(circle at 50% 40%,#4a4a50 0 26%,#1b1b1e 28%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)"></i>찬 자리</span><span><i style="background:#30d158;width:5px"></i>비상구</span></div>
+  <div class="hull"><div class="fuse" id="fuse"></div></div>
 </div>
+<div class="seattop" id="seatTop" hidden><h2 id="seatPlane"></h2><div class="seatjump" id="seatJump"></div></div>
 <div class="col l" id="seatBackCol" hidden><button class="rbtn" id="seatBack" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button></div>
 <div class="focuscard" id="focusCard" hidden>
   <span class="lbl mono" id="fcSeat">좌석: 01C</span>
@@ -430,7 +460,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 <div class="sheet" id="settingsSheet" hidden style="z-index:16"><div class="in">
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.4.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.5.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -871,13 +901,14 @@ function setMarkers(list){
 }
 
 /* ---------- screens ---------- */
-const LAYERS=['home','select','tickets','seatView','seatBackCol','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','soundPop','layerPop','greet'];
+const LAYERS=['home','select','tickets','seatView','seatBackCol','seatTop','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','soundPop','layerPop','greet'];
 function show(m){
   mode=m;
-  const on={home:['home','greet'],select:['select'],tickets:['tickets'],seat:['seatView','seatBackCol','seatBar'],pass:['ticketView'],ready:['readyView'],
+  const on={home:['home','greet'],select:['select'],tickets:['tickets'],seat:['seatView','seatBackCol','seatTop','seatBar'],pass:['ticketView'],ready:['readyView'],
     flight:['hud'],done:['doneView']}[m]||[];
   LAYERS.forEach(id=>$(id).hidden=!on.includes(id));
   if(m==='seat'&&plan.seat)$('focusCard').hidden=false;
+  if(m==='seat')aimSeats();
   $('mapCtl').hidden=!(m==='home'||m==='select'||m==='tickets'||m==='flight');
   $('mapCtl').style.top=m==='flight'?`calc(14px + var(--st))`:'';
   $('winView').hidden=!(m==='flight'&&winOn);
@@ -984,22 +1015,79 @@ $('toSeat').onclick=()=>{
 };
 
 /* seats */
-const COLS=['A','B','C','D'];
+/* fictional aircraft by flight length; letters follow the usual airline convention */
+const PLANES={
+  S:{n:'소형기',w:'268px',cabins:[{k:'biz',n:'비즈니스',a:1,b:3,c:'AC DF'},{k:'eco',n:'일반석',a:10,b:27,c:'ABC DEF',exits:[10,18,19],wing:[15,21]}]},
+  M:{n:'중형기',w:'322px',cabins:[{k:'biz',n:'비즈니스',a:1,b:5,c:'A DG K'},{k:'eco',n:'일반석',a:10,b:33,c:'AC DEFG HK',exits:[10,24],wing:[17,24],mid:24}]},
+  L:{n:'대형기',w:'354px',cabins:[{k:'first',n:'1등석',a:1,b:2,c:'A DG K'},{k:'biz',n:'비즈니스',a:7,b:11,c:'A DG K'},{k:'eco',n:'일반석',a:20,b:43,c:'ABC DEFG HJK',exits:[20,32],wing:[26,33],mid:32}]}
+};
+const planeFor=m=>PLANES[m<150?'S':m<420?'M':'L'];
+const LOCKED=new Set(['first','biz']);
+const svgIcon=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${p}"/></svg>`;
+function seatInfo(cab,row,letter){
+  const groups=cab.c.split(' '),gi=groups.findIndex(g=>g.includes(letter)),g=groups[gi],i=g.indexOf(letter),out=[];
+  const win=(gi===0&&i===0)||(gi===groups.length-1&&i===g.length-1),aisle=(i===0&&gi>0)||(i===g.length-1&&gi<groups.length-1);
+  out.push(win?'창가':aisle?'통로':'가운데');if(win&&aisle)out.push('통로');
+  if(g.length===2)out.push('2인석');
+  if(cab.exits&&cab.exits.includes(row))out.push('비상구 옆 넓은 자리');
+  if(win&&cab.wing&&row>=cab.wing[0]&&row<=cab.wing[1])out.push('날개 위');
+  return out;
+}
+let seatKey='';
+function buildSeats(){
+  const P=planeFor(plan.min),key=plan.no+P.n+plan.min;if(key===seatKey)return;seatKey=key;
+  let seed=[...plan.no].reduce((s,c)=>s*31+c.charCodeAt(0),7)%9973+1;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const wc=CABIN.find(c=>c.k==='wc').p,cup=CABIN.find(c=>c.k==='snack').p,service=`<div class="service" aria-hidden="true"><span>${svgIcon(wc)}</span><span>${svgIcon(cup)}</span><span>${svgIcon(wc)}</span></div>`;
+  let h='';
+  P.cabins.forEach((cab,ci)=>{
+    const groups=cab.c.split(' '),lux=cab.k!=='eco',sw=lux?'minmax(0,40px)':'minmax(0,34px)',aisle=lux?'34px':'20px';
+    const cols=groups.map(g=>`repeat(${g.length},${sw})`).join(' '+aisle+' ');
+    h+=(ci?service:'')+`<section class="cabin ${cab.k}" data-cabin="${cab.k}" style="--cols:${cols};--gap:${lux?'6px':'3px'};--pitch:${lux?'12px':'7px'}"><div class="cabname"><b>${cab.n}</b><span>${groups.map(g=>g.length).join('-')}${LOCKED.has(cab.k)?' · 준비 중':''}</span></div>`;
+    h+='<div class="srow" aria-hidden="true">'+groups.map(g=>[...g].map(l=>`<span class="ch">${l}</span>`).join('')).join('<span></span>')+'</div>';
+    for(let r=cab.a;r<=cab.b;r++){
+      if(cab.mid===r)h+=service;
+      const ex=cab.exits&&cab.exits.includes(r),rn=String(r).padStart(2,'0');
+      if(cab.wing&&r===cab.wing[0])h+='<div class="wing">';
+      h+=`<div class="srow${ex?' exitrow':''}">`+groups.map(g=>[...g].map(l=>{
+        const id=rn+l,lock=LOCKED.has(cab.k),taken=!lock&&rnd()<.32;
+        return `<button class="seat${lock?' lock':''}" data-seat="${id}" data-cab="${cab.k}" ${taken?'disabled':''} ${lock?'aria-disabled="true"':''} aria-pressed="false" aria-label="${id} ${cab.n} ${seatInfo(cab,r,l).join(' ')}${taken?' 찬 자리':''}"></button>`}).join('')).join(`<span class="rn">${r}</span>`)+'</div>';
+      if(cab.wing&&r===cab.wing[1])h+='</div>';
+    }
+    h+='</section>';
+  });
+  const fu=$('fuse');fu.style.setProperty('--fw',P.w);fu.innerHTML=h+service;
+  $('seatPlane').innerHTML=`${P.n}<small>${P.cabins[P.cabins.length-1].c.split(' ').map(g=>g.length).join('-')}</small>`;
+  $('seatJump').innerHTML=P.cabins.map(c=>`<button data-jump="${c.k}" style="--k:${{first:'#b08d57',biz:'#7a5a8c',eco:'#4b6288'}[c.k]}"><i></i>${c.n}</button>`).join('');
+  $('seatJump').querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{$('focusCard').hidden=true;scrollSeats(fu.querySelector(`[data-cabin="${b.dataset.jump}"]`),150,'smooth')});
+}
+function scrollSeats(el,off,behavior){const v=$('seatView');v.scrollTo({top:v.scrollTop+el.getBoundingClientRect().top-off,behavior:behavior||'auto'})}
+/* open at the chosen seat, or at the first seats that can be chosen */
+function aimSeats(){
+  const sel=plan.seat&&$('fuse').querySelector(`[data-seat="${plan.seat}"]`);
+  if(sel)scrollSeats(sel,innerHeight*.36);else{const e=$('fuse').querySelector('[data-cabin="eco"]');if(e)scrollSeats(e,190)}
+}
+function planSeatInfo(){
+  if(!plan.seat)return [];const row=parseInt(plan.seat,10),l=plan.seat.slice(-1),cab=planeFor(plan.min).cabins.find(c=>row>=c.a&&row<=c.b);
+  return cab?seatInfo(cab,row,l):[];
+}
 function renderSeats(){
-  let seed=[...plan.no].reduce((s,c)=>s*31+c.charCodeAt(0),7)%9973;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
-  let h='<div class="srow"><span class="ch">A</span><span class="ch">B</span><span></span><span class="ch">C</span><span class="ch">D</span></div>';
-  for(let r=1;r<=14;r++){
-    const rn=String(r).padStart(2,'0');const seats=COLS.map(c=>{const id=rn+c,taken=rnd()<.3,sel=plan.seat===id,sc=sel&&plan.scen?SCEN.find(s=>s.id===plan.scen):null;
-      return `<button class="seat${sel?' sel':''}" data-seat="${id}" ${taken&&!sel?'disabled':''} aria-label="${id} 좌석" style="${sc?`background:${sc.c}`:''}">${sc?icon(sc,'#000'):''}</button>`});
-    h+=`<div class="srow">${seats[0]}${seats[1]}<span class="rn">${rn}</span>${seats[2]}${seats[3]}</div>`;
-  }
-  $('fuse').innerHTML=h;
-  $('fuse').querySelectorAll('[data-seat]').forEach(b=>b.onclick=()=>{plan.seat=b.dataset.seat;renderSeats();$('focusCard').hidden=false});
-  $('fcSeat').textContent='좌석: '+(plan.seat||'');
+  buildSeats();
+  const sc=plan.scen&&SCEN.find(s=>s.id===plan.scen);
+  $('fuse').querySelectorAll('.seat.sel').forEach(b=>{b.classList.remove('sel');b.innerHTML='';b.setAttribute('aria-pressed','false')});
+  const b=plan.seat&&$('fuse').querySelector(`[data-seat="${plan.seat}"]`);
+  if(b){b.classList.add('sel');b.setAttribute('aria-pressed','true');b.style.setProperty('--sc',sc?sc.c:'#fff');b.innerHTML=sc?icon(sc,'#000'):''}
+  $('fcSeat').textContent='좌석 '+[plan.seat||'',...planSeatInfo()].join(' · ');
   $('chips').innerHTML=SCEN.map(s=>`<button class="chip" data-scen="${s.id}" style="--c:${s.c}" aria-pressed="${plan.scen===s.id}">${icon(s)}${s.n}</button>`).join('');
   $('chips').querySelectorAll('[data-scen]').forEach(b=>b.onclick=()=>{plan.scen=b.dataset.scen;renderSeats();setTimeout(()=>$('focusCard').hidden=true,350)});
   $('toPass').disabled=!(plan.seat&&plan.scen);
 }
+$('fuse').addEventListener('click',e=>{
+  const b=e.target.closest('.seat');if(!b||b.disabled)return;
+  if(LOCKED.has(b.dataset.cab)){toast(b.dataset.cab==='first'?'1등석은 마일로 탈 수 있게 준비하고 있어요':'비즈니스석은 준비하고 있어요');return}
+  plan.seat=b.dataset.seat;renderSeats();$('focusCard').hidden=false;
+  const r=b.getBoundingClientRect(),top=$('focusCard').getBoundingClientRect().top-24;
+  if(r.bottom>top||r.top<150)scrollSeats(b,innerHeight*.36,'smooth');
+});
 $('seatBack').onclick=()=>{show('select');camKey='';renderSelect()};
 $('seatView').addEventListener('click',e=>{if(!e.target.closest('.seat'))$('focusCard').hidden=true});
 $('toPass').onclick=()=>{renderPass();show('pass');drawPreview(false);const line=arc(AP[S.city].v,AP[plan.to].v,0,1,64);
@@ -1064,7 +1152,7 @@ function drawStub(seedStr){
 function renderPass(){
   const from=AP[S.city],to=AP[plan.to],sc=SCEN.find(s=>s.id===plan.scen),now=new Date(),hide=plan.random;
   pass={from:from.c,to:hide?'???':to.c,fromN:from.n,toN:hide?'미공개':to.n,dur:fmtHM(plan.min),color:sc.c,seed:plan.no+plan.seat,
-    fields:[['좌석',plan.seat],['거리',hide?'??? km':Math.round(distKm(from,to)).toLocaleString('en-US')+' km'],['탑승','지금'],
+    fields:[['좌석',plan.seat+(planSeatInfo()[0]?' '+planSeatInfo()[0]:'')],['거리',hide?'??? km':Math.round(distKm(from,to)).toLocaleString('en-US')+' km'],['탑승','지금'],
       ['날짜',`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`],['편명',plan.no],['집중',sc.n]]};
   $('passArt').setAttribute('aria-label',`탑승권. ${pass.fromN}에서 ${pass.toN}, ${pass.dur}, `+pass.fields.map(x=>x.join(' ')).join(', '));
   const st=$('stub');st.style.transition='none';st.style.transform='';st.style.opacity=1;$('ticket').classList.remove('recoil');
