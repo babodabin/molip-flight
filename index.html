@@ -230,7 +230,21 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .pop.left{left:calc(70px + var(--sl));right:auto}
 
 /* window */
-#winView{z-index:4;background:radial-gradient(ellipse at 50% 42%,#1d1d21 0%,#0c0c0e 60%,#050506 100%);display:grid;place-items:center}
+#winView{--amb:#1d1d21;z-index:4;background:radial-gradient(ellipse at 50% 42%,var(--amb) 0%,color-mix(in srgb,var(--amb) 38%,#050506) 62%,#050506 100%);display:grid;place-items:center;overflow:hidden}
+#winView .main{margin-top:-8vh}
+.bezel.side{margin:0;position:absolute;top:calc(50% - 8vh);transform:translate(-50%,-50%);pointer-events:none}
+.bezel.side.l{left:-34vw}.bezel.side.r{left:134vw}
+.bezel.side .glass{background:linear-gradient(var(--zen,#123),var(--hor,#9bd) 62%,var(--low,#456) 66%)}
+#wing{position:absolute;left:-40%;top:0;width:180%;height:100%;pointer-events:none;overflow:visible}
+#wing .nav{animation:nav 1.3s steps(1) infinite}#wing .strobe{opacity:0;animation:strobe 1.3s linear infinite}
+@keyframes nav{0%,55%{opacity:1}56%,100%{opacity:.25}}
+@keyframes strobe{0%,3%{opacity:1}4%,8%{opacity:0}9%,11%{opacity:1}12%,100%{opacity:0}}
+.glass{cursor:grab;touch-action:none}
+.hole{position:absolute;left:50%;bottom:7%;width:4px;height:4px;border-radius:50%;background:rgba(0,0,0,.35);box-shadow:0 0 0 1px rgba(255,255,255,.18);transform:translateX(-50%);pointer-events:none}
+.wininfo{position:absolute;left:0;right:0;bottom:calc(112px + var(--sb));text-align:center;font-family:var(--mono);font-size:12px;line-height:1.7;color:#b9b9c0;pointer-events:none;white-space:pre-line}
+.wininfo b{color:#fff;font-weight:500}
+#winView.first .frame{box-shadow:inset 0 0 0 2px #c9a14e,inset 0 6px 14px rgba(0,0,0,.35)}
+#winView.biz .frame{box-shadow:inset 0 0 0 2px #aab4c0,inset 0 6px 14px rgba(0,0,0,.35)}
 .bezel{position:relative;width:min(74vw,340px);aspect-ratio:.72;border-radius:44%/34%;padding:16px;background:linear-gradient(160deg,#2a2a2f,#141416 60%);box-shadow:0 40px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08),inset 0 -12px 30px rgba(0,0,0,.6);margin-top:-8vh}
 .frame{width:100%;height:100%;border-radius:42%/32%;padding:9px;background:linear-gradient(170deg,#f2f0eb,#c9c6bf);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25),inset 0 6px 14px rgba(0,0,0,.35)}
 .glass{position:relative;width:100%;height:100%;border-radius:40%/30%;overflow:hidden;background:#000;box-shadow:inset 0 0 18px rgba(0,0,0,.6)}
@@ -287,7 +301,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .tkEmpty{padding:40px 10px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
 .toast{position:fixed;left:50%;top:calc(70px + var(--st));transform:translateX(-50%);z-index:20;background:rgba(30,30,33,.95);border:1px solid var(--line);padding:10px 16px;border-radius:14px;font-size:14px}
 #loading{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:#000;color:var(--muted);font-size:14px;transition:opacity .6s}
-@media (prefers-reduced-motion:reduce){.ticket.recoil,.tstubhint canvas{animation:none}}
+@media (prefers-reduced-motion:reduce){#wing .nav,#wing .strobe{animation:none}.ticket.recoil,.tstubhint canvas{animation:none}}
 </style>
 </head>
 <body>
@@ -425,7 +439,25 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 
 <!-- WINDOW -->
 <div class="full" id="winView" hidden>
-  <div class="bezel"><div class="frame"><div class="glass" id="glass"><canvas id="sky"></canvas><div class="shade" id="shade"></div></div></div></div>
+  <div class="bezel side l" aria-hidden="true"><div class="frame"><div class="glass"></div></div></div>
+  <div class="bezel side r" aria-hidden="true"><div class="frame"><div class="glass"></div></div></div>
+  <div class="bezel main"><div class="frame"><div class="glass" id="glass"><canvas id="sky" role="img" aria-label="비행기 창밖 풍경"></canvas>
+    <svg id="wing" viewBox="0 0 180 139" preserveAspectRatio="none" aria-hidden="true"><defs>
+      <linearGradient id="wg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8f979f"/><stop offset=".35" stop-color="#dfe3e7"/><stop offset=".7" stop-color="#bcc3ca"/><stop offset="1" stop-color="#8a929a"/></linearGradient>
+      <radialGradient id="ws"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <linearGradient id="wf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
+      <g id="wingG">
+        <path d="M34 142 L88 68 Q90 65.5 93 65.5 L97 66 Q98 67 97.5 68.5 L136 142Z" fill="url(#wg)"/>
+        <path d="M34 142 L88 68 L90.5 67 L50 142Z" fill="#6e767e" opacity=".55"/>
+        <path d="M96 70 L120 142 M94.6 69 L104 142" stroke="#5d656d" stroke-width=".7" fill="none" opacity=".75"/>
+        <path d="M99.5 78 L91 80 M104 92 L86 96 M110 110 L78 116 M116 128 L70 135" stroke="#6d757d" stroke-width=".5" opacity=".6"/>
+        <path d="M101 88 l4 1 l1.2 5 l-4 -1z M107.5 109 l5 1.2 l1.6 7 l-5 -1.2z" fill="#7d858d"/>
+        <path d="M92 66 Q95 62 97.6 50 L100.4 49.4 Q100.6 60 97.6 67Z" fill="#e9ecef"/><path d="M97.6 50 L100.4 49.4 Q100.6 60 97.6 67 L96.6 66.4 Q98.6 60 97.6 50Z" fill="#8c949c"/>
+        <path d="M34 142 L88 68 Q93 64 97.5 68.5 L136 142Z" fill="url(#wf)"/>
+      </g>
+      <g id="wingL"><circle class="nav" id="navGlow" cx="92" cy="66" r="2.4" fill-opacity=".3"/><circle class="nav" id="navDot" cx="92" cy="66" r=".8"/><circle class="strobe" cx="96" cy="66" r="4" fill="url(#ws)"/></g>
+    </svg><i class="hole"></i><div class="shade" id="shade"></div></div></div></div>
+  <div class="wininfo" id="winInfo"></div>
 </div>
 
 <div class="caption" id="caption" hidden><small>기내 방송</small><span id="capText"></span></div>
@@ -464,7 +496,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 <div class="sheet" id="settingsSheet" hidden style="z-index:16"><div class="in">
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.6.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.7.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1480,63 +1512,188 @@ function hud(s){
   $('hPhase').textContent=F.paused?'일시정지':PHASE[pr.phase];tickExcuse();
 }
 
-/* ---------- window: sky and sea of clouds drawn live ---------- */
-let gl=null,prog=null,uni={},skyRun=false;const SK={sun:[0,.3,1],day:1,alt:1,t0:performance.now()};
+/* ---------- window: what the seat would see, drawn live ----------
+   Real sun direction, the real coastline below, clouds you climb through, city lights at night. Distances are in km, east/north. */
+let gl=null,prog=null,uni={},skyRun=false;
+const SK={sun:[0,.3,1],moon:[0,.3,1],day:1,alt:1,t:0,last:0,off:[0,0],coff:[0,0],yaw:0,az:0,hdg:0,side:1,cover:.6,tilt:0,frost:0,aur:0,rw:0,lat:0,lon:0,vel:.2,q:1.5,slow:0,n:0,key:''};
+const SKY_FS=`precision highp float;
+uniform vec2 res,off,coff,fwd;uniform float t,day,alt,cover,lat,lon,az,tilt,frost,aur,rw;uniform vec3 sun,moon;uniform sampler2D mask;
+const float DECK=2.2;
+float h(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=mat2(.8,.6,-.6,.8)*p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+float fbm3(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p=mat2(.8,.6,-.6,.8)*p*2.03+3.1;a*=.5;}return v/.875;}
+void main(){
+  vec2 w=gl_FragCoord.xy/res,uv=(gl_FragCoord.xy-.5*res)/res.y;
+  uv.y+=sin(t*.7)*.0025+sin(t*1.9)*.001;uv=mat2(cos(tilt),sin(tilt),-sin(tilt),cos(tilt))*uv;
+  vec3 rd=normalize(vec3(uv.x,uv.y-.14,1.15)),sn=normalize(sun);
+  vec2 en=rd.x*vec2(cos(az),-sin(az))+rd.z*vec2(sin(az),cos(az));
+  float sa=sn.y,sunset=(1.-smoothstep(0.,.3,abs(sa)))*smoothstep(-.26,.02,sa),nt=1.-day;
+  vec2 hs=normalize(sn.xz+1e-4);float tow=pow(max(dot(normalize(rd.xz+1e-4),hs),0.),3.);
+  float high=smoothstep(2.,11.,alt);
+  vec3 zen=mix(vec3(.006,.01,.03),mix(vec3(.22,.45,.82),vec3(.07,.2,.56),high),day),hor=mix(vec3(.025,.04,.09),vec3(.74,.85,.96),day);
+  hor=mix(hor,vec3(1.,.5,.22),sunset*(.3+.7*tow));zen=mix(zen,vec3(.28,.26,.52),sunset*.5);
+  float sd=max(dot(rd,sn),0.);
+  vec3 glow=vec3(1.,.88,.68)*(pow(sd,9.)*.28+pow(sd,60.)*.25)*(day+sunset);
+  float up=max(rd.y,0.);
+  vec3 col=mix(hor,zen,pow(up,.5)*1.15);
+  col=mix(col,vec3(1.,.72,.5),sunset*.45*exp(-up*14.)*tow);
+  col+=glow;
+  if(rd.y>-.01){
+    col+=vec3(1.,.94,.82)*smoothstep(.99955,.9998,sd)*3.*step(-.06,sa);
+    vec2 sp=rd.xy/rd.z*220.;float st=h(floor(sp)+floor(az*40.));float tw=.6+.4*sin(t*2.+st*90.);
+    col+=step(.9965,st)*smoothstep(.45,.1,length(fract(sp)-.5))*nt*nt*smoothstep(0.,.12,rd.y)*tw;
+    float md=dot(rd,normalize(moon));
+    col+=vec3(.9,.92,1.)*(smoothstep(.99935,.9996,md)*(.75+.25*n(rd.xy*260.))+pow(max(md,0.),220.)*.16)*nt*step(0.,moon.y);
+    if(aur>.01){
+      float a=atan(en.x,en.y),cu=pow(n(vec2(a*7.+t*.04,t*.05)),2.)+.6*pow(n(vec2(a*23.-t*.07,4.)),3.);
+      float e=rd.y+(n(vec2(a*5.,t*.06))-.5)*.09,band=smoothstep(.015,.09,e)*(1.-smoothstep(.12,.46,e))*(.55+.45*n(vec2(a*70.+t*.2,e*3.))),nn=smoothstep(-.1,.75,cos(a));
+      col+=mix(vec3(.12,.95,.45),vec3(.5,.2,.85),smoothstep(.1,.42,e))*cu*band*nn*aur*nt*.95;
+    }
+    if(alt>DECK&&rd.y>.015){float ci=fbm(en/(rd.y+.12)*vec2(.55,1.6)+coff*.004);col=mix(col,mix(vec3(.05,.06,.1),mix(vec3(1.),vec3(1.,.66,.48),sunset),day*.9+sunset*.1),smoothstep(.56,.95,ci)*.35*smoothstep(.0,.2,rd.y));}
+  }
+  vec3 lightc=mix(vec3(1.,.97,.92),vec3(1.,.6,.38),sunset);
+  if(rd.y<-.0004){
+    float d=alt/(-rd.y);vec2 g=en*d,q=off+g;
+    vec2 tu=vec2((lon+g.x/(111.*max(.15,cos(lat*.017453))))/360.+.5,.5-(lat+g.y/111.)/180.);
+    float m=texture2D(mask,tu).r+(fbm3(q*.035)-.5)*.7,land=smoothstep(.47,.53,m),al=abs(lat);
+    float a=fbm(q*.16),b=fbm3(q*1.3+7.);
+    vec3 green=mix(vec3(.11,.19,.08),vec3(.26,.29,.15),a),dry=mix(vec3(.52,.42,.28),vec3(.66,.55,.38),b),snow=mix(vec3(.78,.82,.87),vec3(.93,.95,.98),b);
+    float arid=smoothstep(12.,20.,al)*(1.-smoothstep(28.,36.,al))*smoothstep(.36,.62,fbm3(q*.012+3.));
+    vec3 lc=mix(green,dry,arid*.85);lc=mix(lc,vec3(.36,.31,.22),smoothstep(.55,.75,a)*.45);lc=mix(lc,snow,smoothstep(58.,68.,al+(b-.5)*10.));
+    float near=1.-smoothstep(4.,26.,d);
+    float fa=floor(n(q*.2)*6.)*.55;vec2 fq=mat2(cos(fa),sin(fa),-sin(fa),cos(fa))*q*vec2(1.5,2.9);fq.x+=h(vec2(floor(fq.y),fa))*.7;float cell=h(floor(fq));vec2 fr=abs(fract(fq)-.5);
+    lc+=near*(1.-arid)*((cell-.5)*vec3(.12,.11,.05)-.05*smoothstep(.46,.5,max(fr.x,fr.y)));lc*=.85+.3*b;
+    lc=mix(lc,vec3(.62,.58,.44),smoothstep(.6,.53,m)*land*.6*(1.-smoothstep(58.,68.,al)));
+    vec3 rn=normalize(vec3((n(q*9.+t*.5)-.5)*.22,1.,(n(q*8.+9.-t*.4)-.5)*.22)),rf=reflect(rd,rn);
+    float fres=pow(1.-max(-rd.y,0.),5.);
+    vec3 sea=mix(vec3(.015,.075,.14),vec3(.03,.15,.23),fbm3(q*.05));sea=mix(sea,vec3(.06,.3,.34),smoothstep(.36,.47,m));
+    vec3 gc=mix(sea,lc,land)*mix(vec3(.012,.016,.03),lightc,max(day,sunset*.35))*1.12;
+    gc+=(1.-land)*(hor*fres*.35+lightc*(pow(max(dot(rf,sn),0.),90.)*1.6+pow(max(dot(rf,sn),0.),14.)*.16)*max(day,sunset));
+    gc+=(1.-land)*vec3(.5,.55,.7)*pow(max(dot(rf,normalize(moon)),0.),60.)*.4*nt*step(0.,moon.y);
+    if(nt>.2){
+      float den=smoothstep(.5,.78,fbm3(q*.045+11.))*land*(1.-smoothstep(60.,72.,al)*.8);den=max(den,land*.62*smoothstep(3.6,1.2,alt)*smoothstep(.25,.5,fbm3(q*.16)));
+      float lv=log2(max(d,.25)/3.),l0=floor(lv);float k0=9./exp2(l0);
+      vec2 p0=q*k0,p1=q*k0*.5;float r0=h(floor(p0)),r1=h(floor(p1)+3.);
+      float a0=step(1.-den*.6,r0)*smoothstep(.24,.04,length(fract(p0)-.5)),a1=step(1.-den*.6,r1)*smoothstep(.24,.04,length(fract(p1)-.5));
+      float pt=mix(a0,a1,lv-l0),fine=1.-smoothstep(25.,90.,d);
+      gc+=mix(vec3(1.,.72,.36),vec3(.95,.95,1.),step(.82,fract(r1*57.)))*(mix(0.,pt*1.7,fine)+den*(.05+.16*(1.-fine))*(.5+.9*n(q*.9)))*smoothstep(.2,.8,nt);
+    }
+    if(rw>.01){
+      float lat2=abs(dot(g,vec2(fwd.y,-fwd.x))),al2=dot(q,fwd);
+      float ap=rw*smoothstep(1.2,.3,lat2);gc=mix(gc,vec3(.2,.26,.12)*mix(.03,1.,day)*(.8+.4*n(q*60.)),ap);
+      float tx=smoothstep(.07,.073,lat2)*smoothstep(.1,.097,lat2);gc=mix(gc,vec3(.22,.22,.24)*mix(.1,1.,day),tx*rw);
+      gc=mix(gc,vec3(.9,.72,.1)*mix(.25,1.,day),smoothstep(.0012,.0004,abs(lat2-.085))*rw);
+      float ed=min(abs(lat2-.068),abs(lat2-.102)),sl=abs(fract(al2*16.)-.5);
+      gc+=vec3(.25,.5,1.)*smoothstep(.0022,.0004,ed)*smoothstep(.06,.02,sl)*rw*(.25+1.4*nt);
+    }
+    float hz=1.-exp(-d/(14.+alt*13.));col=mix(gc,hor,clamp(hz,0.,1.));col+=glow*.4*hz;
+  }
+  float above=alt-DECK;
+  if((above>0.&&rd.y<-.0004)||(above<0.&&rd.y>.004)){
+    float dc=abs(above)/abs(rd.y);vec2 p=(coff+en*dc)*.22;
+    float th=mix(.66,.33,cover),c=fbm(p),c2=fbm(p+(sn.x*vec2(cos(az),-sin(az))+sn.z*vec2(sin(az),cos(az)))*.08);
+    float cov=smoothstep(th-.06,th+.16,c),lit=clamp(.66+(c-c2)*3.4,.22,1.25),thick=smoothstep(th+.1,th+.4,c);
+    vec3 sc=mix(vec3(1.,.56,.36),vec3(1.,.985,.96),smoothstep(0.,.35,sa));
+    vec3 cl=above>0.?sc*(.6+.45*lit)-vec3(.09,.075,.05)*(1.-lit)*thick:mix(vec3(.9,.92,.95),vec3(.5,.54,.6),thick)*mix(vec3(1.),sc,sunset);
+    vec3 nc=vec3(.035,.042,.07)+vec3(.07,.08,.13)*lit*step(0.,moon.y)*.8;
+    cl=mix(nc,cl,clamp(day+sunset*.6,0.,1.));
+    float hz=1.-exp(-dc/(18.+abs(above)*12.));
+    col=mix(col,mix(cl,hor,clamp(hz,0.,1.)),cov*(1.-.35*hz*step(above,0.)));
+  }
+  float fog=exp(-above*above/.11)*smoothstep(.2,.5,cover)*.99;
+  if(fog>.01){float sk=n(vec2(w.x*3.+t*2.5,w.y*5.))*.5+n(vec2(w.x*9.+t*5.,w.y*11.))*.3;col=mix(col,mix(vec3(.05,.055,.075),mix(vec3(.86,.89,.93),vec3(.95,.7,.55),sunset*.7),day)*(.86+.2*sk),fog);}
+  if(frost>.01){
+    vec2 e=abs(w-.5)*2.;float rim=smoothstep(.78,1.16,length(e*vec2(.92,.86)))+smoothstep(.22,0.,w.y)*.35;
+    float ic=smoothstep(.5,.78,n(w*vec2(46.,64.))*.55+n(w*vec2(120.,170.))*.45);
+    col=mix(col,col*.6+vec3(.42,.46,.52)*(.12+.88*day),clamp(rim*ic*frost,0.,.75));
+  }
+  col=col/(1.+max(col-.9,0.)*.6);gl_FragColor=vec4(pow(max(col,0.),vec3(.95)),1.);
+}`;
 function startSky(){
   const c=$('sky');
   if(!gl){
-    gl=c.getContext('webgl',{antialias:false,premultipliedAlpha:false});if(!gl){toast('이 기기에서는 창문 화면을 그릴 수 없어요');return}
-    const vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-    const fs=`precision highp float;uniform vec2 res;uniform float t,day,alt;uniform vec3 sun;
-      float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-      float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<6;i++){v+=a*n(p);p=p*2.02+vec2(1.7,9.2);a*=.5;}return v;}
-      void main(){
-        vec2 uv=(gl_FragCoord.xy-.5*res)/res.y;uv.y+=sin(t*.7)*.004;
-        vec3 rd=normalize(vec3(uv.x,uv.y-.16,1.15));
-        float sa=sun.y,sunset=(1.-smoothstep(0.,.32,abs(sa)))*smoothstep(-.28,.04,sa);
-        vec3 zen=mix(vec3(.008,.012,.035),vec3(.16,.36,.78),day),hor=mix(vec3(.03,.05,.1),vec3(.72,.84,.97),day);
-        vec2 hs=normalize(sun.xz+1e-4);float tow=pow(max(dot(normalize(rd.xz+1e-4),hs),0.),3.);
-        hor=mix(hor,vec3(1.,.52,.26),sunset*(.35+.65*tow));zen=mix(zen,vec3(.32,.28,.52),sunset*.45);
-        vec3 col;
-        if(rd.y>0.){
-          col=mix(hor,zen,pow(rd.y,.55));float sd=max(dot(rd,normalize(sun)),0.);
-          col+=vec3(1.,.9,.72)*(pow(sd,900.)*4.+pow(sd,9.)*.3*(day+sunset));
-          col+=step(.9975,h(floor(rd.xy/rd.z*260.)))*(1.-day)*smoothstep(0.,.15,rd.y)*.9;
-        }else{
-          float d=alt/(-rd.y);vec2 p=rd.xz*d;p.x+=t*.045;
-          float c=fbm(p*.3),c2=fbm(p*.3+hs*.06);float cov=smoothstep(.34,.62,c);
-          float lit=clamp(.62+(c-c2)*3.6,.2,1.25);float thick=smoothstep(.5,.85,c);
-          vec3 sc=mix(vec3(1.,.6,.4),vec3(1.,.98,.95),smoothstep(0.,.35,sa));
-          vec3 cloud=mix(vec3(.05,.06,.1)+vec3(.06,.07,.12)*lit,sc*(.62+.45*lit)-vec3(.08,.07,.05)*thick,clamp(day+sunset*.7,0.,1.));
-          vec3 below=mix(vec3(.01,.015,.03),vec3(.1,.18,.28),day);
-          col=mix(below,cloud,cov);col=mix(col,hor,clamp(1.-exp(-d*.018),0.,1.));
-        }
-        col=pow(col,vec3(.95));gl_FragColor=vec4(col,1.);
-      }`;
-    const sh=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s};
-    prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+    const g=c.getContext('webgl',{antialias:false,premultipliedAlpha:false});if(!g){toast('이 기기에서는 창문 화면을 그릴 수 없어요');return}
+    const sh=(type,src)=>{const x=g.createShader(type);g.shaderSource(x,src);g.compileShader(x);if(!g.getShaderParameter(x,g.COMPILE_STATUS)&&!g.isContextLost())console.error(g.getShaderInfoLog(x));return x};
+    prog=g.createProgram();g.attachShader(prog,sh(g.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));g.attachShader(prog,sh(g.FRAGMENT_SHADER,SKY_FS));g.linkProgram(prog);
+    if(!g.getProgramParameter(prog,g.LINK_STATUS)){if(!g.isContextLost())toast('이 기기에서는 창문 화면을 그릴 수 없어요');return}
+    gl=g;gl.useProgram(prog);
     const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    ['res','t','day','alt','sun'].forEach(k=>uni[k]=gl.getUniformLocation(prog,k));
+    ['res','off','coff','fwd','t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','sun','moon','mask'].forEach(k=>uni[k]=gl.getUniformLocation(prog,k));
+    gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+    const MW=1024,MH=512;let px=new Uint8Array(MW*MH);
+    if(worldTopo){const d=landMask(MW,MH);for(let i=0;i<px.length;i++)px[i]=d[i*4+3];delete maskCache[MW+'x'+MH]}
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,MW,MH,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,px);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.uniform1i(uni.mask,0);
   }
-  if(!skyRun){skyRun=true;requestAnimationFrame(drawSky)}
+  if(F)seatWindow();
+  if(!skyRun){skyRun=true;SK.last=0;requestAnimationFrame(drawSky)}
 }
+/* phones drop the drawing context in the background: rebuild it when they give it back */
+$('sky').addEventListener('webglcontextlost',e=>{e.preventDefault();gl=null;skyRun=false});
+$('sky').addEventListener('webglcontextrestored',()=>{if(winOn&&mode==='flight')startSky()});
+/* which side, and where the wing is from this seat */
+function seatWindow(){
+  const key=F.no+F.seat;if(SK.key===key)return;SK.key=key;SK.yaw=0;SK.off=[0,0];SK.coff=[0,0];
+  const row=parseInt(F.seat,10)||1,l=String(F.seat||'A').slice(-1),P=planeFor(F.min),cab=P.cabins.find(c=>row>=c.a&&row<=c.b)||P.cabins[P.cabins.length-1],all=cab.c.replace(/ /g,''),i=all.indexOf(l);
+  SK.side=i<0?('ABCD'.includes(l)?-1:1):i<all.length/2?-1:1;
+  const wr=P.cabins[P.cabins.length-1].wing,mid=(wr[0]+wr[1])/2;SK.wing=-SK.side*Math.max(-1.35,Math.min(1.35,(row-mid)/(wr[1]-wr[0])))*26;
+  let z=7;for(const ch of F.no)z=(z*31+ch.charCodeAt(0))%997;SK.seed=z/997;
+  $('wingG').setAttribute('transform',SK.side<0?'translate(180 0) scale(-1 1)':'');$('wingL').setAttribute('transform',SK.side<0?'translate(180 0) scale(-1 1)':'');
+  ['navGlow','navDot'].forEach(id=>$(id).setAttribute('fill',SK.side<0?'#ff3b30':'#30d158'));
+  $('winView').classList.toggle('first',F.cls==='first');$('winView').classList.toggle('biz',F.cls==='biz');
+  $('glass').setAttribute('data-side',SK.side<0?'left':'right');
+}
+const D2=x=>x*Math.PI/180;
+let infoAt=0;
 function skyState(s){
-  const [sl,sd]=subsolar(F.depUTC+F.elapsed),sv=vec(sl,sd),up=s.v;
+  seatWindow();
+  const when=F.depUTC+F.elapsed,[sl,sd]=subsolar(when),up=s.v;
   const east=[-Math.sin(s.pos[0]*rad),Math.cos(s.pos[0]*rad),0],north=[up[1]*east[2]-up[2]*east[1],up[2]*east[0]-up[0]*east[2],up[0]*east[1]-up[1]*east[0]];
-  const se=dot(sv,east),sn=dot(sv,north),su=dot(sv,up);
-  const az=Math.atan2(se,sn),look=(s.hdg+90)*rad,rel=az-look,ch=Math.sqrt(Math.max(0,1-su*su));
-  SK.sun=[Math.sin(rel)*ch,su,Math.cos(rel)*ch];SK.day=Math.max(0,Math.min(1,(su+.12)/.3));
-  const pr=profile(s.p);SK.alt=.25+.9*pr.alt/38000;
+  SK.hdg=s.hdg*rad;SK.az=SK.hdg+SK.side*Math.PI/2+SK.yaw;
+  const local=v=>{const su=dot(v,up),az=Math.atan2(dot(v,east),dot(v,north)),rel=az-SK.az,ch=Math.sqrt(Math.max(0,1-su*su));return [Math.sin(rel)*ch,su,Math.cos(rel)*ch]};
+  SK.sun=local(vec(sl,sd));SK.day=Math.max(0,Math.min(1,(SK.sun[1]+.12)/.3));
+  const age=((when/86400000-10962.76)%29.5306+29.5306)%29.5306;SK.moon=local(vec(((sl-age/29.5306*360)%360+540)%360-180,-sd*.8));
+  const tm=F.elapsed/60000,left=(F.T-F.elapsed)/60000,sm=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)};
+  const pr=profile(s.p),km=pr.alt*.3048/1000*sm(25,110,tm*60)*sm(6,50,left*60); // a takeoff run first, wheels down at the end
+  SK.alt=Math.max(.012,km);SK.lat=s.pos[1];SK.lon=((s.pos[0]+180)%360+360)%360-180;
+  SK.cover=.5+.36*Math.sin(tm/11+SK.seed*6.28)+.1*Math.sin(tm/3.7+SK.seed*20);
+  const ramp=Math.min(1,Math.min(tm,left)/6);SK.kmh=Math.round(Math.min(tm*60<25?20+tm*60*9.6:1e4,left*60<12?60+left*60*17:1e4,260+500*ramp));SK.vel=SK.kmh/3600;
+  SK.tilt=SK.side*D2(pr.phase==='climb'?6*sm(22,34,tm*60):pr.phase==='descent'?-2.5:0)+D2(1.2)*Math.sin(tm*.9+SK.seed*9);
+  SK.frost=Math.max(0,Math.min(1,(km-6)/4))*.8;SK.aur=Math.max(0,Math.min(1,(Math.abs(SK.lat)-56)/9));SK.rw=Math.max(0,1-km/.35);
+  const now=performance.now();
+  $('wing').style.transform=`translateX(${(SK.wing-SK.yaw/rad)/35*100/1.8}%)`;
+  if(now-infoAt>900){infoAt=now;
+    const temp=Math.round(15-6.5*Math.min(km,11)),mode0=SK.day>.75?'낮':SK.day>.04?'노을':'밤',land=overLand(SK.lon,SK.lat);
+    $('winInfo').innerHTML=`<b>${(Math.round(km/.03048)*100).toLocaleString('en-US')}</b> ft · 시속 <b>${SK.kmh}</b> km · 바깥 <b>${temp}</b>°C\n${SK.side<0?'왼쪽':'오른쪽'} 창 · ${mode0} · 지금 아래는 ${land?'육지':'바다'}`;
+    const g=$('wingG').style;g.filter=`brightness(${(.1+.9*Math.max(SK.day,.06)).toFixed(2)})`;
+    const v=$('winView').style,mix=(a,b)=>'rgb('+a.map((x,i)=>Math.round(x+(b[i]-x)*SK.day)).join()+')';
+    v.setProperty('--amb',mix([17,18,28],[74,73,71]));v.setProperty('--zen',mix([3,5,12],[40,90,180]));v.setProperty('--hor',mix([10,14,28],[190,215,240]));v.setProperty('--low',mix([8,10,18],[205,215,226]));
+  }
 }
-function drawSky(){
-  if(!winOn||mode!=='flight'){skyRun=false;return}
+function overLand(lon,lat){if(!worldTopo)return false;const d=landMask(360,180),x=((Math.floor(lon+180)%360)+360)%360,y=Math.max(0,Math.min(179,Math.floor(90-lat)));return d[(y*360+x)*4+3]>110}
+function drawSky(now){
+  if(!winOn||mode!=='flight'||!gl||!F){skyRun=false;return}
   requestAnimationFrame(drawSky);
-  const c=$('sky'),dpr=Math.min(1.5,devicePixelRatio||1),w=c.clientWidth*dpr|0,h=c.clientHeight*dpr|0;
+  if(SK.last&&now-SK.last<30)return;                       // 30 frames a second is plenty and kinder to the battery
+  const dt=SK.last?Math.min(.2,(now-SK.last)/1000):0;SK.last=now;
+  SK.n++;if(dt>.055&&dt<.19)SK.slow++;if(SK.n>=60){if(SK.slow>35&&SK.q>.6)SK.q*=.75;SK.n=SK.slow=0}
+  if(!F.paused){SK.t+=dt;const e=Math.sin(SK.hdg),n=Math.cos(SK.hdg),v=SK.vel*dt;SK.off[0]+=e*v;SK.off[1]+=n*v;SK.coff[0]+=e*v*2;SK.coff[1]+=n*v*2}
+  const c=$('sky'),dpr=Math.min(SK.q,devicePixelRatio||1),w=c.clientWidth*dpr|0,h=c.clientHeight*dpr|0;if(!w||!h)return;
   if(c.width!==w||c.height!==h){c.width=w;c.height=h;gl.viewport(0,0,w,h)}
-  gl.uniform2f(uni.res,w,h);gl.uniform1f(uni.t,(performance.now()-SK.t0)/1000*(F&&!F.paused?1:0)+0);gl.uniform1f(uni.day,SK.day);gl.uniform1f(uni.alt,SK.alt);gl.uniform3fv(uni.sun,SK.sun);
+  gl.uniform2f(uni.res,w,h);gl.uniform2fv(uni.off,SK.off);gl.uniform2fv(uni.coff,SK.coff);gl.uniform2f(uni.fwd,Math.sin(SK.hdg),Math.cos(SK.hdg));
+  for(const k of ['t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw'])gl.uniform1f(uni[k],SK[k]);
+  gl.uniform3fv(uni.sun,SK.sun);gl.uniform3fv(uni.moon,SK.moon);
   gl.drawArrays(gl.TRIANGLES,0,3);
+}
+/* drag the glass to look forward and back */
+{ const gls=$('glass');let d=null;
+  gls.onpointerdown=e=>{if(e.target.id==='shade')return;d={x:e.clientX,y:SK.yaw,id:e.pointerId};try{gls.setPointerCapture(e.pointerId)}catch(_){}};
+  gls.onpointermove=e=>{if(!d||e.pointerId!==d.id)return;SK.yaw=Math.max(-D2(48),Math.min(D2(48),d.y-(e.clientX-d.x)/gls.clientWidth*D2(35)))};
+  gls.onpointerup=gls.onpointercancel=()=>d=null;
 }
 { const sh=$('shade');let d=null;
   sh.onpointerdown=e=>{d={y:e.clientY,h:sh.offsetHeight,H:sh.parentElement.offsetHeight};try{sh.setPointerCapture(e.pointerId)}catch(_){}};
