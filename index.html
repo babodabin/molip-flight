@@ -53,6 +53,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-of
 /* sheets */
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) max(10px, calc(var(--sb) - 20px)) calc(12px + var(--sl))}
 .sheet>.in{max-width:520px;margin:0 auto;background:var(--sheet);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--line);border-radius:26px;padding:18px;display:grid;gap:14px;max-height:56vh;overflow:auto}
+#home>.in{max-height:60vh}
 #select .alist{height:max(96px,calc(56vh - 354px));overflow:auto;align-content:start}
 .pill{all:unset;cursor:pointer;text-align:center;padding:15px 18px;border-radius:999px;font-weight:600;font-size:16px;background:#fff;color:#000}
 .pill.dark{background:rgba(255,255,255,.1);color:var(--fg)}
@@ -80,6 +81,33 @@ h2{font-size:19px}
 
 .mrow{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:rgba(255,214,10,.1);border-radius:16px;padding:10px 12px}
 .mrow b{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--yellow)}
+.mrow.two{flex-direction:column;align-items:flex-start;gap:2px}
+.mrow.gold{background:linear-gradient(110deg,rgba(255,190,60,.2),rgba(255,236,170,.1))}
+.coin{display:inline-block;width:.95em;height:.95em;border-radius:50%;vertical-align:-.1em;margin-right:.3em;background:radial-gradient(circle at 35% 30%,#fff3bf,#ffcf4a 45%,#c98a17);box-shadow:inset 0 0 0 1.5px rgba(130,80,0,.35)}
+/* duty-free shop */
+#shopView{z-index:15;overflow:auto;background:radial-gradient(ellipse at 50% 0,#2c2416,#0b0a09 60%)}
+.shopIn{max-width:560px;margin:0 auto;padding:calc(16px + var(--st)) 16px calc(40px + var(--sb));display:grid;gap:14px}
+.shopTop{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;background:linear-gradient(#1a150e 80%,transparent)}
+.shopTop b{font-family:var(--mono);font-size:18px;color:var(--yellow);font-weight:500}
+.shopIn h3{margin:8px 0 0;font-size:15px}.shopIn h3 small{display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:3px}
+.goods{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:8px}
+.good{all:unset;box-sizing:border-box;cursor:pointer;display:grid;justify-items:center;gap:6px;padding:12px 6px 10px;border-radius:18px;background:rgba(255,255,255,.055);font-size:13px;text-align:center}
+.good canvas{width:64px;height:64px}
+.good em{font-style:normal;font-size:12px;color:var(--yellow);font-family:var(--mono)}
+.good.own em{color:var(--muted);font-family:var(--f)}
+.good[aria-pressed="true"]{box-shadow:0 0 0 2px var(--yellow) inset;background:rgba(255,214,10,.12)}.good[aria-pressed="true"] em{color:var(--yellow)}
+.good:focus-visible,.spd:focus-visible{outline:2px solid #fff}
+/* replay */
+#replayBar{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:0 calc(12px + var(--sr)) max(10px,calc(var(--sb) - 14px)) calc(12px + var(--sl))}
+#replayBar .in{max-width:520px;margin:0 auto;box-sizing:border-box;padding:14px 16px;border-radius:24px;background:var(--sheet);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--line);display:grid;gap:10px}
+.spds{display:grid;grid-template-columns:48px 1fr 1fr 1fr;gap:8px}
+.spd{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:10px 4px;border-radius:999px;background:rgba(255,255,255,.1);font-size:14px;white-space:nowrap}
+.spd[aria-pressed="true"]{background:var(--yellow);color:#000}
+.spd svg{width:16px;height:16px;vertical-align:-3px}
+#hud.rp ~ #winView .wininfo{bottom:calc(176px + var(--sb))}
+#hud.rp ~ #winView .main{margin-top:-18vh}
+#hud.rp .col.l,#hud.rp .hudb{display:none}
+.mini.can{cursor:pointer}.mini .play{font-size:11px;color:var(--yellow)}
 .mcost{font-size:13px;line-height:18px;height:18px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mcost b{color:var(--yellow);font-weight:600}.mcost.no{color:#ff8a80}
 .mrules{display:grid;gap:8px;font-size:14px;line-height:1.45}.mrules div{display:flex;justify-content:space-between;gap:14px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.mrules span:last-child{text-align:right;color:var(--yellow)}
 
@@ -390,7 +418,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
     <div><span class="lbl">집중 시간</span><b id="kMinutes">0m</b></div>
     <div><span class="lbl">비행 거리</span><b id="kKm">0 km</b></div>
   </div>
-  <button class="mrow" id="goMiles"><span class="lbl">마일 · <span id="kReach"></span></span><b id="kMiles"></b></button>
+  <div class="grid2"><button class="mrow two" id="goMiles"><span class="lbl">마일 · <span id="kReach"></span></span><b id="kMiles"></b></button><button class="mrow two gold" id="goShop"><span class="lbl">골드 · 기내 면세점</span><b><i class="coin"></i><span id="kGold"></span></b></button></div>
   <div class="legend"><span><i style="background:var(--visited)"></i>가 본 공항</span><span><i style="background:var(--yellow)"></i>안 가 본 공항</span><span><i style="background:#fff"></i>지금 위치</span></div>
   <button class="pill" id="goSelect">여정 시작하기</button>
   <div class="grid2"><button class="pill dark sm" id="goRandom">랜덤 비행</button><button class="pill dark sm" id="goTickets">티켓 모음 <span id="tcount" class="mono" style="color:var(--yellow)"></span></button></div>
@@ -551,11 +579,29 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
     <div class="big" id="doneTime"></div>
     <span class="lbl" id="doneNote"></span>
     <span id="doneMiles" style="font-size:15px;color:var(--yellow);text-align:center;line-height:1.45"></span>
+    <span id="doneGold" style="font-size:14px;color:#ffdf8f" hidden></span>
     <span class="badge" id="doneBadge" hidden>새로운 공항!</span>
     <button class="pill" id="layover" style="width:100%;margin-top:8px">5분 환승 휴식</button>
     <button class="pill dark" id="toHome" style="width:100%">홈으로</button>
   </div>
 </div>
+
+<!-- SHOP -->
+<div class="full" id="shopView" hidden><div class="shopIn">
+  <div class="shopTop"><h2>기내 면세점</h2><span class="row"><b><i class="coin"></i><span id="shopGold"></span></b><button class="ghost" id="shopClose">닫기</button></span></div>
+  <span class="lbl">도착하면 12분에 1골드, 처음 가는 공항이면 5골드를 더 받아요. 골드는 잃지 않아요. 진짜 돈이 아니고, 마일을 사거나 비행을 빨리 끝낼 수는 없어요.</span>
+  <div id="shopList" style="display:grid;gap:12px"></div>
+</div></div>
+<div class="sheet" id="buySheet" hidden style="z-index:18"><div class="in">
+  <div class="row sp"><h2 id="buyTitle"></h2><button class="ghost" id="buyClose">닫기</button></div>
+  <span class="lbl" id="buyInfo"></span>
+  <button class="pill" id="buyGo"></button>
+</div></div>
+<div id="replayBar" hidden><div class="in">
+  <div class="row sp"><b id="rpTitle" style="font-size:15px"></b><button class="ghost" id="rpClose">닫기</button></div>
+  <input type="range" id="rpSeek" min="0" max="1000" value="0" aria-label="비행 시점">
+  <div class="spds"><button class="spd" id="rpPlay" aria-label="재생"></button><button class="spd" data-spd="1">실시간</button><button class="spd" data-spd="40">×40</button><button class="spd" data-spd="400">×400</button></div>
+</div></div>
 
 <!-- MILES -->
 <div class="sheet" id="milesSheet" hidden style="z-index:16"><div class="in">
@@ -578,7 +624,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.9.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.0.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -882,6 +928,17 @@ try{const s=JSON.parse(localStorage.getItem('mf-v2')||localStorage.getItem('mf-v
 if(!Array.isArray(S.tickets))S.tickets=[];
 if(!Number.isFinite(S.miles)||S.miles<0)S.miles=1200;
 
+/* ---------- gold ----------
+   Earned by landing, never lost. It buys looks and replays, not miles and not time. */
+const goldFor=(m,isNew)=>Math.max(1,Math.round(m/12))+(isNew?5:0);
+if(!Number.isFinite(S.gold)||S.gold<0)S.gold=S.tickets.filter(t=>t.status==='landed').reduce((a,t)=>a+goldFor(t.min,false),0);
+if(!Array.isArray(S.owned))S.owned=[];
+S.equip=Object.assign({plane:'sun',sky:'none'},S.equip);
+const SKINS={sun:['노랑',['#ffd60a'],0],sky:['하늘',['#64d2ff'],50],mint:['민트',['#5ef0b0'],50],pink:['분홍',['#ff8fc0'],50],red:['빨강',['#ff5a4a'],50],violet:['보라',['#b48cff'],50],pearl:['진주',['#ffffff','#cfd9ea'],80],dusk:['노을',['#ffb347','#ff5e8a','#8a5cff'],120],aurora:['오로라',['#5effa9','#42c8ff','#a06bff'],120]};
+const SKIES={none:['그대로',0],aurora:['오로라',80,'밤이면 어디서나 오로라'],meteor:['별똥별',80,'밤하늘에 별똥별'],rose:['분홍 하늘',80,'낮에 분홍빛 하늘']};
+const SPEEDS={40:['다시 보기 ×40',30],400:['다시 보기 ×400',60]};
+const owns=id=>S.owned.includes(id),skin=()=>SKINS[S.equip.plane]&&(S.equip.plane==='sun'||owns('plane:'+S.equip.plane))?SKINS[S.equip.plane]:SKINS.sun,skyPick=()=>owns('sky:'+S.equip.sky)?S.equip.sky:'none';
+
 /* ---------- miles ----------
    A flight holds a deposit of 10 per minute: landing returns it plus 20%, diverting costs half.
    Short hops are free when miles run out, and so is the nearest airport, so nobody gets stranded. */
@@ -939,14 +996,14 @@ function planeImage(fill,size){
   const c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');
   g.translate(size/2,size/2);g.scale(size/26,size/26);
   g.beginPath();planePts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();
-  g.fillStyle=fill;g.fill();g.lineWidth=1.1;g.strokeStyle='rgba(0,0,0,.75)';g.stroke();
+  if(Array.isArray(fill)&&fill.length>1){const lg=g.createLinearGradient(-11,-8,11,10);fill.forEach((c,i)=>lg.addColorStop(i/(fill.length-1),c));g.fillStyle=lg}else g.fillStyle=Array.isArray(fill)?fill[0]:fill;g.fill();g.lineWidth=1.1;g.strokeStyle='rgba(0,0,0,.75)';g.stroke();
   const d=g.getImageData(0,0,size,size);return {width:size,height:size,data:new Uint8Array(d.data.buffer)};
 }
 const EMPTY={type:'FeatureCollection',features:[]};
 function addOverlays(){
   baseSymbols=map.getStyle().layers.filter(l=>l.type==='symbol').map(l=>l.id);
   const firstSym=baseSymbols[0];
-  if(!map.hasImage('me'))map.addImage('me',planeImage('#ffd60a',96),{pixelRatio:2});
+  if(!map.hasImage('me'))map.addImage('me',planeImage(skin()[1],96),{pixelRatio:2});
   if(!map.hasImage('tr'))map.addImage('tr',planeImage('#f2f2f7',64),{pixelRatio:2});
   for(const id of ['night','history','airports','preview','remain','flown','traffic','plane'])if(!map.getSource(id))map.addSource(id,{type:'geojson',data:EMPTY});
   map.addLayer({id:'history',type:'line',source:'history',layout:{'line-cap':'round'},paint:{'line-color':'#ff9f43','line-width':1.8,'line-opacity':.7}});
@@ -963,7 +1020,7 @@ function addOverlays(){
     paint:{'text-color':['match',['get','st'],'lock','#b0b0b6','#ffd60a'],'text-halo-color':'rgba(0,0,0,.9)','text-halo-width':1.6}});
   map.addLayer({id:'preview',type:'line',source:'preview',layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':2.4}});
   map.addLayer({id:'remain',type:'line',source:'remain',layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':2,'line-dasharray':[1.5,2],'line-opacity':.8}});
-  map.addLayer({id:'flown',type:'line',source:'flown',layout:{'line-cap':'round'},paint:{'line-color':'#ffd60a','line-width':3.2}});
+  map.addLayer({id:'flown',type:'line',source:'flown',layout:{'line-cap':'round'},paint:{'line-color':skin()[1][0],'line-width':3.2}});
   map.addLayer({id:'traffic',type:'symbol',source:'traffic',layout:{'icon-image':'tr','icon-size':['interpolate',['linear'],['zoom'],1,.45,6,.8,10,1.1],'icon-rotate':['get','b'],
     'icon-rotation-alignment':'map','icon-allow-overlap':true,'icon-ignore-placement':true,
     'text-field':['step',['zoom'],'',4,['concat',['get','cs'],'  ',['get','r']]],'text-size':10,'text-offset':[0,1.4],'text-anchor':'top','text-font':['Noto Sans Regular'],'text-optional':true},
@@ -980,6 +1037,7 @@ function applyToggles(){
   document.querySelectorAll('[data-style]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.style===curStyle));
   $('tLabels').setAttribute('aria-pressed',showLabels);$('tTraffic').setAttribute('aria-pressed',trafficOn);
 }
+function paintPlane(){if(!map||!mapReady)return;const im=planeImage(skin()[1],96);if(map.hasImage('me'))map.updateImage('me',im);else map.addImage('me',im,{pixelRatio:2});if(map.getLayer('flown'))map.setPaintProperty('flown','line-color',skin()[1][0])}
 function setStyle(k){if(!BASE[k]||k===curStyle)return;curStyle=k;S.style=k;save();map.setStyle(BASE[k],{diff:false})}
 
 /* night side of the planet, computed from the flight's own clock */
@@ -1027,17 +1085,17 @@ function setMarkers(list){
 }
 
 /* ---------- screens ---------- */
-const LAYERS=['home','select','tickets','seatView','seatBackCol','seatTop','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','menuSheet','foodSheet','mealView','soundPop','layerPop','greet'];
+const LAYERS=['home','select','tickets','seatView','seatBackCol','seatTop','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','menuSheet','foodSheet','mealView','replayBar','shopView','buySheet','soundPop','layerPop','greet'];
 function show(m){
   mode=m;
   const on={home:['home','greet'],select:['select'],tickets:['tickets'],seat:['seatView','seatBackCol','seatTop','seatBar'],pass:['ticketView'],ready:['readyView'],
-    flight:['hud'],done:['doneView']}[m]||[];
+    flight:['hud'],replay:['hud','replayBar'],done:['doneView']}[m]||[];
   LAYERS.forEach(id=>$(id).hidden=!on.includes(id));
   if(m==='seat'&&plan.seat)$('focusCard').hidden=false;
   if(m==='seat')aimSeats();
-  $('mapCtl').hidden=!(m==='home'||m==='select'||m==='tickets'||m==='flight');
-  $('mapCtl').style.top=m==='flight'?`calc(14px + var(--st))`:'';
-  $('winView').hidden=!(m==='flight'&&winOn);
+  $('mapCtl').hidden=!(m==='home'||m==='select'||m==='tickets'||m==='flight'||m==='replay');$('hud').classList.toggle('rp',m==='replay');
+  $('mapCtl').style.top=m==='flight'||m==='replay'?`calc(14px + var(--st))`:'';
+  $('winView').hidden=!((m==='flight'||m==='replay')&&winOn);
   if(m==='home'){renderHome();setMarkers([[S.city,'dep']]);clearRoute();map.easeTo({center:AP[S.city].ll,zoom:1.7,pitch:0,bearing:0,padding:pad(),duration:1200})}
   if(m==='tickets'){renderTickets();setMarkers([])}
   if(m==='done')$('mapCtl').hidden=true;
@@ -1056,7 +1114,7 @@ function renderHome(){
   const km=S.tickets.filter(t=>t.status==='landed'&&AP[t.from]&&AP[t.to]).reduce((s,t)=>s+distKm(AP[t.from],AP[t.to]),0);
   $('kKm').textContent=Math.round(km).toLocaleString('en-US')+' km';
   $('tcount').textContent=S.tickets.length?S.tickets.length:'';
-  $('kMiles').textContent=fmtMi(S.miles);$('kReach').textContent='지금 '+fmtKo(Math.min(840,maxMin()))+'까지';
+  $('kMiles').textContent=fmtMi(S.miles);$('kGold').textContent=fmtMi(S.gold);$('kReach').textContent='지금 '+fmtKo(Math.min(840,maxMin()))+'까지';
 }
 
 /* select */
@@ -1399,7 +1457,7 @@ function updateFlightLayers(force){
   map.getSource('plane').setData({type:'Feature',properties:{b:s.hdg},geometry:{type:'Point',coordinates:s.pos}});
   const now=performance.now();if(!force&&now-lineT<250)return s;lineT=now;
   map.getSource('flown').setData(s.p>0?{type:'Feature',geometry:{type:'LineString',coordinates:arc(F.A,F.B,0,s.p,Math.max(4,Math.ceil(s.p*96)))}}:EMPTY);
-  map.getSource('remain').setData(F.random||F.status!=='flying'?EMPTY:{type:'Feature',geometry:{type:'LineString',coordinates:arc(F.A,F.B,s.p,1,Math.max(4,Math.ceil((1-s.p)*96)))}});
+  map.getSource('remain').setData((F.random&&!F.replay)||F.status!=='flying'&&!F.replay?EMPTY:{type:'Feature',geometry:{type:'LineString',coordinates:arc(F.A,F.B,s.p,1,Math.max(4,Math.ceil((1-s.p)*96)))}});
   return s;
 }
 const VIEWS=['chase','top','route'];
@@ -1450,14 +1508,15 @@ $('reasonGo').onclick=()=>{
   const fee=F.fee||0,lost=cancel?0:Math.round(F.stake/2);
   F.paused=false;F.status='diverted';S.miles+=F.stake-lost+(cancel?fee:0);S.live=null;setTicket(cancel?'canceled':'diverted',cancel?0:-lost-fee,why);$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;keepAwake(false);$('layover').hidden=true;endFlightExtras();
   $('doneMiles').textContent=cancel?`1분 안에 취소해서 마일을 모두 돌려받았어요 · 보유 ${fmtMi(S.miles)}마일`:lost?`-${fmtMi(lost)}마일${fee?` · 좌석 값 -${fee}`:''} · 보유 ${fmtMi(S.miles)}마일`:`잃은 마일 없음 · 보유 ${fmtMi(S.miles)}마일`;
-  $('doneSub').textContent=cancel?'취소':'회항';$('doneTitle').textContent=cancel?'비행을 취소했어요':AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
+  $('doneGold').hidden=true;$('doneSub').textContent=cancel?'취소':'회항';$('doneTitle').textContent=cancel?'비행을 취소했어요':AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
   $('doneNote').textContent=`이유: ${reasonName(why)} · 집중 시간에는 더해지지 않아요. 다음 비행에서 다시 도전해 보세요.`;$('doneBadge').hidden=true;map.setMinZoom(0);show('done');
 };
 function setTicket(st,mi,why){const t=S.tickets.find(x=>x.no===F.no&&x.status==='flying');if(t){t.status=st;t.miles=mi;if(F.foods&&F.foods.length)t.food=F.foods;if(why){t.reason=why;t.flown=Math.floor(F.elapsed/60000)}}save()}
 function land(){
   dropExcuse();F.status='landed';const isNew=!S.visited.includes(F.to);clearTimeout(capT);$('caption').hidden=true;
   S.city=F.to;if(isNew)S.visited.push(F.to);S.flights++;S.minutes+=F.min;
-  const bonus=bonusFor(F.min,F.cls),fee=F.fee||0;S.miles+=(F.stake||0)+bonus;S.live=null;setTicket('landed',bonus-fee);
+  const bonus=bonusFor(F.min,F.cls),fee=F.fee||0;S.miles+=(F.stake||0)+bonus;const gold=goldFor(F.min,isNew);S.gold+=gold;S.live=null;setTicket('landed',bonus-fee);
+  $('doneGold').hidden=false;$('doneGold').innerHTML=`<i class="coin"></i>+${gold}골드${isNew?' (새 공항 +5)':''} · 보유 ${fmtMi(S.gold)}골드`;
   $('doneMiles').textContent=`${fee?clsOf(F.cls).n+' 보너스 ':''}+${fmtMi(bonus)}마일${fee?` · 좌석 값 -${fee}`:''} · 보유 ${fmtMi(S.miles)}마일`;
   winOn=false;$('winView').hidden=true;$('btnWindow').setAttribute('aria-pressed',false);map.setMinZoom(0);
   $('doneSub').textContent='도착';$('doneTitle').textContent=AP[F.to].n+'에 도착했어요';$('doneTime').textContent=fmtHM(F.min);
@@ -1779,10 +1838,11 @@ function loop(now){
   const dt=Math.min(5,(now-last)/1000);last=now;if(!map||!mapReady)return;
   const flying=F&&mode==='flight'&&F.status==='flying'&&!F.paused;
   if(F&&mode==='flight'&&F.status==='flying'){advance();if(F.elapsed>=F.T){F.elapsed=F.T;land();return}}
+  if(F&&mode==='replay')stepReplay(dt);
   updateTraffic(dt,flying?speed:1);
-  if(F&&(mode==='flight'||mode==='done')){
+  if(F&&(mode==='flight'||mode==='done'||mode==='replay')){
     const s=updateFlightLayers();
-    if(s&&mode==='flight'&&!camBusy&&view!=='route'){
+    if(s&&(mode==='flight'||mode==='replay')&&!camBusy&&view!=='route'){
       const o={center:s.pos};if(!northUp)o.bearing=s.hdg;map.jumpTo(o);
     }
     if(now-hudT>250){hudT=now;hud(s||planeState())}
@@ -1803,9 +1863,9 @@ function hud(s){
 /* ---------- window: what the seat would see, drawn live ----------
    Real sun direction, the real coastline below, clouds you climb through, city lights at night. Distances are in km, east/north. */
 let gl=null,prog=null,uni={},skyRun=false;
-const SK={sun:[0,.3,1],moon:[0,.3,1],day:1,alt:1,t:0,last:0,off:[0,0],coff:[0,0],yaw:0,az:0,hdg:0,side:1,cover:.6,tilt:0,frost:0,aur:0,rw:0,lat:0,lon:0,vel:.2,q:1.5,slow:0,n:0,key:''};
+const SK={sun:[0,.3,1],moon:[0,.3,1],day:1,alt:1,t:0,last:0,off:[0,0],coff:[0,0],yaw:0,az:0,hdg:0,side:1,cover:.6,tilt:0,frost:0,aur:0,rw:0,pink:0,met:0,lat:0,lon:0,vel:.2,q:1.5,slow:0,n:0,key:''};
 const SKY_FS=`precision highp float;
-uniform vec2 res,off,coff,fwd;uniform float t,day,alt,cover,lat,lon,az,tilt,frost,aur,rw;uniform vec3 sun,moon;uniform sampler2D mask;
+uniform vec2 res,off,coff,fwd;uniform float t,day,alt,cover,lat,lon,az,tilt,frost,aur,rw,pink,met;uniform vec3 sun,moon;uniform sampler2D mask;
 const float DECK=2.2;
 float h(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
@@ -1821,6 +1881,7 @@ void main(){
   float high=smoothstep(2.,11.,alt);
   vec3 zen=mix(vec3(.006,.01,.03),mix(vec3(.22,.45,.82),vec3(.07,.2,.56),high),day),hor=mix(vec3(.025,.04,.09),vec3(.74,.85,.96),day);
   hor=mix(hor,vec3(1.,.5,.22),sunset*(.3+.7*tow));zen=mix(zen,vec3(.28,.26,.52),sunset*.5);
+  zen=mix(zen,vec3(.56,.34,.66),pink*day*.75);hor=mix(hor,vec3(1.,.74,.8),pink*day*.8);
   float sd=max(dot(rd,sn),0.);
   vec3 glow=vec3(1.,.88,.68)*(pow(sd,9.)*.28+pow(sd,60.)*.25)*(day+sunset);
   float up=max(rd.y,0.);
@@ -1835,9 +1896,11 @@ void main(){
     col+=vec3(.9,.92,1.)*(smoothstep(.99935,.9996,md)*(.75+.25*n(rd.xy*260.))+pow(max(md,0.),220.)*.16)*nt*step(0.,moon.y);
     if(aur>.01){
       float a=atan(en.x,en.y),cu=pow(n(vec2(a*7.+t*.04,t*.05)),2.)+.6*pow(n(vec2(a*23.-t*.07,4.)),3.);
-      float e=rd.y+(n(vec2(a*5.,t*.06))-.5)*.09,band=smoothstep(.015,.09,e)*(1.-smoothstep(.12,.46,e))*(.55+.45*n(vec2(a*70.+t*.2,e*3.))),nn=smoothstep(-.1,.75,cos(a));
-      col+=mix(vec3(.12,.95,.45),vec3(.5,.2,.85),smoothstep(.1,.42,e))*cu*band*nn*aur*nt*.95;
+      float e=rd.y+(n(vec2(a*5.,t*.06))-.5)*.09,band=smoothstep(.015,.09,e)*(1.-smoothstep(.12,.46,e))*(.55+.45*n(vec2(a*70.+t*.2,e*3.))),nn=max(smoothstep(-.1,.75,cos(a)),step(1.5,aur)*.9);
+      col+=mix(vec3(.12,.95,.45),vec3(.5,.2,.85),smoothstep(.1,.42,e))*cu*band*nn*min(aur,1.)*nt*.95;
     }
+    if(met>.5){float sg=floor(t/3.6),k=fract(t/3.6)*5.;vec2 s0=vec2((h(vec2(sg,1.))-.5)*.6,.1+.24*h(vec2(sg,2.))),dr=normalize(vec2(h(vec2(sg,3.))>.5?1.:-1.,-.42)),pp=uv-s0-dr*(k-.4)*.2;
+      float al=dot(pp,dr),ac=abs(dot(pp,vec2(-dr.y,dr.x)));col+=vec3(.9,.95,1.)*smoothstep(.0045,0.,ac)*smoothstep(-.15,0.,al)*step(al,0.)*step(k,1.9)*smoothstep(1.9,1.2,k)*nt*step(.0,rd.y)*1.3;}
     if(alt>DECK&&rd.y>.015){float ci=fbm(en/(rd.y+.12)*vec2(.55,1.6)+coff*.004);col=mix(col,mix(vec3(.05,.06,.1),mix(vec3(1.),vec3(1.,.66,.48),sunset),day*.9+sunset*.1),smoothstep(.56,.95,ci)*.35*smoothstep(.0,.2,rd.y));}
   }
   vec3 lightc=mix(vec3(1.,.97,.92),vec3(1.,.6,.38),sunset);
@@ -1908,7 +1971,7 @@ function startSky(){
     gl=g;gl.useProgram(prog);
     const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    ['res','off','coff','fwd','t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','sun','moon','mask'].forEach(k=>uni[k]=gl.getUniformLocation(prog,k));
+    ['res','off','coff','fwd','t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','pink','met','sun','moon','mask'].forEach(k=>uni[k]=gl.getUniformLocation(prog,k));
     gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
     const MW=1024,MH=512;let px=new Uint8Array(MW*MH);
     if(worldTopo){const d=landMask(MW,MH);for(let i=0;i<px.length;i++)px[i]=d[i*4+3];delete maskCache[MW+'x'+MH]}
@@ -1922,7 +1985,7 @@ function startSky(){
 }
 /* phones drop the drawing context in the background: rebuild it when they give it back */
 $('sky').addEventListener('webglcontextlost',e=>{e.preventDefault();gl=null;skyRun=false});
-$('sky').addEventListener('webglcontextrestored',()=>{if(winOn&&mode==='flight')startSky()});
+$('sky').addEventListener('webglcontextrestored',()=>{if(winOn&&(mode==='flight'||mode==='replay'))startSky()});
 /* which side, and where the wing is from this seat */
 function seatWindow(){
   const key=F.no+F.seat;if(SK.key===key)return;SK.key=key;SK.yaw=0;SK.off=[0,0];SK.coff=[0,0];
@@ -1951,7 +2014,7 @@ function skyState(s){
   SK.cover=.5+.36*Math.sin(tm/11+SK.seed*6.28)+.1*Math.sin(tm/3.7+SK.seed*20);
   const ramp=Math.min(1,Math.min(tm,left)/6);SK.kmh=Math.round(Math.min(tm*60<25?20+tm*60*9.6:1e4,left*60<12?60+left*60*17:1e4,260+500*ramp));SK.vel=SK.kmh/3600;
   SK.tilt=SK.side*D2(pr.phase==='climb'?6*sm(22,34,tm*60):pr.phase==='descent'?-2.5:0)+D2(1.2)*Math.sin(tm*.9+SK.seed*9);
-  SK.frost=Math.max(0,Math.min(1,(km-6)/4))*.8;SK.aur=Math.max(0,Math.min(1,(Math.abs(SK.lat)-56)/9));SK.rw=Math.max(0,1-km/.35);
+  SK.frost=Math.max(0,Math.min(1,(km-6)/4))*.8;SK.aur=Math.max(0,Math.min(1,(Math.abs(SK.lat)-56)/9));SK.rw=Math.max(0,1-km/.35);const sk=skyPick();if(sk==='aurora')SK.aur=2;SK.met=sk==='meteor'?1:0;SK.pink=sk==='rose'?1:0;
   const now=performance.now();
   $('wing').style.transform=`translateX(${(SK.wing-SK.yaw/rad)/35*100/1.8}%)`;
   if(now-infoAt>900){infoAt=now;
@@ -1964,7 +2027,7 @@ function skyState(s){
 }
 function overLand(lon,lat){if(!worldTopo)return false;const d=landMask(360,180),x=((Math.floor(lon+180)%360)+360)%360,y=Math.max(0,Math.min(179,Math.floor(90-lat)));return d[(y*360+x)*4+3]>110}
 function drawSky(now){
-  if(!winOn||mode!=='flight'||!gl||!F){skyRun=false;return}
+  if(!winOn||mode!=='flight'&&mode!=='replay'||!gl||!F){skyRun=false;return}
   requestAnimationFrame(drawSky);
   if(SK.last&&now-SK.last<30)return;                       // 30 frames a second is plenty and kinder to the battery
   const dt=SK.last?Math.min(.2,(now-SK.last)/1000):0;SK.last=now;
@@ -1973,7 +2036,7 @@ function drawSky(now){
   const c=$('sky'),dpr=Math.min(SK.q,devicePixelRatio||1),w=c.clientWidth*dpr|0,h=c.clientHeight*dpr|0;if(!w||!h)return;
   if(c.width!==w||c.height!==h){c.width=w;c.height=h;gl.viewport(0,0,w,h)}
   gl.uniform2f(uni.res,w,h);gl.uniform2fv(uni.off,SK.off);gl.uniform2fv(uni.coff,SK.coff);gl.uniform2f(uni.fwd,Math.sin(SK.hdg),Math.cos(SK.hdg));
-  for(const k of ['t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw'])gl.uniform1f(uni[k],SK[k]);
+  for(const k of ['t','day','alt','cover','lat','lon','az','tilt','frost','aur','rw','pink','met'])gl.uniform1f(uni[k],SK[k]);
   gl.uniform3fv(uni.sun,SK.sun);gl.uniform3fv(uni.moon,SK.moon);
   gl.drawArrays(gl.TRIANGLES,0,3);
 }
@@ -2120,7 +2183,7 @@ function renderTickets(){
     h+=`<div class="month">${k}<span>${ts.length}장 · ${fmtHM(gm)}</span></div>`;
     h+=ts.map(t=>{const sc=SCEN.find(s=>s.id===t.scen)||SCEN[0],d=new Date(t.date),hide=t.random&&t.status!=='landed',to=hide?'???':t.to;
       const km=!hide&&AP[t.from]&&AP[t.to]?Math.round(distKm(AP[t.from],AP[t.to])).toLocaleString('en-US')+'km':'';
-      return `<div class="mini${t.status==='landed'?'':' dim'}${clsOf(t.cls).fee?' '+t.cls:''}" style="--c:${sc.c}">
+      return `<div class="mini${t.status==='landed'?' can':' dim'}${clsOf(t.cls).fee?' '+t.cls:''}" style="--c:${sc.c}"${t.status==='landed'?` role="button" tabindex="0" data-rp="${all.indexOf(t)}" aria-label="${t.from}에서 ${t.to} 다시 보기"`:''}>
         <div class="mm">
           <div class="codes">${t.from}<svg viewBox="-12 -12 24 24"><path d="${plane}" transform="rotate(90)"/></svg>${to}</div>
           <div class="cities">${AP[t.from]?AP[t.from].n:''} → ${hide?'미공개':(AP[t.to]?AP[t.to].n:'')}${t.random?' · 랜덤':''}</div>
@@ -2130,7 +2193,73 @@ function renderTickets(){
       </div>`}).join('');
   }
   el.innerHTML=h;
+  el.querySelectorAll('[data-rp]').forEach(b=>{const go=()=>startReplay(S.tickets[+b.dataset.rp]);b.onclick=go;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
 }
+/* watch a finished flight again: nothing here touches miles, gold or records */
+const RP={on:false,speed:1,play:true};
+const PLAY_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>',PAUSE_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+function startReplay(t){
+  if(!t||!AP[t.from]||!AP[t.to]||!(t.min>0)||F&&F.status==='flying')return;
+  const A=AP[t.from].v,B=AP[t.to].v,om=angle(A,B),d=new Date(t.date);
+  F={no:t.no,from:t.from,to:t.to,min:t.min,random:t.random,scen:t.scen,seat:t.seat,cls:t.cls||'eco',A,B,om,T:t.min*60000,elapsed:0,dist:om*R,depUTC:t.date,status:'replay',replay:true,paused:false};
+  Object.assign(RP,{speed:owns('speed:40')?40:1,play:true});SK.key='';winOn=false;$('btnWindow').setAttribute('aria-pressed',false);
+  $('rpTitle').textContent=`${AP[t.from].n} → ${AP[t.to].n} · ${d.getMonth()+1}/${d.getDate()}`;$('rpSeek').value=0;
+  clearRoute();  setMarkers([[F.from,'dep'],[F.to,'arr']]);view='route';northUp=false;show('replay');drawSpeeds();updateFlightLayers(true);enterView(true);
+}
+function stepReplay(dt){
+  if(RP.play&&F.elapsed<F.T){F.elapsed=Math.min(F.T,F.elapsed+dt*1000*RP.speed);$('rpSeek').value=F.elapsed/F.T*1000;if(F.elapsed>=F.T){RP.play=false;drawSpeeds()}}
+}
+function drawSpeeds(){
+  F&&(F.paused=!RP.play);$('rpPlay').innerHTML=RP.play?PAUSE_SVG:PLAY_SVG;$('rpPlay').setAttribute('aria-label',RP.play?'멈춤':'재생');
+  document.querySelectorAll('[data-spd]').forEach(b=>{const v=+b.dataset.spd,ok=v===1||owns('speed:'+v);b.setAttribute('aria-pressed',RP.speed===v);b.innerHTML=v===1?'실시간':ok?'×'+v:`×${v} <i class="coin"></i>${SPEEDS[v][1]}`});
+}
+$('rpPlay').onclick=()=>{if(!F)return;if(F.elapsed>=F.T)F.elapsed=0;RP.play=!RP.play;drawSpeeds()};
+$('rpSeek').oninput=e=>{if(F&&F.replay){F.elapsed=e.target.value/1000*F.T;updateFlightLayers(true)}};
+document.querySelectorAll('[data-spd]').forEach(b=>b.onclick=()=>{const v=+b.dataset.spd;if(v!==1&&!owns('speed:'+v)){askBuy('speed:'+v,SPEEDS[v][0],SPEEDS[v][1],'지난 비행을 '+v+'배로 빠르게 볼 수 있어요. 한 번 사면 계속 써요.',()=>{RP.speed=v;drawSpeeds()});return}RP.speed=v;if(F&&F.elapsed<F.T)RP.play=true;drawSpeeds()});
+$('rpClose').onclick=()=>{F=null;winOn=false;clearRoute();show('tickets')};
+
+/* ---------- duty-free shop ---------- */
+let buy=null;
+function askBuy(id,name,cost,info,then){
+  buy={id,cost,then};const lack=cost-S.gold;$('buyTitle').textContent=name;$('buyInfo').textContent=info+` 지금 ${fmtMi(S.gold)}골드가 있어요.`;
+  $('buyGo').disabled=lack>0;$('buyGo').innerHTML=lack>0?`${fmtMi(lack)}골드가 더 필요해요`:`<i class="coin"></i>${cost}골드로 사기`;$('buySheet').hidden=false;
+}
+$('buyGo').onclick=()=>{
+  if(!buy||owns(buy.id)||S.gold<buy.cost)return;const b=buy;buy=null;S.gold-=b.cost;S.owned.push(b.id);save();
+  $('buySheet').hidden=true;chime();buzz([20,40,20]);toast('잘 사셨어요!');b.then&&b.then();if(!$('shopView').hidden)renderShop();if(mode==='home')renderHome();
+};
+$('buyClose').onclick=()=>{buy=null;$('buySheet').hidden=true};
+function skyArt(g,k){
+  const lg=g.createLinearGradient(0,0,0,64);(k==='rose'?['#a779c9','#ffc1cf']:k==='none'?['#3d7fd0','#cfe6ff']:['#050a1c','#16223f']).forEach((c,i)=>lg.addColorStop(i,c));
+  g.save();g.beginPath();g.ellipse(32,32,23,31,0,0,7);g.fillStyle='#e9e6df';g.fill();g.beginPath();g.ellipse(32,32,19,27,0,0,7);g.clip();g.fillStyle=lg;g.fillRect(0,0,64,64);
+  if(k==='aurora')[[18,'#37f29a'],[30,'#35d6b4'],[42,'#8c6bff']].forEach(([x,c])=>{const q=g.createLinearGradient(0,8,0,40);q.addColorStop(0,'transparent');q.addColorStop(.6,c);q.addColorStop(1,'transparent');g.fillStyle=q;g.fillRect(x-5,6,10,36)});
+  if(k==='meteor'){g.fillStyle='#fff';for(let i=0;i<14;i++)g.fillRect((i*37)%50+8,(i*23)%40+8,1.2,1.2);g.strokeStyle='#fff';g.lineWidth=1.6;g.beginPath();g.moveTo(48,14);g.lineTo(24,28);g.stroke();g.beginPath();g.arc(24,28,1.8,0,7);g.fill()}
+  g.fillStyle=k==='none'||k==='rose'?'rgba(255,255,255,.85)':'rgba(120,135,170,.4)';[[20,52,12],[36,54,14],[48,51,9]].forEach(([x,y,r])=>{g.beginPath();g.ellipse(x,y,r,6,0,0,7);g.fill()});g.restore();
+}
+function renderShop(){
+  $('shopGold').textContent=fmtMi(S.gold);
+  const card=(id,name,cost,on,own)=>`<button class="good${own?' own':''}" data-good="${id}" aria-pressed="${on}"><canvas aria-hidden="true"></canvas>${name}<em>${on?'쓰는 중':own?'가지고 있음':`<i class="coin"></i>${cost}`}</em></button>`;
+  const cur=SKINS[S.equip.plane]===skin()?S.equip.plane:'sun',sk=skyPick();
+  $('shopList').innerHTML='<h3>비행기 색<small>지도의 내 비행기와 지나온 길 색이 바뀌어요</small></h3><div class="goods">'+Object.entries(SKINS).map(([k,[n,,c]])=>card('plane:'+k,n,c,cur===k,!c||owns('plane:'+k))).join('')+'</div>'
+    +'<h3>창밖 풍경<small>비행 중 창문에서 볼 수 있어요</small></h3><div class="goods">'+Object.entries(SKIES).map(([k,[n,c]])=>card('sky:'+k,n,c,sk===k,!c||owns('sky:'+k))).join('')+'</div>'
+    +'<h3>다시 보기<small>티켓 모음에서 도착한 티켓을 누르면 지난 비행을 봐요</small></h3><div class="goods">'+Object.entries(SPEEDS).map(([k,[n,c]])=>card('speed:'+k,'×'+k,c,false,owns('speed:'+k))).join('')+'</div>';
+  $('shopList').querySelectorAll('[data-good]').forEach(b=>{
+    const [type,k]=b.dataset.good.split(':'),c=b.querySelector('canvas');
+    paint(c,64,64,g=>{
+      if(type==='sky')return skyArt(g,k);
+      if(type==='plane'){const im=planeImage(SKINS[k][1],128),o=document.createElement('canvas');o.width=o.height=128;o.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(im.data),128,128),0,0);g.drawImage(o,4,4,56,56);return}
+      g.fillStyle='rgba(255,214,10,.16)';g.beginPath();g.arc(32,32,28,0,7);g.fill();g.fillStyle='#ffd60a';(k==='40'?[22,36]:[14,27,40]).forEach(x=>{g.beginPath();g.moveTo(x,20);g.lineTo(x+13,32);g.lineTo(x,44);g.fill()});
+    });
+    b.onclick=()=>{
+      const equip=()=>{if(type==='plane'){S.equip.plane=k;paintPlane()}else if(type==='sky')S.equip.sky=k;save();renderShop()};
+      const cost=type==='plane'?SKINS[k][2]:type==='sky'?SKIES[k][1]:SPEEDS[k][1];
+      if(!cost||owns(b.dataset.good)){if(type!=='speed')equip();else toast('티켓 모음에서 도착한 티켓을 눌러 보세요');return}
+      askBuy(b.dataset.good,type==='plane'?SKINS[k][0]+' 비행기':type==='sky'?SKIES[k][0]:SPEEDS[k][0],cost,type==='plane'?'한 번 사면 계속 써요.':type==='sky'?'창문을 열면 '+SKIES[k][2]+(k==='aurora'?'가':'이')+' 보여요. 한 번 사면 계속 써요.':'지난 비행을 '+k+'배로 빠르게 볼 수 있어요.',type==='speed'?null:equip);
+    };
+  });
+}
+$('goShop').onclick=()=>{renderShop();$('shopView').hidden=false};
+$('shopClose').onclick=()=>{$('shopView').hidden=true;renderHome()};
 document.querySelectorAll('[data-tf]').forEach(b=>b.onclick=()=>{tkFilter=b.dataset.tf;document.querySelectorAll('[data-tf]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderTickets()});
 $('goTickets').onclick=()=>show('tickets');$('ticketsBack').onclick=()=>show('home');
 
