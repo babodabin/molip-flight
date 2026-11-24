@@ -85,7 +85,8 @@ h2{font-size:19px}
 .mrow.gold{background:linear-gradient(110deg,rgba(255,190,60,.2),rgba(255,236,170,.1))}
 .coin{display:inline-block;width:.95em;height:.95em;border-radius:50%;vertical-align:-.1em;margin-right:.3em;background:radial-gradient(circle at 35% 30%,#fff3bf,#ffcf4a 45%,#c98a17);box-shadow:inset 0 0 0 1.5px rgba(130,80,0,.35)}
 /* radar: cards, airport board, flight log */
-.apm{pointer-events:none}
+.apm,.mePlane{pointer-events:none}
+.mePlane{z-index:3}.mePlane canvas{display:block;width:48px;height:48px}
 body:has(#offer:not([hidden])) #infoCard,body:has(#excuse:not([hidden])) #infoCard{top:calc(116px + var(--st))}
 #infoCard:not([hidden]) ~ #toast{top:calc(282px + var(--st))}
 .hudmid{cursor:pointer}
@@ -223,15 +224,17 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 #ticketView{pointer-events:none}
 #ticketView>*{pointer-events:auto}
 .ticketWrap{position:fixed;left:0;right:0;bottom:0;padding:0 16px calc(16px + var(--sb));display:grid;gap:14px;justify-items:center}
-.ticket{width:min(380px,100%);position:relative;filter:drop-shadow(0 18px 40px rgba(0,0,0,.6))}
+.ticket{width:min(400px,100%);height:156px;position:relative;display:flex;filter:drop-shadow(0 14px 30px rgba(0,0,0,.6))}
 .ticket{touch-action:none;cursor:grab}
 .tmain,.tstub{position:relative;overflow:hidden}
-.tmain{border-radius:20px 20px 0 0;background:#1c1c1e}
-.tstub{border-radius:0 0 20px 20px;transform-origin:100% 0;margin-top:-10px;outline-offset:-4px}
+.tmain{flex:1;min-width:0;border-radius:18px 0 0 18px;background:#1c1c1e}
+.tstub{flex:none;width:calc(31% + 22px);border-radius:0 18px 18px 0;transform-origin:0 100%;margin-left:-32px;outline-offset:-4px;will-change:transform}
+.tmain canvas,.tstub canvas{height:156px}
 .tmain canvas,.tstub canvas,.tstubhint canvas,#checkIn canvas{display:block;width:100%;pointer-events:none}
 .tstubhint{width:min(380px,100%);pointer-events:none}
-.tstubhint canvas{height:24px;animation:pull 1.6s ease-in-out infinite}
-@keyframes pull{50%{transform:translateY(5px)}}
+.tstubhint{width:min(400px,100%)}
+.tstubhint canvas{height:22px;animation:pull 1.4s ease-in-out infinite}
+@keyframes pull{50%{transform:translateX(9px)}}
 #checkIn canvas{height:20px}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text!important;user-select:text!important}
@@ -309,6 +312,11 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .cut svg{width:78%;height:84%}
 @media (max-height:700px){.seatback{padding-top:20px}.dish.main{min-height:124px}.ife .tm{font-size:32px}}
 .excuse button{all:unset;cursor:pointer;background:var(--yellow);color:#000;font-weight:600;font-size:12px;padding:5px 10px;border-radius:999px}
+#testBar{position:fixed;left:50%;bottom:calc(150px + var(--sb));transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:5px;padding:6px 8px 6px 11px;border-radius:999px;background:rgba(20,20,23,.82);border:1px solid var(--line);font-size:12px;white-space:nowrap}
+#testBar span{color:var(--muted);margin-right:2px;font-size:11px}
+#testBar button{all:unset;cursor:pointer;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.1)}
+#testBar button[aria-pressed="true"]{background:var(--yellow);color:#000}
+#hud.rp #testBar{display:none}
 .strictTag{position:fixed;left:calc(16px + var(--sl));bottom:calc(92px + var(--sb));z-index:5;font-size:11px;letter-spacing:.08em;color:var(--red);border:1px solid rgba(255,107,90,.5);padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.4)}
 /* wallpaper */
 #wallView{z-index:16;background:#050506;overflow:auto;display:grid;place-items:start center;padding:calc(18px + var(--st)) 18px calc(18px + var(--sb))}
@@ -318,7 +326,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .seg2 button{all:unset;cursor:pointer;padding:7px 14px;border-radius:999px;font-size:13px;color:var(--muted)}
 .seg2 button[aria-pressed="true"]{background:#fff;color:#000;font-weight:600}
 .ticket.recoil{animation:recoil .35s ease-out}
-@keyframes recoil{30%{transform:translateY(-6px) rotate(-.8deg)}70%{transform:translateY(2px) rotate(.3deg)}}
+@keyframes recoil{30%{transform:translateX(-7px) rotate(-.8deg)}70%{transform:translateX(2px) rotate(.3deg)}}
 
 /* ready */
 #readyView{overflow:auto;background:radial-gradient(ellipse at 50% 40%,rgba(235,244,255,.84),rgba(250,250,252,.95) 70%);color:#111;display:grid;place-items:center;text-align:center}
@@ -490,8 +498,8 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="col l"><button class="rbtn" id="passBack" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button></div>
   <div class="ticketWrap">
     <div class="ticket" id="ticket">
-      <div class="tmain"><canvas id="passArt" role="img" style="height:268px"></canvas></div>
-      <div class="tstub" id="stub" role="button" tabindex="0" aria-label="탑승권 찢기"><canvas id="stubArt" style="height:106px"></canvas></div>
+      <div class="tmain"><canvas id="passArt" role="img"></canvas></div>
+      <div class="tstub" id="stub" role="button" tabindex="0" aria-label="탑승권 찢기"><canvas id="stubArt"></canvas></div>
     </div>
     <div class="tstubhint"><canvas id="hintArt" aria-hidden="true"></canvas></div>
     <button class="pill" id="checkIn" aria-label="탑승 수속" style="width:min(380px,100%);box-sizing:border-box"><canvas id="checkArt"></canvas></button>
@@ -530,6 +538,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="hudmid" id="hudmid" role="button" tabindex="0" aria-label="내 비행 정보"><span id="hFrom">ICN</span><span class="bar"><i id="hBar"></i></span><span id="hTo">NRT</span><em id="hPhase">순항</em></div>
   <div class="excuse" id="offer" hidden><span id="offText"></span><button id="offYes">받기</button><button class="no" id="offNo">괜찮아요</button></div>
   <div class="excuse" id="excuse" hidden><span id="exText">화장실 · 4:59</span><button id="exEnd">돌아왔어요</button></div>
+  <div id="testBar" hidden><span>테스트</span><button data-tsp="1">×1</button><button data-tsp="60">×60</button><button data-tsp="400">×400</button><button id="tMeal">기내식</button><button id="tSnack">간식</button><button id="tLand">착륙</button></div>
   <div class="strictTag" id="strictTag" hidden>엄격 모드</div>
   <div class="hudb"><div><small>남은 시간</small><b id="hTime">30<u>min</u></b></div><div class="r"><small>남은 거리</small><b id="hDist">190<u>km</u></b></div></div>
 </div>
@@ -668,10 +677,12 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 <!-- INSTALL GUIDE -->
 <div class="sheet" id="settingsSheet" hidden style="z-index:16"><div class="in">
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
+  <button class="pill dark sm" id="testToggle"></button>
+  <span class="lbl" id="testInfo"></span>
   <button class="pill dark sm" id="logOpen">내 비행 기록과 비행기 도감</button>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.1.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.2.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1002,6 +1013,21 @@ const SKIES={none:['그대로',0],aurora:['오로라',80,'밤이면 어디서나
 const SPEEDS={40:['다시 보기 ×40',30],400:['다시 보기 ×400',60]};
 const owns=id=>S.owned.includes(id),skin=()=>SKINS[S.equip.plane]&&(S.equip.plane==='sun'||owns('plane:'+S.equip.plane))?SKINS[S.equip.plane]:SKINS.sun,skyPick=()=>owns('sky:'+S.equip.sky)?S.equip.sky:'none';
 
+/* ---------- test mode ----------
+   Everything can be flown and bought. The real records wait untouched in their own place until testing ends. */
+const REAL='mf-real';
+function topUp(){if(S.test){S.miles=Math.max(S.miles,99999);S.gold=Math.max(S.gold,9999)}}
+function startTest(){
+  if(S.test||S.live)return false;
+  try{localStorage.setItem(REAL,JSON.stringify({...S,testDone:true}));if(!localStorage.getItem(REAL))return false}catch(e){return false}
+  S.test=true;topUp();save();return true;
+}
+function stopTest(){
+  let raw=null;try{raw=localStorage.getItem(REAL);const p=JSON.parse(raw);if(!p||!AP[p.city]||!Array.isArray(p.tickets))return;localStorage.setItem('mf-v2',raw);localStorage.removeItem(REAL)}catch(e){toast('원래 기록을 불러오지 못했어요');return}
+  F=null;location.reload();
+}
+setTimeout(()=>{if(!S.test&&!S.testDone&&startTest()&&mapReady&&mode==='home')renderHome()},0);
+
 /* ---------- miles ----------
    A flight holds a deposit of 10 per minute: landing returns it plus 20%, diverting costs half.
    Short hops are free when miles run out, and so is the nearest airport, so nobody gets stranded. */
@@ -1102,7 +1128,7 @@ function applyToggles(){
   document.querySelectorAll('[data-style]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.style===curStyle));
   $('tLabels').setAttribute('aria-pressed',showLabels);$('tTraffic').setAttribute('aria-pressed',trafficOn);
 }
-function paintPlane(){if(!map||!mapReady)return;const im=planeImage(skin()[1],96);if(map.hasImage('me'))map.updateImage('me',im);else map.addImage('me',im,{pixelRatio:2});if(F)updateFlightLayers(true)}
+function paintPlane(){if(!map||!mapReady)return;const im=planeImage(skin()[1],96);if(map.hasImage('me'))map.updateImage('me',im);else map.addImage('me',im,{pixelRatio:2});paintMe();if(F)updateFlightLayers(true)}
 function setStyle(k){if(!BASE[k]||k===curStyle)return;curStyle=k;S.style=k;save();map.setStyle(BASE[k],{diff:false})}
 
 /* night side of the planet, computed from the flight's own clock */
@@ -1152,7 +1178,7 @@ function setMarkers(list){
 /* ---------- screens ---------- */
 const LAYERS=['home','select','tickets','seatView','seatBackCol','seatTop','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','menuSheet','foodSheet','mealView','replayBar','shopView','buySheet','infoCard','apSheet','logView','soundPop','layerPop','greet'];
 function show(m){
-  closeCard();mode=m;
+  closeCard();mode=m;setSpd(1);$('testBar').hidden=!(m==='flight'&&S.test);
   const on={home:['home','greet'],select:['select'],tickets:['tickets'],seat:['seatView','seatBackCol','seatTop','seatBar'],pass:['ticketView'],ready:['readyView'],
     flight:['hud'],replay:['hud','replayBar'],done:['doneView']}[m]||[];
   LAYERS.forEach(id=>$(id).hidden=!on.includes(id));
@@ -1168,10 +1194,11 @@ function show(m){
   requestAnimationFrame(()=>{const sh=[...document.querySelectorAll('.sheet')].find(s=>!s.hidden);document.documentElement.style.setProperty('--attrib-lift',(sh?sh.offsetHeight:0)+'px')});
 }
 function pad(){const sh=[...document.querySelectorAll('.sheet')].find(s=>!s.hidden);return {top:80,bottom:sh?sh.offsetHeight+10:30,left:20,right:20}}
-function clearRoute(){['preview','remain','flown','sel','plane'].forEach(id=>map.getSource(id)&&map.getSource(id).setData(EMPTY))}
+function clearRoute(){dropPlane();['preview','remain','flown','sel','plane'].forEach(id=>map.getSource(id)&&map.getSource(id).setData(EMPTY))}
 
 /* home */
 function renderHome(){
+  topUp();
   const h=new Date().getHours();
   $('hello').textContent=h>=5&&h<12?'좋은 아침이에요':h>=12&&h<18?'좋은 오후예요':h>=18&&h<22?'좋은 저녁이에요':'좋은 밤이에요';
   $('here').textContent=AP[S.city].n;
@@ -1179,7 +1206,7 @@ function renderHome(){
   const km=S.tickets.filter(t=>t.status==='landed'&&AP[t.from]&&AP[t.to]).reduce((s,t)=>s+distKm(AP[t.from],AP[t.to]),0);
   $('kKm').textContent=Math.round(km).toLocaleString('en-US')+' km';
   $('tcount').textContent=S.tickets.length?S.tickets.length:'';
-  $('kMiles').textContent=fmtMi(S.miles);$('kGold').textContent=fmtMi(S.gold);$('kReach').textContent='지금 '+fmtKo(Math.min(840,maxMin()))+'까지';
+  $('kMiles').textContent=fmtMi(S.miles);$('kGold').textContent=fmtMi(S.gold);$('kReach').textContent=S.test?'테스트 중':'지금 '+fmtKo(Math.min(840,maxMin()))+'까지';
 }
 
 /* select */
@@ -1340,7 +1367,7 @@ $('fuse').addEventListener('click',e=>{
 $('seatBack').onclick=()=>{show('select');camKey='';renderSelect()};
 $('seatView').addEventListener('click',e=>{if(!e.target.closest('.seat'))$('focusCard').hidden=true});
 $('toPass').onclick=()=>{renderPass();show('pass');drawPreview(false);const line=arc(AP[S.city].v,AP[plan.to].v,0,1,64);
-  fitLine(line,{padding:{top:60,bottom:Math.min(innerHeight*.62,520),left:40,right:40}})};
+  fitLine(line,{padding:{top:60,bottom:Math.min(innerHeight*.5,330),left:40,right:40}})};
 
 /* ---------- ticket ---------- */
 let worldTopo=null;
@@ -1369,47 +1396,56 @@ let pass=null;
 const PAPER={first:{bg:'#2a2213',ink:'#f4d58d',band:['#7a5a22','#ffe9b0','#b88a3a'],tag:'FIRST CLASS'},biz:{bg:'#23262b',ink:'#dfe5ec',band:['#6b7480','#ffffff','#8d97a3'],tag:'BUSINESS CLASS'}};
 function drawPass(){
   if(!pass||$('ticketView').hidden)return;
-  const P=pass,{g,w,h}=art('passArt'),L=20,Rr=w-20;
+  const P=pass,{g,w,h}=art('passArt'),L=16,Rr=w-42;
   const pp=PAPER[P.cls],bg=pp?pp.bg:'#1c1c1e',ink=pp?pp.ink:'#fff';
   g.fillStyle=bg;g.fillRect(0,0,w,h);
   if(worldTopo){
-    const W=360,H=180,data=landMask(W,H),step=Math.max(4.5,w/70),sx=w/W,sy=h/(H*.75);g.fillStyle='rgba(255,255,255,.14)';
-    for(let y=step/2;y<h;y+=step)for(let x=step/2;x<w;x+=step){const lx=Math.floor(x/sx),ly=Math.floor(y/sy+H*.08);if(ly<H&&data[(ly*W+lx)*4+3]>100){g.beginPath();g.arc(x,y,step*.18,0,7);g.fill()}}
+    const W=360,H=180,data=landMask(W,H),step=4.6,sx=w/W,sy=h/(H*.78);g.fillStyle='rgba(255,255,255,.12)';
+    for(let y=step/2;y<h;y+=step)for(let x=step/2;x<w;x+=step){const lx=Math.floor(x/sx),ly=Math.floor(y/sy+H*.08);if(ly<H&&data[(ly*W+lx)*4+3]>100){g.beginPath();g.arc(x,y,.85,0,7);g.fill()}}
   }
-  if(pp){const lg=g.createLinearGradient(0,0,w,0);pp.band.forEach((c,i)=>lg.addColorStop(i/2,c));g.fillStyle=lg;g.fillRect(0,0,w,6)}else{g.fillStyle=P.color;g.fillRect(0,0,w,4)}
-  word(g,'몰입 항공',L,32,'600 13px '+SANS,ink);word(g,pp?pp.tag:'BOARDING PASS',Rr,32,'500 11px '+MONO,pp?ink:'#8e8e93','right');
-  word(g,P.from,L,86,'500 44px '+MONO,ink);word(g,P.to,Rr,86,'500 44px '+MONO,ink,'right');
-  const a=L+92,b=Rr-92,mid=(a+b)/2;
-  g.strokeStyle='rgba(255,255,255,.4)';g.lineWidth=1.5;g.setLineDash([3,4]);g.beginPath();g.moveTo(a,80);g.quadraticCurveTo(mid,46,b,80);g.stroke();g.setLineDash([]);
-  g.fillStyle='#fff';for(const x of [a,b]){g.beginPath();g.arc(x,80,3,0,7);g.fill()}
-  g.save();g.translate(mid,63);g.rotate(Math.PI/2);g.scale(1.15,1.15);g.beginPath();planePts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.lineWidth=4;g.strokeStyle=bg;g.stroke();g.fillStyle=P.color;g.fill();g.restore();
-  const third=(w-40)/3-6;
-  word(g,P.fromN,L,108,'400 12px '+SANS,'#a1a1a8','left',third);word(g,P.dur,w/2,108,'400 12px '+MONO,'#a1a1a8','center',third);word(g,P.toN,Rr,108,'400 12px '+SANS,'#a1a1a8','right',third);
-  g.strokeStyle='rgba(255,255,255,.1)';g.lineWidth=1;g.beginPath();g.moveTo(L,124);g.lineTo(Rr,124);g.stroke();
-  P.fields.forEach(([k,v],i)=>{const right=i%2,x=right?Rr:L,y=148+Math.floor(i/2)*42,al=right?'right':'left';word(g,k,x,y,'400 11px '+SANS,'#8e8e93',al);word(g,v,x,y+18,'500 14px '+MONO,ink,al,(w-60)/2)});
-  drawStub(P.seed,bg);document.querySelector('.tmain').style.background=bg;
-  { const {g,w}=art('hintArt');g.strokeStyle=g.fillStyle='#8e8e93';g.lineWidth=2;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(w/2-9,7);g.lineTo(w/2,15);g.lineTo(w/2+9,7);g.stroke() }
+  if(pp){const lg=g.createLinearGradient(0,0,w,0);pp.band.forEach((c,i)=>lg.addColorStop(i/2,c));g.fillStyle=lg;g.fillRect(0,0,w,5)}else{g.fillStyle=P.color;g.fillRect(0,0,w,4)}
+  word(g,'몰입 항공',L,24,'600 11px '+SANS,ink);word(g,pp?pp.tag:'BOARDING PASS',Rr,24,'500 9px '+MONO,pp?ink:'#8e8e93','right');
+  word(g,P.from,L,60,'500 32px '+MONO,ink);word(g,P.to,Rr,60,'500 32px '+MONO,ink,'right');
+  const a=L+66,b=Rr-66,mid=(a+b)/2;
+  g.strokeStyle='rgba(255,255,255,.4)';g.lineWidth=1.3;g.setLineDash([2.5,3.5]);g.beginPath();g.moveTo(a,54);g.quadraticCurveTo(mid,36,b,54);g.stroke();g.setLineDash([]);
+  g.fillStyle='#fff';for(const x of [a,b]){g.beginPath();g.arc(x,54,2.4,0,7);g.fill()}
+  g.save();g.translate(mid,45);g.rotate(Math.PI/2);g.scale(.85,.85);g.beginPath();planePts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.lineWidth=4;g.strokeStyle=bg;g.stroke();g.fillStyle=P.color;g.fill();g.restore();
+  const third=(Rr-L)/3-3;
+  word(g,P.fromN,L,78,'400 10px '+SANS,'#a1a1a8','left',third);word(g,P.dur,mid,78,'400 10px '+MONO,'#a1a1a8','center',third);word(g,P.toN,Rr,78,'400 10px '+SANS,'#a1a1a8','right',third);
+  g.strokeStyle='rgba(255,255,255,.1)';g.lineWidth=1;g.beginPath();g.moveTo(L,87);g.lineTo(Rr,87);g.stroke();
+  const col=(Rr-L)/3;
+  P.fields.forEach(([k,v],i)=>{const c=i%3,x=c===0?L:c===1?mid:Rr,y=101+Math.floor(i/3)*29,al=['left','center','right'][c];word(g,k,x,y,'400 9px '+SANS,'#8e8e93',al);word(g,v,x,y+13,'500 11px '+MONO,ink,al,col-4)});
+  drawStub(P,bg,ink);document.querySelector('.tmain').style.background=bg;
+  { const {g,w}=art('hintArt');g.strokeStyle='#8e8e93';g.lineWidth=2;g.lineCap='round';g.lineJoin='round';for(const k of [0,9]){const x=w*.84+k;g.beginPath();g.moveTo(x-4,4);g.lineTo(x+4,11);g.lineTo(x-4,18);g.stroke()} }
   { const {g,w}=art('checkArt');word(g,'탑승 수속',w/2,16,'600 16px '+SANS,'#000','center') }
 }
-function drawStub(seedStr,bg){
+function drawStub(P,bg,ink){
   const {g,w,h}=art('stubArt');g.fillStyle=bg;g.fillRect(0,0,w,h);
-  g.strokeStyle='rgba(255,255,255,.22)';g.lineWidth=2;g.setLineDash([7,6]);g.beginPath();g.moveTo(18,13);g.lineTo(w-18,13);g.stroke();g.setLineDash([]);
-  const X=20,Y=28,bw=w-40,bh=58;g.fillStyle='#fff';g.fillRect(X,Y,bw,bh);g.fillStyle='#000';
-  let s=[...seedStr].reduce((a,ch)=>a*33+ch.charCodeAt(0),5381)>>>0;const rnd=()=>(s=(s*1103515245+12345)>>>0)/4294967296;
-  const m=8,cw=3,rows=6,rh=(bh-2*m)/rows;
-  g.fillRect(X+m,Y+m,4,bh-2*m);g.fillRect(X+m+6,Y+m,2,bh-2*m);g.fillRect(X+bw-m-4,Y+m,4,bh-2*m);g.fillRect(X+bw-m-8,Y+m,2,bh-2*m);
-  for(let y=0;y<rows;y++)for(let x=m+12;x<bw-m-14;x+=cw)if(rnd()<.5)g.fillRect(X+x,Y+m+y*rh,cw*(rnd()<.3?2:1),rh-.5);
+  const pp=PAPER[P.cls];g.fillStyle=pp?pp.band[2]:P.color;g.fillRect(0,0,w,pp?5:4);
+  g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=2;g.setLineDash([5,5]);g.beginPath();P.rip.forEach(([y,o],i)=>{if(i%2)return;i?g.lineTo(o+5,y*h):g.moveTo(o+5,y*h)});g.stroke();g.setLineDash([]);
+  const X=42,Rr=w-12,bw=Rr-X;
+  word(g,P.seat,X,28,'500 17px '+MONO,ink);word(g,P.to,X,44,'500 11px '+MONO,'#a1a1a8');
+  const Y=54,bh=h-Y-14;g.fillStyle='#fff';g.fillRect(X,Y,bw,bh);g.fillStyle='#000';
+  let s=[...P.seed].reduce((a,ch)=>a*33+ch.charCodeAt(0),5381)>>>0;const rnd=()=>(s=(s*1103515245+12345)>>>0)/4294967296;
+  for(let y=Y+6;y<Y+bh-6;){const t=1+Math.floor(rnd()*3);g.fillRect(X+6,y,bw-12,t);y+=t+1+Math.floor(rnd()*3)}
+}
+/* the rip wanders and leans the way you pull; both halves share the same edge */
+const RIP_W=32;
+function makeRip(lean){
+  const K=34,ph=Math.random()*7,f1=3+Math.random()*3,f2=8+Math.random()*5,pts=[];
+  for(let i=0;i<=K;i++){const y=i/K,o=14+lean*(y*2-1)+3.4*Math.sin(y*f1+ph)+1.6*Math.sin(y*f2+ph*2)+(Math.random()-.5)*3.2;pts.push([y,Math.max(1,Math.min(RIP_W-5,o))])}
+  pass.rip=pts;
+  $('stub').style.clipPath=`polygon(${pts.map(([y,o])=>`${o.toFixed(1)}px ${(y*100).toFixed(1)}%`).join(',')},100% 100%,100% 0)`;
+  $('ticket').querySelector('.tmain').style.clipPath=`polygon(0 0,${pts.map(([y,o])=>`calc(100% - ${(RIP_W-o-.7).toFixed(1)}px) ${(y*100).toFixed(1)}%`).join(',')},0 100%)`;
 }
 function renderPass(){
   const from=AP[S.city],to=AP[plan.to],sc=SCEN.find(s=>s.id===plan.scen),now=new Date(),hide=plan.random;
-  pass={from:from.c,to:hide?'???':to.c,fromN:from.n,toN:hide?'미공개':to.n,dur:fmtHM(plan.min),color:sc.c,cls:plan.cls,seed:plan.no+plan.seat,
+  pass={from:from.c,to:hide?'???':to.c,fromN:from.n,toN:hide?'미공개':to.n,dur:fmtHM(plan.min),color:sc.c,cls:plan.cls,seat:plan.seat,seed:plan.no+plan.seat,
     fields:[['좌석',plan.seat+(planSeatInfo()[0]?' '+planSeatInfo()[0]:'')],['거리',hide?'??? km':Math.round(distKm(from,to)).toLocaleString('en-US')+' km'],['탑승','지금'],
       ['날짜',`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`],['편명',plan.no],['집중',sc.n]]};
   $('passArt').setAttribute('aria-label',`탑승권. ${clsOf(plan.cls).n}. ${pass.fromN}에서 ${pass.toN}, ${pass.dur}, `+pass.fields.map(x=>x.join(' ')).join(', '));
   const st=$('stub');st.style.transition='none';st.style.transform='';st.style.opacity=1;$('ticket').classList.remove('recoil');
-  // jagged rip line shared by both halves
-  const K=26,pts=[];for(let i=0;i<=K;i++)pts.push([i/K*100,Math.round((Math.random()*.6+(i%2?.4:0))*9*10)/10]);
-  st.style.clipPath=`polygon(${pts.map(([x,o])=>`${x}% ${o}px`).join(',')},100% 100%,0 100%)`;
+  makeRip((Math.random()-.5)*8);
   requestAnimationFrame(drawPass);
   // web fonts arrive in pieces: ask for exactly these letters, then paint once more
   const all=JSON.stringify(pass)+'몰입 항공 BOARDING PASS FIRST BUSINESS CLASS 탑승 수속';
@@ -1419,7 +1455,7 @@ addEventListener('resize',()=>requestAnimationFrame(drawPass));
 $('passBack').onclick=()=>{show('seat');renderSeats()};
 
 let tearing=false;
-/* tearing: the stub hinges at its top-right corner, so the rip runs left to right while you pull down */
+/* tearing: a short pull to the side is enough; the stub hinges at its bottom corner */
 let audio=null,noiseBuf=null;
 function ac(){if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)()}if(audio.state==='suspended')audio.resume();return audio}
 function ripSound(v){
@@ -1436,16 +1472,19 @@ const buzz=p=>{try{navigator.vibrate&&navigator.userActivation&&navigator.userAc
   document.addEventListener('selectstart',e=>{if(!(e.target.closest&&e.target.closest('input,textarea')))e.preventDefault()});
   $('ticketView').addEventListener('contextmenu',e=>e.preventDefault());
   tk.onpointerdown=e=>{if(tearing||drag)return;e.preventDefault();const sel=window.getSelection&&window.getSelection();sel&&sel.removeAllRanges();drag={x:e.clientX,y:e.clientY,id:e.pointerId};lastD=0;try{tk.setPointerCapture(e.pointerId)}catch(_){}st.style.transition='none';ripSound(0)};
-  tk.onpointermove=e=>{if(!drag||e.pointerId!==drag.id)return;const d=Math.max(0,(e.clientY-drag.y)*.9+Math.abs(e.clientX-drag.x)*.3),t=Math.min(1,d/140),now=performance.now();
-    st.style.transform=`translate(${-t*8}px,${t*14}px) rotate(${-t*9}deg)`;
-    if(d>lastD+6&&now-lastT>35){ripSound(d-lastD);buzz(6);lastT=now;lastD=d}if(t>=1){drag=null;tear()}};
+  tk.onpointermove=e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y,d=Math.hypot(dx,dy),t=Math.min(1,d/46),now=performance.now();
+    if(d<4)return;
+    if(!drag.set){drag.set=true;drag.down=dy>=0;st.style.transformOrigin=drag.down?'0 0':'0 100%';makeRip(Math.max(-11,Math.min(11,dy/(Math.abs(dx)+6)*9)));requestAnimationFrame(drawPass)}
+    drag.r=(drag.down?-1:1)*t*(5+4*Math.min(1,Math.abs(dy)/30));
+    st.style.transform=`translate(${Math.max(0,t*8+dx*.12)}px,${dy*.14}px) rotate(${drag.r}deg)`;
+    if(d>lastD+4&&now-lastT>35){ripSound(d-lastD);buzz(6);lastT=now;lastD=d}if(t>=1){const a={x:dx/d,y:dy/d,r:drag.r};drag=null;tear(a)}};
   tk.onpointerup=tk.onpointercancel=e=>{if(!drag||e.pointerId!==drag.id)return;drag=null;st.style.transition='transform .45s cubic-bezier(.3,1.6,.5,1)';st.style.transform=''};
   st.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tear()}};
 }
-function tear(){
-  if(tearing)return;tearing=true;const st=$('stub');
+function tear(a){
+  if(tearing)return;tearing=true;a=a&&Number.isFinite(a.x)?a:{x:.9,y:.2,r:8};const st=$('stub');
   for(let i=0;i<4;i++)setTimeout(()=>ripSound(30),i*40);buzz([12,20,18]);$('ticket').classList.add('recoil');
-  let x=-8,y=14,r=-9,vx=-1.2,vy=-2,vr=-1.4,o=1;st.style.transition='none';
+  let x=10,y=a.y*6,r=a.r,vx=Math.max(1.2,a.x*3.6),vy=-2.2+a.y*2.4,vr=a.r<0?-1.7:1.7,o=1;st.style.transition='none';
   const fall=()=>{vy+=.6;x+=vx;y+=vy;r+=vr;o-=.02;st.style.transform=`translate(${x}px,${y}px) rotate(${r}deg)`;st.style.opacity=Math.max(0,o);if(o>0)requestAnimationFrame(fall)};
   requestAnimationFrame(fall);
   setTimeout(()=>{tearing=false;board()},900);
@@ -1515,6 +1554,15 @@ function planeState(){
   const p=Math.min(1,F.elapsed/F.T),v=slerp(F.A,F.B,p,F.om),pos=ll(v),ahead=ll(slerp(F.A,F.B,Math.min(1,p+.001),F.om)),back=ll(slerp(F.A,F.B,Math.max(0,p-.001),F.om));
   return {p,pos,hdg:p<1?bearing(pos,ahead):bearing(back,pos),v};
 }
+/* my plane is a marker, so it moves in the same frame as the camera and never shakes */
+let meMk=null;
+function movePlane(s){
+  if(!meMk){const el=document.createElement('div');el.className='mePlane';el.innerHTML='<canvas></canvas>';meMk=new maplibregl.Marker({element:el,rotationAlignment:'map',pitchAlignment:'map',subpixelPositioning:true,opacityWhenCovered:'0'}).setLngLat(s.pos).addTo(map);paintMe()}
+  meMk.setLngLat(s.pos).setRotation(s.hdg);
+  const k=.7+.45*Math.max(0,Math.min(1,(map.getZoom()-1)/7));meMk.getElement().firstChild.style.transform=`scale(${k.toFixed(3)})`;
+}
+function paintMe(){if(!meMk)return;const c=meMk.getElement().firstChild,im=planeImage(skin()[1],144);c.width=c.height=144;c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(im.data),144,144),0,0)}
+function dropPlane(){if(meMk){meMk.remove();meMk=null}}
 /* the flown path: pale near the ground, full colour at cruise height */
 function altAt(Tm,p){
   const tm=p*Tm,climb=Math.min(22,Tm*.22),desc=Math.min(30,Tm*.28),ca=Tm<80?26000:Tm<200?35000:38000,ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),2);
@@ -1531,7 +1579,7 @@ let lineT=0;
 function updateFlightLayers(force){
   if(!F||!map.getSource('plane'))return;
   const s=planeState();
-  map.getSource('plane').setData({type:'Feature',properties:{b:s.hdg},geometry:{type:'Point',coordinates:s.pos}});
+  movePlane(s);
   const now=performance.now();if(!force&&now-lineT<250)return s;lineT=now;
   map.getSource('flown').setData(s.p>0?altLine(s.p):EMPTY);
   map.getSource('remain').setData((F.random&&!F.replay)||F.status!=='flying'&&!F.replay?EMPTY:{type:'Feature',geometry:{type:'LineString',coordinates:arc(F.A,F.B,s.p,1,Math.max(4,Math.ceil((1-s.p)*96)))}});
@@ -1802,7 +1850,7 @@ function checkService(){
   while(F.svc<L.length&&F.elapsed>=L[F.svc].at*60000){
     const v=L[F.svc],room=SERVE[v.kind].m+10,end=Math.min((v.at+20)*60000,F.T-room*60000);
     F.offer=F.elapsed<end?{kind:v.kind,i:F.svc,end}:null;F.svc++;
-    if(F.offer)announceMeal(v.kind);
+    if(F.offer){if(speed>1)setSpd(1);announceMeal(v.kind)}
   }
   if(F.offer&&F.elapsed>F.offer.end){F.offer=null;$('menuSheet').hidden=true}
 }
@@ -1918,12 +1966,20 @@ function tapMap(e){
   const closest=fs=>fs.map(f=>{const p=map.project(f.geometry.coordinates);return [Math.hypot(p.x-x,p.y-y),f]}).sort((a,b)=>a[0]-b[0]).map(v=>v[1])[0];
   const ap=closest(near('airports',13));
   if(mode==='select'){if(ap&&!plan.random&&ap.properties.hot>0){const a=AP[ap.properties.c],m=flightMin(AP[S.city],a);if(m>=30&&m<=maxMin())pickCity(a,m)}return}
-  if((mode==='flight'||mode==='replay')&&near('plane',18).length){openMe();return}
+  if((mode==='flight'||mode==='replay')&&F){const p=map.project(planeState().pos);if(Math.hypot(p.x-x,p.y-y)<24){openMe();return}}
   const pl=trafficOn&&closest(near('traffic',16));
   if(pl){openPlane(pl.properties.i);return}
   if(ap){openAirport(ap.properties.c);return}
   closeCard();
 }
+function setSpd(v){speed=v;document.querySelectorAll('[data-tsp]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.tsp===v))}
+document.querySelectorAll('[data-tsp]').forEach(b=>b.onclick=()=>{if(F&&F.status==='flying')advance();setSpd(+b.dataset.tsp)});
+function callCart(kind){
+  if(!F||F.status!=='flying'||!S.test)return;if(F.excuse&&F.excuse.k==='meal'){toast('지금 먹고 있어요');return}
+  dropExcuse();setSpd(1);F.offer={kind,i:Math.floor(Math.random()*8),end:F.T};announceMeal(kind);tickOffer();snap();
+}
+$('tMeal').onclick=()=>callCart('meal');$('tSnack').onclick=()=>callCart('snack');
+$('tLand').onclick=()=>{if(F&&F.status==='flying'&&S.test){setSpd(1);F.elapsed=Math.max(F.elapsed,F.T-20000);toast('20초 뒤에 착륙해요')}};
 function closeCard(){sel=null;$('infoCard').hidden=true;map&&map.getSource&&mapReady&&map.getSource('sel')&&map.getSource('sel').setData(EMPTY)}
 function openPlane(i){
   const t=traffic[i];if(!t)return;sel={k:'plane',i,cs:t.cs};selT=0;
@@ -2049,7 +2105,7 @@ float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=mat2(.8,.6,-.
 float fbm3(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p=mat2(.8,.6,-.6,.8)*p*2.03+3.1;a*=.5;}return v/.875;}
 void main(){
   vec2 w=gl_FragCoord.xy/res,uv=(gl_FragCoord.xy-.5*res)/res.y;
-  uv.y+=sin(t*.7)*.0025+sin(t*1.9)*.001;uv=mat2(cos(tilt),sin(tilt),-sin(tilt),cos(tilt))*uv;
+  uv.y+=sin(t*.5)*.0006;uv=mat2(cos(tilt),sin(tilt),-sin(tilt),cos(tilt))*uv;
   vec3 rd=normalize(vec3(uv.x,uv.y-.14,1.15)),sn=normalize(sun);
   vec2 en=rd.x*vec2(cos(az),-sin(az))+rd.z*vec2(sin(az),cos(az));
   float sa=sn.y,sunset=(1.-smoothstep(0.,.3,abs(sa)))*smoothstep(-.26,.02,sa),nt=1.-day;
@@ -2189,7 +2245,7 @@ function skyState(s){
   SK.alt=Math.max(.012,km);SK.lat=s.pos[1];SK.lon=((s.pos[0]+180)%360+360)%360-180;
   SK.cover=.5+.36*Math.sin(tm/11+SK.seed*6.28)+.1*Math.sin(tm/3.7+SK.seed*20);
   const ramp=Math.min(1,Math.min(tm,left)/6);SK.kmh=Math.round(Math.min(tm*60<25?20+tm*60*9.6:1e4,left*60<12?60+left*60*17:1e4,260+500*ramp));SK.vel=SK.kmh/3600;
-  SK.tilt=SK.side*D2(pr.phase==='climb'?6*sm(22,34,tm*60):pr.phase==='descent'?-2.5:0)+D2(1.2)*Math.sin(tm*.9+SK.seed*9);
+  SK.tilt=SK.side*D2(pr.phase==='climb'?6*sm(22,34,tm*60):pr.phase==='descent'?-2.5:0)+D2(.35)*Math.sin(tm*.5+SK.seed*9);
   SK.frost=Math.max(0,Math.min(1,(km-6)/4))*.8;SK.aur=Math.max(0,Math.min(1,(Math.abs(SK.lat)-56)/9));SK.rw=Math.max(0,1-km/.35);const sk=skyPick();if(sk==='aurora')SK.aur=2;SK.met=sk==='meteor'?1:0;SK.pink=sk==='rose'?1:0;
   const now=performance.now();
   $('wing').style.transform=`translateX(${(SK.wing-SK.yaw/rad)/35*100/1.8}%)`;
@@ -2469,7 +2525,14 @@ $('goInstall').onclick=async()=>{
 $('installClose').onclick=()=>$('installSheet').hidden=true;
 $('goMiles').onclick=()=>{$('milesSheet').hidden=false};
 $('milesClose').onclick=()=>{$('milesSheet').hidden=true};
-$('goSettings').onclick=()=>{$('settingsSheet').hidden=false};
+let testArm=0;
+function drawTest(){testArm=0;$('testToggle').textContent=S.test?'테스트 끝내기':'테스트 모드 켜기';$('testInfo').textContent=S.test?'테스트 중에는 모든 비행과 좌석, 상점을 쓸 수 있어요. 끝내면 테스트 기록은 지워지고 원래 기록으로 돌아가요.':'모든 비행과 좌석, 상점을 마음껏 써 볼 수 있어요. 원래 기록은 따로 보관해요.'}
+$('testToggle').onclick=()=>{
+  if(!S.test){if(startTest()){drawTest();renderHome();toast('테스트 모드를 켰어요')}else toast('비행이 끝난 뒤에 켤 수 있어요');return}
+  if(Date.now()-testArm>4000){testArm=Date.now();$('testToggle').textContent='한 번 더 누르면 끝나요';setTimeout(()=>{if(testArm&&Date.now()-testArm>=3900)drawTest()},4000);return}
+  stopTest();
+};
+$('goSettings').onclick=()=>{drawTest();$('settingsSheet').hidden=false};
 $('settingsClose').onclick=()=>{$('settingsSheet').hidden=true};
 $('scHow').onclick=e=>{e.preventDefault();e.stopPropagation();$('scSheet').hidden=false};
 $('scClose').onclick=()=>$('scSheet').hidden=true;
