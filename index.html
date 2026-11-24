@@ -269,6 +269,8 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .month span{font-family:var(--mono);font-weight:400}
 .mini{position:relative;display:grid;grid-template-columns:1fr 78px;background:#1c1c1e;border-radius:16px;overflow:hidden}
 .mini.dim{opacity:.62}
+.mini.first{background:#2a2213;box-shadow:inset 0 3px 0 #d9b05c}.mini.biz{background:#23262b;box-shadow:inset 0 3px 0 #b9c3cf}
+.mini.first .codes{color:#f4d58d}
 .mini .mm{padding:14px 14px 12px 16px;display:grid;gap:6px;min-width:0}
 .mini .codes{font-family:var(--mono);font-size:24px;font-weight:500;display:flex;gap:10px;align-items:center;line-height:1}
 .mini .codes svg{width:14px;height:14px;fill:#8e8e93}
@@ -449,18 +451,20 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="mrules">
     <div><span>도착</span><span>보증금 전부 + 20%</span></div>
     <div><span>회항</span><span>보증금 절반을 잃음</span></div>
+    <div><span>비즈니스 · 좌석 값 100</span><span>도착하면 +25%</span></div>
+    <div><span>1등석 · 좌석 값 300</span><span>도착하면 +30%</span></div>
     <div><span>출발 1분 안에 취소</span><span>전부 돌려받음</span></div>
     <div><span>마일이 부족할 때</span><span>1시간까지 무료</span></div>
     <div><span>앱이 꺼졌을 때</span><span>다시 열면 이어서 비행</span></div>
   </div>
-  <span class="lbl">1시간 안에 갈 공항이 없는 곳에서는 가장 가까운 공항까지 무료예요.</span>
+  <span class="lbl">1시간 안에 갈 공항이 없는 곳에서는 가장 가까운 공항까지 무료예요. 좌석 값은 도착해도 돌려받지 않아요. 무료 비행은 일반석만 탈 수 있어요.</span>
 </div></div>
 
 <!-- INSTALL GUIDE -->
 <div class="sheet" id="settingsSheet" hidden style="z-index:16"><div class="in">
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.5.0 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v1.6.0 · 2026.11.24</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -771,6 +775,14 @@ const price=m=>m*10,fmtMi=n=>Math.round(n).toLocaleString('en-US'),CANCEL_MS=600
 function freeMax(){const from=AP[S.city];return Math.max(60,Math.min(...AIRPORTS.filter(a=>a!==from).map(a=>flightMin(from,a)).filter(m=>m>=30)))}
 function maxMin(){return Math.max(freeMax(),Math.floor(S.miles/10))}
 function stakeFor(m){return S.miles>=price(m)?price(m):0}
+/* better seats cost a fee that never comes back, and pay a bigger bonus; free flights are economy only */
+const CLASS={first:{n:'1등석',fee:300,rate:.3},biz:{n:'비즈니스',fee:100,rate:.25},eco:{n:'일반석',fee:0,rate:.2}};
+const clsOf=k=>CLASS[k]||CLASS.eco,bonusFor=(m,k)=>Math.round(price(m)*clsOf(k).rate);
+function seatBlock(m,k){
+  const c=clsOf(k);if(!c.fee)return '';const st=stakeFor(m);
+  if(!st)return `무료 비행은 일반석만 탈 수 있어요`;
+  return S.miles<st+c.fee?`${c.n}은 ${fmtMi(st+c.fee-S.miles)}마일이 더 필요해요`:'';
+}
 function save(){try{localStorage.setItem('mf-v2',JSON.stringify(S))}catch(e){}}
 
 const fmtHM=m=>{m=Math.round(m);const h=Math.floor(m/60),mm=m%60;return h?`${h}h ${String(mm).padStart(2,'0')}m`:`${mm}m`};
@@ -1011,7 +1023,7 @@ $('toSeat').onclick=()=>{
     const pick=near[Math.floor(Math.random()*near.length)];plan.to=pick.a.c;plan.min=pick.m;
   }
   if(!plan.to||plan.min>maxMin())return;
-  plan.no='MF '+(100+Math.floor(Math.random()*8900));plan.seat=null;plan.scen=null;renderSeats();show('seat');
+  plan.no='MF '+(100+Math.floor(Math.random()*8900));plan.seat=null;plan.cls='eco';plan.scen=null;renderSeats();show('seat');
 };
 
 /* seats */
@@ -1022,7 +1034,6 @@ const PLANES={
   L:{n:'대형기',w:'354px',cabins:[{k:'first',n:'1등석',a:1,b:2,c:'A DG K'},{k:'biz',n:'비즈니스',a:7,b:11,c:'A DG K'},{k:'eco',n:'일반석',a:20,b:43,c:'ABC DEFG HJK',exits:[20,32],wing:[26,33],mid:32}]}
 };
 const planeFor=m=>PLANES[m<150?'S':m<420?'M':'L'];
-const LOCKED=new Set(['first','biz']);
 const svgIcon=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${p}"/></svg>`;
 function seatInfo(cab,row,letter){
   const groups=cab.c.split(' '),gi=groups.findIndex(g=>g.includes(letter)),g=groups[gi],i=g.indexOf(letter),out=[];
@@ -1035,21 +1046,21 @@ function seatInfo(cab,row,letter){
 }
 let seatKey='';
 function buildSeats(){
-  const P=planeFor(plan.min),key=plan.no+P.n+plan.min;if(key===seatKey)return;seatKey=key;
+  const P=planeFor(plan.min),key=[plan.no,P.n,plan.min,seatBlock(plan.min,'first'),seatBlock(plan.min,'biz')].join('|');if(key===seatKey)return;seatKey=key;
   let seed=[...plan.no].reduce((s,c)=>s*31+c.charCodeAt(0),7)%9973+1;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const wc=CABIN.find(c=>c.k==='wc').p,cup=CABIN.find(c=>c.k==='snack').p,service=`<div class="service" aria-hidden="true"><span>${svgIcon(wc)}</span><span>${svgIcon(cup)}</span><span>${svgIcon(wc)}</span></div>`;
   let h='';
   P.cabins.forEach((cab,ci)=>{
     const groups=cab.c.split(' '),lux=cab.k!=='eco',sw=lux?'minmax(0,40px)':'minmax(0,34px)',aisle=lux?'34px':'20px';
     const cols=groups.map(g=>`repeat(${g.length},${sw})`).join(' '+aisle+' ');
-    h+=(ci?service:'')+`<section class="cabin ${cab.k}" data-cabin="${cab.k}" style="--cols:${cols};--gap:${lux?'6px':'3px'};--pitch:${lux?'12px':'7px'}"><div class="cabname"><b>${cab.n}</b><span>${groups.map(g=>g.length).join('-')}${LOCKED.has(cab.k)?' · 준비 중':''}</span></div>`;
+    h+=(ci?service:'')+`<section class="cabin ${cab.k}" data-cabin="${cab.k}" style="--cols:${cols};--gap:${lux?'6px':'3px'};--pitch:${lux?'12px':'7px'}"><div class="cabname"><b>${cab.n}</b><span>${groups.map(g=>g.length).join('-')}${lux?` · ${CLASS[cab.k].fee}마일 · 보너스 ${CLASS[cab.k].rate*100}%`:''}</span></div>${lux&&seatBlock(plan.min,cab.k)?`<div class="cabname" style="margin-top:-6px">${seatBlock(plan.min,cab.k)}</div>`:''}`;
     h+='<div class="srow" aria-hidden="true">'+groups.map(g=>[...g].map(l=>`<span class="ch">${l}</span>`).join('')).join('<span></span>')+'</div>';
     for(let r=cab.a;r<=cab.b;r++){
       if(cab.mid===r)h+=service;
       const ex=cab.exits&&cab.exits.includes(r),rn=String(r).padStart(2,'0');
       if(cab.wing&&r===cab.wing[0])h+='<div class="wing">';
       h+=`<div class="srow${ex?' exitrow':''}">`+groups.map(g=>[...g].map(l=>{
-        const id=rn+l,lock=LOCKED.has(cab.k),taken=!lock&&rnd()<.32;
+        const id=rn+l,taken=rnd()<(lux?.4:.32),lock=lux&&!taken&&!!seatBlock(plan.min,cab.k);
         return `<button class="seat${lock?' lock':''}" data-seat="${id}" data-cab="${cab.k}" ${taken?'disabled':''} ${lock?'aria-disabled="true"':''} aria-pressed="false" aria-label="${id} ${cab.n} ${seatInfo(cab,r,l).join(' ')}${taken?' 찬 자리':''}"></button>`}).join('')).join(`<span class="rn">${r}</span>`)+'</div>';
       if(cab.wing&&r===cab.wing[1])h+='</div>';
     }
@@ -1076,15 +1087,16 @@ function renderSeats(){
   $('fuse').querySelectorAll('.seat.sel').forEach(b=>{b.classList.remove('sel');b.innerHTML='';b.setAttribute('aria-pressed','false')});
   const b=plan.seat&&$('fuse').querySelector(`[data-seat="${plan.seat}"]`);
   if(b){b.classList.add('sel');b.setAttribute('aria-pressed','true');b.style.setProperty('--sc',sc?sc.c:'#fff');b.innerHTML=sc?icon(sc,'#000'):''}
-  $('fcSeat').textContent='좌석 '+[plan.seat||'',...planSeatInfo()].join(' · ');
+  const pc=clsOf(plan.cls);
+  $('fcSeat').textContent='좌석 '+[plan.seat||'',...(plan.seat&&pc.fee?[pc.n]:[]),...planSeatInfo()].join(' · ')+(plan.seat&&pc.fee?` · 좌석 값 ${pc.fee}마일, 도착 보너스 +${fmtMi(bonusFor(plan.min,plan.cls))}`:'');
   $('chips').innerHTML=SCEN.map(s=>`<button class="chip" data-scen="${s.id}" style="--c:${s.c}" aria-pressed="${plan.scen===s.id}">${icon(s)}${s.n}</button>`).join('');
   $('chips').querySelectorAll('[data-scen]').forEach(b=>b.onclick=()=>{plan.scen=b.dataset.scen;renderSeats();setTimeout(()=>$('focusCard').hidden=true,350)});
   $('toPass').disabled=!(plan.seat&&plan.scen);
 }
 $('fuse').addEventListener('click',e=>{
   const b=e.target.closest('.seat');if(!b||b.disabled)return;
-  if(LOCKED.has(b.dataset.cab)){toast(b.dataset.cab==='first'?'1등석은 마일로 탈 수 있게 준비하고 있어요':'비즈니스석은 준비하고 있어요');return}
-  plan.seat=b.dataset.seat;renderSeats();$('focusCard').hidden=false;
+  const why=seatBlock(plan.min,b.dataset.cab);if(why){toast(why);return}
+  plan.seat=b.dataset.seat;plan.cls=b.dataset.cab;renderSeats();$('focusCard').hidden=false;
   const r=b.getBoundingClientRect(),top=$('focusCard').getBoundingClientRect().top-24;
   if(r.bottom>top||r.top<150)scrollSeats(b,innerHeight*.36,'smooth');
 });
@@ -1117,31 +1129,33 @@ function art(id){
 function word(g,t,x,y,font,color,align,max){g.font=font;g.fillStyle=color;g.textAlign=align||'left';if(max)g.fillText(t,x,y,max);else g.fillText(t,x,y)}
 /* the whole boarding pass is painted, so there is no text on it that a finger could select */
 let pass=null;
+const PAPER={first:{bg:'#2a2213',ink:'#f4d58d',band:['#7a5a22','#ffe9b0','#b88a3a'],tag:'FIRST CLASS'},biz:{bg:'#23262b',ink:'#dfe5ec',band:['#6b7480','#ffffff','#8d97a3'],tag:'BUSINESS CLASS'}};
 function drawPass(){
   if(!pass||$('ticketView').hidden)return;
   const P=pass,{g,w,h}=art('passArt'),L=20,Rr=w-20;
-  g.fillStyle='#1c1c1e';g.fillRect(0,0,w,h);
+  const pp=PAPER[P.cls],bg=pp?pp.bg:'#1c1c1e',ink=pp?pp.ink:'#fff';
+  g.fillStyle=bg;g.fillRect(0,0,w,h);
   if(worldTopo){
     const W=360,H=180,data=landMask(W,H),step=Math.max(4.5,w/70),sx=w/W,sy=h/(H*.75);g.fillStyle='rgba(255,255,255,.14)';
     for(let y=step/2;y<h;y+=step)for(let x=step/2;x<w;x+=step){const lx=Math.floor(x/sx),ly=Math.floor(y/sy+H*.08);if(ly<H&&data[(ly*W+lx)*4+3]>100){g.beginPath();g.arc(x,y,step*.18,0,7);g.fill()}}
   }
-  g.fillStyle=P.color;g.fillRect(0,0,w,4);
-  word(g,'몰입 항공',L,32,'600 13px '+SANS,'#fff');word(g,'BOARDING PASS',Rr,32,'500 11px '+MONO,'#8e8e93','right');
-  word(g,P.from,L,86,'500 44px '+MONO,'#fff');word(g,P.to,Rr,86,'500 44px '+MONO,'#fff','right');
+  if(pp){const lg=g.createLinearGradient(0,0,w,0);pp.band.forEach((c,i)=>lg.addColorStop(i/2,c));g.fillStyle=lg;g.fillRect(0,0,w,6)}else{g.fillStyle=P.color;g.fillRect(0,0,w,4)}
+  word(g,'몰입 항공',L,32,'600 13px '+SANS,ink);word(g,pp?pp.tag:'BOARDING PASS',Rr,32,'500 11px '+MONO,pp?ink:'#8e8e93','right');
+  word(g,P.from,L,86,'500 44px '+MONO,ink);word(g,P.to,Rr,86,'500 44px '+MONO,ink,'right');
   const a=L+92,b=Rr-92,mid=(a+b)/2;
   g.strokeStyle='rgba(255,255,255,.4)';g.lineWidth=1.5;g.setLineDash([3,4]);g.beginPath();g.moveTo(a,80);g.quadraticCurveTo(mid,46,b,80);g.stroke();g.setLineDash([]);
   g.fillStyle='#fff';for(const x of [a,b]){g.beginPath();g.arc(x,80,3,0,7);g.fill()}
-  g.save();g.translate(mid,63);g.rotate(Math.PI/2);g.scale(1.15,1.15);g.beginPath();planePts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.lineWidth=4;g.strokeStyle='#1c1c1e';g.stroke();g.fillStyle=P.color;g.fill();g.restore();
+  g.save();g.translate(mid,63);g.rotate(Math.PI/2);g.scale(1.15,1.15);g.beginPath();planePts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.lineWidth=4;g.strokeStyle=bg;g.stroke();g.fillStyle=P.color;g.fill();g.restore();
   const third=(w-40)/3-6;
   word(g,P.fromN,L,108,'400 12px '+SANS,'#a1a1a8','left',third);word(g,P.dur,w/2,108,'400 12px '+MONO,'#a1a1a8','center',third);word(g,P.toN,Rr,108,'400 12px '+SANS,'#a1a1a8','right',third);
   g.strokeStyle='rgba(255,255,255,.1)';g.lineWidth=1;g.beginPath();g.moveTo(L,124);g.lineTo(Rr,124);g.stroke();
-  P.fields.forEach(([k,v],i)=>{const right=i%2,x=right?Rr:L,y=148+Math.floor(i/2)*42,al=right?'right':'left';word(g,k,x,y,'400 11px '+SANS,'#8e8e93',al);word(g,v,x,y+18,'500 14px '+MONO,'#fff',al,(w-60)/2)});
-  drawStub(P.seed);
+  P.fields.forEach(([k,v],i)=>{const right=i%2,x=right?Rr:L,y=148+Math.floor(i/2)*42,al=right?'right':'left';word(g,k,x,y,'400 11px '+SANS,'#8e8e93',al);word(g,v,x,y+18,'500 14px '+MONO,ink,al,(w-60)/2)});
+  drawStub(P.seed,bg);document.querySelector('.tmain').style.background=bg;
   { const {g,w}=art('hintArt');g.strokeStyle=g.fillStyle='#8e8e93';g.lineWidth=2;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(w/2-9,7);g.lineTo(w/2,15);g.lineTo(w/2+9,7);g.stroke() }
   { const {g,w}=art('checkArt');word(g,'탑승 수속',w/2,16,'600 16px '+SANS,'#000','center') }
 }
-function drawStub(seedStr){
-  const {g,w,h}=art('stubArt');g.fillStyle='#1c1c1e';g.fillRect(0,0,w,h);
+function drawStub(seedStr,bg){
+  const {g,w,h}=art('stubArt');g.fillStyle=bg;g.fillRect(0,0,w,h);
   g.strokeStyle='rgba(255,255,255,.22)';g.lineWidth=2;g.setLineDash([7,6]);g.beginPath();g.moveTo(18,13);g.lineTo(w-18,13);g.stroke();g.setLineDash([]);
   const X=20,Y=28,bw=w-40,bh=58;g.fillStyle='#fff';g.fillRect(X,Y,bw,bh);g.fillStyle='#000';
   let s=[...seedStr].reduce((a,ch)=>a*33+ch.charCodeAt(0),5381)>>>0;const rnd=()=>(s=(s*1103515245+12345)>>>0)/4294967296;
@@ -1151,17 +1165,17 @@ function drawStub(seedStr){
 }
 function renderPass(){
   const from=AP[S.city],to=AP[plan.to],sc=SCEN.find(s=>s.id===plan.scen),now=new Date(),hide=plan.random;
-  pass={from:from.c,to:hide?'???':to.c,fromN:from.n,toN:hide?'미공개':to.n,dur:fmtHM(plan.min),color:sc.c,seed:plan.no+plan.seat,
+  pass={from:from.c,to:hide?'???':to.c,fromN:from.n,toN:hide?'미공개':to.n,dur:fmtHM(plan.min),color:sc.c,cls:plan.cls,seed:plan.no+plan.seat,
     fields:[['좌석',plan.seat+(planSeatInfo()[0]?' '+planSeatInfo()[0]:'')],['거리',hide?'??? km':Math.round(distKm(from,to)).toLocaleString('en-US')+' km'],['탑승','지금'],
       ['날짜',`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`],['편명',plan.no],['집중',sc.n]]};
-  $('passArt').setAttribute('aria-label',`탑승권. ${pass.fromN}에서 ${pass.toN}, ${pass.dur}, `+pass.fields.map(x=>x.join(' ')).join(', '));
+  $('passArt').setAttribute('aria-label',`탑승권. ${clsOf(plan.cls).n}. ${pass.fromN}에서 ${pass.toN}, ${pass.dur}, `+pass.fields.map(x=>x.join(' ')).join(', '));
   const st=$('stub');st.style.transition='none';st.style.transform='';st.style.opacity=1;$('ticket').classList.remove('recoil');
   // jagged rip line shared by both halves
   const K=26,pts=[];for(let i=0;i<=K;i++)pts.push([i/K*100,Math.round((Math.random()*.6+(i%2?.4:0))*9*10)/10]);
   st.style.clipPath=`polygon(${pts.map(([x,o])=>`${x}% ${o}px`).join(',')},100% 100%,0 100%)`;
   requestAnimationFrame(drawPass);
   // web fonts arrive in pieces: ask for exactly these letters, then paint once more
-  const all=JSON.stringify(pass)+'몰입 항공 BOARDING PASS 탑승 수속';
+  const all=JSON.stringify(pass)+'몰입 항공 BOARDING PASS FIRST BUSINESS CLASS 탑승 수속';
   if(document.fonts&&document.fonts.load)Promise.all(['400 12px "Pretendard Variable"','600 16px "Pretendard Variable"','500 44px "JetBrains Mono"','400 12px "JetBrains Mono"'].map(x=>document.fonts.load(x,all))).then(drawPass).catch(()=>{});
 }
 addEventListener('resize',()=>requestAnimationFrame(drawPass));
@@ -1203,18 +1217,19 @@ $('checkIn').onclick=()=>tear();
 
 /* ---------- board, ready, takeoff ---------- */
 function board(){
-  const r={no:plan.no,from:S.city,to:plan.to,min:plan.min,random:plan.random,scen:plan.scen,seat:plan.seat};
+  const r={no:plan.no,from:S.city,to:plan.to,min:plan.min,random:plan.random,scen:plan.scen,seat:plan.seat,cls:plan.cls&&!seatBlock(plan.min,plan.cls)?plan.cls:'eco'};
   S.tickets.unshift({...r,date:Date.now(),status:'flying'});S.tickets=S.tickets.slice(0,200);save();
   const A=AP[r.from].v,B=AP[r.to].v,om=angle(A,B);
   F={...r,A,B,om,T:r.min*60000,elapsed:0,dist:om*R,depUTC:Date.now(),status:'taxi',away:0,awayMs:0,breaks:0,excuse:null,paused:false};
   const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optSc').checked=isIOS&&!!pr.sc;$('optScRow').hidden=!isIOS;$('dndNote').hidden=isIOS;
   const st=stakeFor(r.min);
-  $('readyMiles').innerHTML=st?`보증금 <b>${fmtMi(st)}마일</b>을 걸어요. 도착하면 <b>${fmtMi(st+price(r.min)*.2)}마일</b>을 받아요.<br>회항하면 절반을 잃어요. 1분 안 취소는 무료예요.`:`보증금 없는 <b>무료 비행</b>이에요. 도착하면 <b>${fmtMi(price(r.min)*.2)}마일</b>을 받아요.`;
+  const rc=clsOf(r.cls);
+  $('readyMiles').innerHTML=st?`보증금 <b>${fmtMi(st)}마일</b>을 걸어요. 도착하면 <b>${fmtMi(st+bonusFor(r.min,r.cls))}마일</b>을 받아요.<br>${rc.fee?`${rc.n} 좌석 값은 <b>${rc.fee}마일</b>이고 돌려받지 않아요.<br>`:''}회항하면 보증금 절반을 잃어요. 1분 안 취소는 무료예요.`:`보증금 없는 <b>무료 비행</b>이에요. 도착하면 <b>${fmtMi(price(r.min)*.2)}마일</b>을 받아요.`;
   show('ready');
 }
 $('go').onclick=()=>{
   if(!F||F.status!=='taxi')return;
-  F.stake=stakeFor(F.min);S.miles-=F.stake;
+  F.stake=stakeFor(F.min);F.fee=clsOf(F.cls).fee;S.miles-=F.stake+F.fee;
   ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
   const useSc=isIOS&&$('optSc').checked;
   F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc};snap();
@@ -1234,7 +1249,7 @@ $('go').onclick=()=>{
 };
 /* the flight in progress is kept in storage, so a killed app picks it up again */
 let snapAt=0;
-const LIVE=['no','from','to','min','random','scen','seat','elapsed','depUTC','lastWall','away','awayMs','breaks','excuse','graceUntil','paused','strict','warnOn','warned','stake'];
+const LIVE=['no','from','to','min','random','scen','seat','elapsed','depUTC','lastWall','away','awayMs','breaks','excuse','graceUntil','paused','strict','warnOn','warned','stake','cls','fee'];
 function snap(){if(F&&F.status==='flying'){S.live={};LIVE.forEach(k=>S.live[k]=F[k]);snapAt=Date.now();save()}}
 function resumeFlight(){
   const L=S.live;
@@ -1288,7 +1303,7 @@ $('winView').addEventListener('dblclick',()=>$('btnWindow').click());
 
 /* pause & divert */
 const canCancel=()=>F&&Date.now()-F.depUTC<CANCEL_MS;
-function divertLabel(){if(!F)return;$('divert').textContent=canCancel()?'비행 취소하기 · 보증금 전부 돌려받기':F.stake?`회항하기 · ${fmtMi(F.stake/2)}마일 잃음`:'회항하기'}
+function divertLabel(){if(!F)return;$('divert').textContent=canCancel()?'비행 취소하기 · 마일 전부 돌려받기':F.stake?`회항하기 · ${fmtMi(F.stake/2)}마일 잃음`:'회항하기'}
 $('btnPause').onclick=()=>{if(!F||F.status!=='flying')return;F.paused=true;snap();showPause()};
 function showPause(){divertLabel();clearTimeout(showPause.t);if(canCancel())showPause.t=setTimeout(divertLabel,CANCEL_MS-(Date.now()-F.depUTC)+50);$('pauseInfo').textContent=`남은 시간 ${fmtKo(Math.ceil((F.T-F.elapsed)/60000))} · 일시정지 중에는 비행이 멈춰요`;$('pauseSheet').hidden=false}
 $('resume').onclick=()=>{advance();F.paused=false;snap();$('pauseSheet').hidden=true};
@@ -1310,7 +1325,7 @@ $('divert').onclick=()=>{
   if(!F||F.status!=='flying')return;
   stop={cancel:canCancel(),reason:null};pickReason(null);
   $('reasonTitle').textContent=stop.cancel?'왜 취소하나요?':'왜 멈추나요?';
-  $('reasonInfo').textContent=stop.cancel?'보증금은 모두 돌려받아요. 이유는 티켓에 남아요.':F.stake?`회항하면 ${fmtMi(F.stake/2)}마일을 잃어요. 이유는 티켓에 남아요.`:'이유는 티켓에 남아요.';
+  $('reasonInfo').textContent=stop.cancel?`보증금${F.fee?'과 좌석 값':''}은 모두 돌려받아요. 이유는 티켓에 남아요.`:F.stake?`회항하면 ${fmtMi(F.stake/2)}마일을 잃어요.${F.fee?` 좌석 값 ${F.fee}마일도 돌려받지 못해요.`:''} 이유는 티켓에 남아요.`:'이유는 티켓에 남아요.';
   $('reasonGo').textContent=stop.cancel?'비행 취소하기':'회항하기';
   $('pauseSheet').hidden=true;$('reasonSheet').hidden=false;
 };
@@ -1318,9 +1333,9 @@ $('reasonBack').onclick=()=>{stop=null;$('reasonSheet').hidden=true;showPause()}
 $('reasonGo').onclick=()=>{
   if(!F||F.status!=='flying'||!stop||!stop.reason)return;
   const cancel=stop.cancel,why=stop.reason;stop=null;$('reasonSheet').hidden=true;clearTimeout(capT);$('caption').hidden=true;
-  const lost=cancel?0:Math.round(F.stake/2);
-  F.paused=false;F.status='diverted';S.miles+=F.stake-lost;S.live=null;setTicket(cancel?'canceled':'diverted',-lost,why);$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;keepAwake(false);$('layover').hidden=true;endFlightExtras();
-  $('doneMiles').textContent=cancel?`1분 안에 취소해서 보증금을 모두 돌려받았어요 · 보유 ${fmtMi(S.miles)}마일`:lost?`-${fmtMi(lost)}마일 · 보유 ${fmtMi(S.miles)}마일`:`잃은 마일 없음 · 보유 ${fmtMi(S.miles)}마일`;
+  const fee=F.fee||0,lost=cancel?0:Math.round(F.stake/2);
+  F.paused=false;F.status='diverted';S.miles+=F.stake-lost+(cancel?fee:0);S.live=null;setTicket(cancel?'canceled':'diverted',cancel?0:-lost-fee,why);$('pauseSheet').hidden=true;winOn=false;$('winView').hidden=true;keepAwake(false);$('layover').hidden=true;endFlightExtras();
+  $('doneMiles').textContent=cancel?`1분 안에 취소해서 마일을 모두 돌려받았어요 · 보유 ${fmtMi(S.miles)}마일`:lost?`-${fmtMi(lost)}마일${fee?` · 좌석 값 -${fee}`:''} · 보유 ${fmtMi(S.miles)}마일`:`잃은 마일 없음 · 보유 ${fmtMi(S.miles)}마일`;
   $('doneSub').textContent=cancel?'취소':'회항';$('doneTitle').textContent=cancel?'비행을 취소했어요':AP[F.from].n+'(으)로 돌아왔어요';$('doneTime').textContent=fmtHM(F.elapsed/60000);
   $('doneNote').textContent=`이유: ${reasonName(why)} · 집중 시간에는 더해지지 않아요. 다음 비행에서 다시 도전해 보세요.`;$('doneBadge').hidden=true;map.setMinZoom(0);show('done');
 };
@@ -1328,8 +1343,8 @@ function setTicket(st,mi,why){const t=S.tickets.find(x=>x.no===F.no&&x.status===
 function land(){
   F.status='landed';const isNew=!S.visited.includes(F.to);clearTimeout(capT);$('caption').hidden=true;
   S.city=F.to;if(isNew)S.visited.push(F.to);S.flights++;S.minutes+=F.min;
-  const bonus=Math.round(price(F.min)*.2);S.miles+=(F.stake||0)+bonus;S.live=null;setTicket('landed',bonus);
-  $('doneMiles').textContent=`+${fmtMi(bonus)}마일 · 보유 ${fmtMi(S.miles)}마일`;
+  const bonus=bonusFor(F.min,F.cls),fee=F.fee||0;S.miles+=(F.stake||0)+bonus;S.live=null;setTicket('landed',bonus-fee);
+  $('doneMiles').textContent=`${fee?clsOf(F.cls).n+' 보너스 ':''}+${fmtMi(bonus)}마일${fee?` · 좌석 값 -${fee}`:''} · 보유 ${fmtMi(S.miles)}마일`;
   winOn=false;$('winView').hidden=true;$('btnWindow').setAttribute('aria-pressed',false);map.setMinZoom(0);
   $('doneSub').textContent='도착';$('doneTitle').textContent=AP[F.to].n+'에 도착했어요';$('doneTime').textContent=fmtHM(F.min);
   $('doneNote').textContent=`${SCEN.find(s=>s.id===F.scen).n}에 집중한 시간 · 자리 비움 ${F.away}회 · 기내 활동 ${F.breaks}회`+(F.strict&&F.awayMs>30000?` · 딴짓으로 ${fmtKo(Math.round(F.awayMs/60000))} 늦게 도착`:'');$('doneBadge').hidden=!isNew;
@@ -1660,11 +1675,11 @@ function renderTickets(){
     h+=`<div class="month">${k}<span>${ts.length}장 · ${fmtHM(gm)}</span></div>`;
     h+=ts.map(t=>{const sc=SCEN.find(s=>s.id===t.scen)||SCEN[0],d=new Date(t.date),hide=t.random&&t.status!=='landed',to=hide?'???':t.to;
       const km=!hide&&AP[t.from]&&AP[t.to]?Math.round(distKm(AP[t.from],AP[t.to])).toLocaleString('en-US')+'km':'';
-      return `<div class="mini${t.status==='landed'?'':' dim'}" style="--c:${sc.c}">
+      return `<div class="mini${t.status==='landed'?'':' dim'}${clsOf(t.cls).fee?' '+t.cls:''}" style="--c:${sc.c}">
         <div class="mm">
           <div class="codes">${t.from}<svg viewBox="-12 -12 24 24"><path d="${plane}" transform="rotate(90)"/></svg>${to}</div>
           <div class="cities">${AP[t.from]?AP[t.from].n:''} → ${hide?'미공개':(AP[t.to]?AP[t.to].n:'')}${t.random?' · 랜덤':''}</div>
-          <div class="meta"><span><i>날짜</i>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span><span><i>시간</i>${fmtHM(t.min)}</span><span><i>좌석</i>${t.seat}</span>${km?`<span><i>거리</i>${km}</span>`:''}${reasonName(t.reason)?`<span><i>이유</i>${reasonName(t.reason)}</span>`:''}${Number.isFinite(t.miles)&&t.miles?`<span><i>마일</i>${t.miles>0?'+':'-'}${fmtMi(Math.abs(t.miles))}</span>`:''}</div>
+          <div class="meta"><span><i>날짜</i>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span><span><i>시간</i>${fmtHM(t.min)}</span><span><i>${clsOf(t.cls).fee?clsOf(t.cls).n:'좌석'}</i>${t.seat}</span>${km?`<span><i>거리</i>${km}</span>`:''}${reasonName(t.reason)?`<span><i>이유</i>${reasonName(t.reason)}</span>`:''}${Number.isFinite(t.miles)&&t.miles?`<span><i>마일</i>${t.miles>0?'+':'-'}${fmtMi(Math.abs(t.miles))}</span>`:''}</div>
         </div>
         <div class="stub">${icon(sc)}<b>${sc.n}</b><span class="stamp ${t.status}">${ST[t.status]||''}</span></div>
       </div>`}).join('');
