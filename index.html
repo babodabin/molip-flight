@@ -19,7 +19,7 @@
 /* Layout: full-bleed map; floating round controls; one bottom sheet per step; full-screen overlays for ticket, window and arrival */
 :root{
   --ink:#0b0b0c; --sheet:rgba(18,18,20,.82); --sheet-solid:#141416; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.18);
-  --fg:#f5f5f7; --muted:#9a9aa1; --dim:#6b6b72;
+  --fg:#f5f5f7; --muted:#9a9aa1; --dim:#88888f;
   --yellow:#ffd60a; --visited:#ff9f43; --sky:#64d2ff; --green:#30d158; --red:#ff6b5a;
   --f:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"JetBrains Mono","Pretendard Variable",Pretendard,"Apple SD Gothic Neo",ui-monospace,"SF Mono",Menlo,monospace;
@@ -61,13 +61,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-of
 .pill{all:unset;cursor:pointer;text-align:center;padding:15px 18px;border-radius:999px;font-weight:600;font-size:16px;background:#fff;color:#000}
 .pill.dark{background:rgba(255,255,255,.1);color:var(--fg)}
 .pill[disabled]{opacity:.35;cursor:not-allowed}
-.pill.sm{padding:10px 14px;font-size:14px}
+.pill.sm{padding:12px 14px;font-size:14px}
 .lbl{font-size:12px;color:var(--muted)}
 .mono{font-family:var(--mono)}
 .row{display:flex;gap:10px;align-items:center}
 .sp{justify-content:space-between}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ghost{all:unset;cursor:pointer;font-size:14px;color:var(--muted);padding:6px 4px}
+.ghost{all:unset;cursor:pointer;font-size:14px;color:var(--muted);padding:12px 10px;margin:-6px -8px -6px 0}
 h1,h2{margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
 h2{font-size:19px}
 
@@ -110,11 +110,12 @@ body:has(#view3:not([hidden])) #testBar{bottom:calc(82px + var(--sb))}
 .mePlane{z-index:3}.mePlane canvas{display:block;width:48px;height:48px}
 body:has(#offer:not([hidden])) #infoCard,body:has(#excuse:not([hidden])) #infoCard{top:calc(116px + var(--st))}
 #infoCard:not([hidden]) ~ #toast{top:calc(282px + var(--st))}
-.hudmid{cursor:pointer}
+.hudmid{cursor:pointer}.hudmid::after{content:"";position:absolute;inset:-7px -4px}
+[data-tf]{padding-block:11px!important}
 #infoCard{position:fixed;left:50%;top:calc(68px + var(--st));transform:translateX(-50%);z-index:7;width:min(236px,calc(100vw - 146px));box-sizing:border-box;padding:12px 13px;border-radius:18px;background:rgba(22,22,25,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);display:grid;gap:7px;font-size:12px;box-shadow:0 14px 34px rgba(0,0,0,.5)}
 #infoCard .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
 #infoCard .hd b{font-family:var(--mono);font-size:16px;font-weight:500}
-#infoCard .hd button{all:unset;cursor:pointer;padding:4px 8px;margin:-4px -6px;color:var(--muted);font-size:16px;line-height:1}
+#infoCard .hd button{all:unset;cursor:pointer;padding:13px 15px;margin:-13px -13px;color:var(--muted);font-size:16px;line-height:1}
 #infoCard .ty{color:var(--muted)}#infoCard .ty em{font-style:normal;color:#ffdf8f;margin-left:5px}
 #infoCard .rt{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px}
 #infoCard .rt span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden}#infoCard .rt i{display:block;height:100%;background:#fff}
@@ -168,7 +169,7 @@ body:has(#offer:not([hidden])) #infoCard,body:has(#excuse:not([hidden])) #infoCa
 
 /* time select */
 .tbig{font-family:var(--mono);font-size:40px;font-weight:500;letter-spacing:-.03em}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:40px;margin-block:-6px;background:transparent}
 input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:rgba(255,255,255,.16)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;margin-top:-11px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:rgba(255,255,255,.16)}
@@ -199,7 +200,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 #seatBackCol{z-index:10}
 .seattop h2{font-size:17px;margin:0}.seattop h2 small{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted);margin-left:6px}
 .seatjump{display:flex;gap:6px}
-.seatjump button{all:unset;cursor:pointer;white-space:nowrap;font-size:13px;padding:6px clamp(7px,2.6vw,12px);border-radius:999px;background:rgba(255,255,255,.08);display:flex;align-items:center;gap:6px}
+.seatjump button{all:unset;cursor:pointer;white-space:nowrap;font-size:13px;padding:11px clamp(7px,2.6vw,12px);margin-block:-3px;border-radius:999px;background:rgba(255,255,255,.08);display:flex;align-items:center;gap:6px}
 .seatjump i{width:9px;height:9px;border-radius:3px;background:var(--k)}
 .seatkey{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin:0 0 16px}
 .seatkey span{display:flex;align-items:center;gap:6px}
@@ -264,7 +265,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .prep{display:grid;gap:8px;width:min(360px,88vw);text-align:left}
 .opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.05);cursor:pointer}
 .restRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:-2px}
-.restRow button{all:unset;cursor:pointer;text-align:center;font-size:13px;padding:9px 4px;border-radius:12px;background:rgba(0,0,0,.05)}
+.restRow button{all:unset;cursor:pointer;text-align:center;font-size:13px;padding:12px 4px;border-radius:12px;background:rgba(0,0,0,.05)}
 .restRow button[aria-pressed="true"]{background:#111;color:#fff}
 .restRow button:focus-visible{outline:2px solid #1a5fd0}
 .opt input{width:20px;height:20px;margin:2px 0 0;accent-color:#000;flex:none}
@@ -733,7 +734,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="privOpen">개인정보 안내</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.7.0 · 2026.11.25</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#8a8a91;margin-top:2px">몰입 비행 v2.7.1 · 2026.11.25</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1549,7 +1550,10 @@ $('passBack').onclick=()=>{if(tearing)return;show('seat');renderSeats()};
 let tearing=false;
 /* tearing: a short pull to the side is enough; the stub hinges at its bottom corner */
 let audio=null,noiseBuf=null;
-function ac(){if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)()}if(audio.state==='suspended')audio.resume();return audio}
+function ac(){if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)()}if(audio.state!=='running')audio.resume().catch(()=>{});return audio}
+/* a phone call or another app can stop the sound: bring the chosen one back on return */
+function reviveSound(){if(typeof snd==='undefined'||!snd||!audio||document.hidden)return;if(audio.state!=='running')audio.resume().catch(()=>{});if(mediaEl&&mediaEl.paused)mediaEl.play().catch(()=>{})}
+addEventListener('pointerdown',()=>reviveSound(),{passive:true});document.addEventListener('visibilitychange',()=>setTimeout(reviveSound,300));
 function ripSound(v){
   try{const a=ac();if(!noiseBuf){noiseBuf=a.createBuffer(1,a.sampleRate*.06,a.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(Math.random()<.3?1:.35)}
     const s=a.createBufferSource();s.buffer=noiseBuf;s.playbackRate.value=.7+Math.random()*.8;
@@ -2115,7 +2119,7 @@ function tapMap(e){
   closeCard();
 }
 function setSpd(v){speed=v;document.querySelectorAll('[data-tsp]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.tsp===v))}
-document.querySelectorAll('[data-tsp]').forEach(b=>b.onclick=()=>{if(F&&F.status==='flying')advance();setSpd(+b.dataset.tsp)});
+document.querySelectorAll('[data-tsp]').forEach(b=>b.onclick=()=>{if(!S.test)return;if(F&&F.status==='flying')advance();setSpd(+b.dataset.tsp)});
 function callCart(kind){
   if(!F||F.status!=='flying'||!S.test)return;if(F.excuse&&F.excuse.k==='meal'){toast('지금 먹고 있어요');return}
   const L=services(F.min,F.restK),hit=L.find(x=>x.kind===kind),dur=hit?hit.dur:L[0]?Math.max(3,Math.round(L[0].dur*(kind==='meal'?2:.5))):10;
