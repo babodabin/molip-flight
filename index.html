@@ -87,6 +87,16 @@ h2{font-size:19px}
 .mrow.two{flex-direction:column;align-items:flex-start;gap:2px}
 .mrow.gold{background:linear-gradient(110deg,rgba(255,190,60,.2),rgba(255,236,170,.1))}
 .coin{display:inline-block;width:.95em;height:.95em;border-radius:50%;vertical-align:-.1em;margin-right:.3em;background:radial-gradient(circle at 35% 30%,#fff3bf,#ffcf4a 45%,#c98a17);box-shadow:inset 0 0 0 1.5px rgba(130,80,0,.35)}
+body.fly .rbtn,body.fly .hudmid,body.fly #infoCard,body.fly .excuse,body.fly .caption,body.fly #replayBar .in,body.fly .pop{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.fly .hudmid,body.fly #infoCard,body.fly .caption,body.fly .pop,body.fly #replayBar .in{background:rgba(20,20,23,.94)}
+body.fly .excuse{background:rgba(64,54,8,.94)}
+/* dark screen that saves power */
+#dimView{z-index:19;background:#000;display:grid;place-items:center;text-align:center;cursor:pointer;touch-action:none}
+#dimView .d{display:grid;gap:10px;justify-items:center;color:#8b8b92;transition:transform 2s}
+#dimView b{font-family:var(--mono);font-weight:400;font-size:46px;color:#b9b9bf;letter-spacing:-.02em}
+#dimView u{display:block;width:150px;height:3px;border-radius:2px;background:#1f1f22;overflow:hidden;text-decoration:none}#dimView u i{display:block;height:100%;background:#7c6a12}
+#dimView small{font-size:12px;color:#55555b}
+body.dim #map,body.dim #hud,body.dim #winView,body.dim #view3,body.dim #v3Bar,body.dim .caption{visibility:hidden}
 /* 3D */
 #view3{z-index:4;background:#05070c;touch-action:none;cursor:grab}
 #view3 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
@@ -631,6 +641,8 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="wininfo" id="winInfo"></div>
 </div>
 
+<div class="full" id="dimView" hidden role="button" tabindex="0" aria-label="화면 켜기"><div class="d" id="dimBox"><span id="dimRoute"></span><b id="dimTime"></b><u><i id="dimBar"></i></u><small>누르면 다시 밝아져요</small></div></div>
+
 <!-- 3D -->
 <div class="full" id="view3" hidden><canvas id="sky3" role="img" aria-label="비행기 바깥 풍경"></canvas><canvas id="mesh3" aria-hidden="true"></canvas><canvas id="cock" aria-hidden="true"></canvas></div>
 <div id="v3Bar" hidden><button data-v3="out">옆모습</button><button data-v3="cock">조종석</button><button data-v3="">닫기</button></div>
@@ -716,11 +728,12 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="row sp"><h2>설정</h2><button class="ghost" id="settingsClose">닫기</button></div>
   <button class="pill dark sm" id="testToggle"></button>
   <span class="lbl" id="testInfo"></span>
+  <button class="pill dark sm" id="dimToggle"></button>
   <button class="pill dark sm" id="logOpen">내 비행 기록과 비행기 도감</button>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="privOpen">개인정보 안내</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.6.1 · 2026.11.24</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#6e6e76;margin-top:2px">몰입 비행 v2.7.0 · 2026.11.25</div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -1117,7 +1130,7 @@ async function loadStyles(){
 }
 
 /* ---------- state ---------- */
-let mode='home',F=null,plan={},target=120,view='chase',northUp=false,winOn=false,v3=null,speed=1;
+let mode='home',F=null,plan={},target=120,view='chase',northUp=false,winOn=false,v3=null,speed=1,dim=false,touchAt=0;
 let map,markers=[],lastInteract=0,mapReady=false,styleOk=false;
 
 /* ---------- map setup ---------- */
@@ -1255,9 +1268,9 @@ function setMarkers(list){
 }
 
 /* ---------- screens ---------- */
-const LAYERS=['home','select','tickets','seatView','seatBackCol','seatTop','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','menuSheet','foodSheet','mealView','replayBar','shopView','buySheet','infoCard','apSheet','logView','view3','v3Bar','soundPop','layerPop','greet'];
+const LAYERS=['home','select','tickets','seatView','seatBackCol','seatTop','seatBar','focusCard','ticketView','readyView','hud','winView','doneView','pauseSheet','reasonSheet','menuSheet','foodSheet','mealView','replayBar','shopView','buySheet','infoCard','apSheet','logView','view3','v3Bar','dimView','soundPop','layerPop','greet'];
 function show(m){
-  closeCard();mode=m;setSpd(1);$('testBar').hidden=!(m==='flight'&&S.test);
+  setDim(false);document.body.classList.toggle('fly',m==='flight'||m==='replay');closeCard();mode=m;setSpd(1);$('testBar').hidden=!(m==='flight'&&S.test);
   const on={home:['home','greet'],select:['select'],tickets:['tickets'],seat:['seatView','seatBackCol','seatTop','seatBar'],pass:['ticketView'],ready:['readyView'],
     flight:['hud'],replay:['hud','replayBar'],done:['doneView']}[m]||[];
   LAYERS.forEach(id=>$(id).hidden=!on.includes(id));
@@ -1266,7 +1279,7 @@ function show(m){
   $('mapCtl').hidden=!(m==='home'||m==='select'||m==='tickets'||m==='flight'||m==='replay');$('hud').classList.toggle('rp',m==='replay');
   $('mapCtl').style.top=m==='flight'||m==='replay'?`calc(14px + var(--st))`:'';
   $('winView').hidden=!((m==='flight'||m==='replay')&&winOn);if(m!=='flight'&&m!=='replay')v3=null;$('view3').hidden=$('v3Bar').hidden=!v3;
-  if(m==='home'){renderHome();setMarkers([[S.city,'dep']]);clearRoute();map.easeTo({center:AP[S.city].ll,zoom:1.7,pitch:0,bearing:0,padding:pad(),duration:1200})}
+  shown=null;if(m==='home'){lastInteract=performance.now()-4000;renderHome();setMarkers([[S.city,'dep']]);clearRoute();map.easeTo({center:AP[S.city].ll,zoom:1.7,pitch:0,bearing:0,padding:pad(),duration:1200})}
   if(m==='tickets'){renderTickets();setMarkers([])}
   if(m==='done')$('mapCtl').hidden=true;
   refreshAirports();refreshHistory();
@@ -1592,7 +1605,7 @@ function board(){
 $('go').onclick=()=>{
   if(!F||F.status!=='taxi')return;
   F.stake=stakeFor(F.min);F.fee=clsOf(F.cls).fee;S.miles-=F.stake+F.fee;
-  hudT1=hudD1='left';ac();F.status='flying';F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
+  hudT1=hudD1='left';ac();F.status='flying';touchAt=performance.now();F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
   const useSc=isIOS&&$('optSc').checked;
   F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;F.mealOn=$('optMeal').checked;F.svc=0;F.offer=null;F.foods=[];F.rest=0;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc,meal:F.mealOn,restK:F.restK};snap();
   if(useSc){
@@ -1627,7 +1640,7 @@ function resumeFlight(){
   return true;
 }
 let capT=null;
-function caption(lines){let i=0;clearTimeout(capT);const el=$('caption');
+function caption(lines){if(dim){setDim(false);touchAt=performance.now()-DIM_MS+30000}let i=0;clearTimeout(capT);const el=$('caption');
   const next=()=>{if(i>=lines.length){el.style.opacity=0;capT=setTimeout(()=>el.hidden=true,500);return}el.hidden=false;el.style.opacity=1;$('capText').textContent=lines[i++];capT=setTimeout(next,3200)};next()}
 
 /* ---------- flight model ---------- */
@@ -1665,8 +1678,9 @@ let lineT=0;
 function updateFlightLayers(force){
   if(!F||!map.getSource('plane'))return;
   const s=planeState();
-  movePlane(s);
-  const now=performance.now();if(!force&&now-lineT<250)return s;lineT=now;
+  if(!following()||!meMk)movePlane(s);
+  // the lines grow a fraction of a pixel a second at normal speed, so once in a while is enough
+  const now=performance.now(),slow=mode==='done'?2000:speed>1||F.replay&&RP.speed>1?250:1500;if(!force&&now-lineT<slow)return s;lineT=now;
   map.getSource('flown').setData(s.p>0?altLine(s.p):EMPTY);
   map.getSource('remain').setData((F.random&&!F.replay)||F.status!=='flying'&&!F.replay?EMPTY:{type:'Feature',geometry:{type:'LineString',coordinates:arc(F.A,F.B,s.p,1,Math.max(4,Math.ceil((1-s.p)*96)))}});
   return s;
@@ -1677,7 +1691,7 @@ const VIEWS=['chase','top','route'];
 let cam=null,followZ=8.6,followOn=false;
 const following=()=>!!F&&(mode==='flight'||mode==='replay')&&view!=='route';
 function setFollow(on){
-  if(on===followOn||!map)return;followOn=on;
+  if(on===followOn||!map)return;followOn=on;shown=null;
   ['dragPan','dragRotate','scrollZoom','touchZoomRotate','touchPitch','doubleClickZoom','boxZoom','keyboard'].forEach(h=>map[h]&&map[h][on?'disable':'enable']());
 }
 function enterView(first){
@@ -1689,12 +1703,20 @@ function enterView(first){
   cam={lock,t0:performance.now(),d:first?2200:900,z:map.getZoom(),p:map.getPitch(),b:map.getBearing(),pad:(map.getPadding().bottom||0),padT:(map.getPadding().top||0),padL:(map.getPadding().left||0),padR:(map.getPadding().right||0),c:vec(c.lng,c.lat)};
   setFollow(true);
 }
+let shown=null,spin=0;
 function followPlane(s,now){
+  // nothing to draw until the plane has moved about a third of a pixel, or the view itself changes
+  if(!cam&&shown&&shown.view===view&&shown.z===followZ&&shown.north===northUp&&shown.h===innerHeight&&shown.w===innerWidth){
+    const px=angle(shown.v,s.v)*R/(40075*Math.max(.1,Math.cos(s.pos[1]*rad))/(512*Math.pow(2,followZ))),turn=northUp?0:Math.abs(((s.hdg-shown.hdg+540)%360+360)%360-180);
+    if(px<.34&&turn<.05||now-shown.at<60&&px<1.4&&turn<.2)return;
+  }
+  shown={at:now,v:s.v,hdg:s.hdg,view,z:followZ,north:northUp,h:innerHeight,w:innerWidth};
+  movePlane(s);
   const pitch=view==='chase'?62:0,pad=view==='chase'?innerHeight*.28:0,brg=northUp?0:s.hdg;
   let o={center:s.pos,zoom:followZ,pitch,bearing:brg,padding:{top:0,bottom:pad,left:0,right:0}};
   if(cam){
     let k=Math.min(1,(now-cam.t0)/cam.d);k=k<0?0:k*k*(3-2*k);const mix=(a,b)=>a+(b-a)*k,om=angle(cam.c,s.v);
-    if(k<1)o={center:!cam.lock&&om>1e-4?ll(slerp(cam.c,s.v,k,om)):s.pos,zoom:mix(cam.z,followZ),pitch:mix(cam.p,pitch),bearing:cam.b+(((brg-cam.b+540)%360+360)%360-180)*k,padding:{top:mix(cam.padT,0),bottom:mix(cam.pad,pad),left:mix(cam.padL,0),right:mix(cam.padR,0)}};
+    if(k<1)shown=null,o={center:!cam.lock&&om>1e-4?ll(slerp(cam.c,s.v,k,om)):s.pos,zoom:mix(cam.z,followZ),pitch:mix(cam.p,pitch),bearing:cam.b+(((brg-cam.b+540)%360+360)%360-180)*k,padding:{top:mix(cam.padT,0),bottom:mix(cam.pad,pad),left:mix(cam.padL,0),right:mix(cam.padR,0)}};
     else cam=null;
   }
   map.jumpTo(o);
@@ -2071,7 +2093,7 @@ for(let i=0;i<90;i++){const t={};newTraffic(t);t.p=Math.random();traffic.push(t)
 let trafT=0;
 function updateTraffic(dt,spd){
   traffic.forEach(t=>{t.p+=dt*1000*spd/t.T;if(t.p>=1)newTraffic(t,t.b.c)});
-  const now=performance.now();if(now-trafT<200||!trafficOn||winOn||v3||!map.getSource('traffic'))return;trafT=now;
+  const now=performance.now();if(now-trafT<(mode==='flight'&&speed===1?1500:mode==='replay'||speed>1?250:1000)||dim||document.hidden||!['home','select','pass','flight','replay','done'].includes(mode)||!trafficOn||winOn||v3||!map.getSource('traffic'))return;trafT=now;
   map.getSource('traffic').setData({type:'FeatureCollection',features:traffic.map((t,i)=>{const pos=ll(slerp(t.a.v,t.b.v,t.p,t.om)),ah=ll(slerp(t.a.v,t.b.v,Math.min(1,t.p+.002),t.om));
     return {type:'Feature',properties:{b:bearing(pos,ah),cs:t.cs,r:t.a.c+'→'+t.b.c,i,ty:t.ty,z:TYPES[t.ty].z},geometry:{type:'Point',coordinates:pos}}})});
   drawSel();
@@ -2188,21 +2210,45 @@ document.querySelector('#home .stats').onclick=openLog;
 
 /* ---------- main loop ---------- */
 let last=performance.now(),hudT=0;
+/* ---------- power saving: after three quiet minutes the flight goes on behind a nearly black screen ---------- */
+const DIM_MS=180000;
+let dimT=0;
+function setDim(on){
+  if(on===dim)return;dim=on;touchAt=performance.now();$('dimView').hidden=!on;document.body.classList.toggle('dim',on);
+  if(on)drawDim();else{shown=null;if(F&&map&&styleOk&&(mode==='flight'||mode==='replay'))updateFlightLayers(true)}
+}
+function drawDim(){
+  if(!F)return;const left=Math.max(0,F.T-F.elapsed)/60000,m=Math.floor(Date.now()/60000);
+  $('dimRoute').textContent=F.from+' → '+(F.random?'???':F.to);$('dimTime').textContent=left>=60?Math.floor(left/60)+'h '+String(Math.floor(left%60)).padStart(2,'0')+'m':left>=1?Math.ceil(left)+'m':Math.ceil(left*60)+'s';$('dimBar').style.width=F.elapsed/F.T*100+'%';
+  $('dimBox').style.transform=`translate(${Math.sin(m*1.7)*18}px,${Math.cos(m*2.3)*46}px)`;
+}
+function tickDim(now){
+  if(dim){if(now-dimT>1000){dimT=now;drawDim()}return}
+  if(S.dimOff||mode!=='flight'||!F||F.status!=='flying'||F.paused||F.excuse||F.offer||speed!==1||now-touchAt<DIM_MS||F.T-F.elapsed<90000)return;
+  if(['pauseSheet','reasonSheet','menuSheet','cabinSheet','mealView','foodSheet','apSheet'].some(i=>!$(i).hidden))return;
+  setDim(true);
+}
+for(const n of ['pointerdown','keydown','wheel','pointermove'])addEventListener(n,e=>{touchAt=performance.now()},{passive:true,capture:true});
+$('dimView').addEventListener('click',e=>{e.stopPropagation();setDim(false)});$('dimView').onkeydown=()=>setDim(false);
+function drawDimBtn(){$('dimToggle').textContent='절전 화면 '+(S.dimOff?'꺼짐':'켜짐')}
+$('dimToggle').onclick=()=>{S.dimOff=!S.dimOff;save();drawDimBtn();toast(S.dimOff?'화면이 저절로 어두워지지 않아요':'비행 중 3분 동안 안 누르면 어두워져요')};
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(5,(now-last)/1000);last=now;if(!map||!mapReady)return;
   const flying=F&&mode==='flight'&&F.status==='flying'&&!F.paused;
   if(F&&mode==='flight'&&F.status==='flying'){advance();if(F.elapsed>=F.T){F.elapsed=F.T;land();return}}
   if(F&&mode==='replay')stepReplay(dt);
+  tickDim(now);
   updateTraffic(dt,flying?speed:1);
   if(F&&(mode==='flight'||mode==='done'||mode==='replay')){
-    const covered=(winOn||v3)&&mode!=='done',s=covered?planeState():updateFlightLayers();
+    const covered=(winOn||v3||dim)&&mode!=='done',s=covered?planeState():updateFlightLayers();
     const fo=following();if(fo!==followOn)setFollow(fo);if(s&&fo&&!covered)followPlane(s,now);
-    if(now-hudT>250){hudT=now;hud(s||planeState())}
-    if(v3)state3(s||planeState());else if(winOn)skyState(s||planeState());
+    if(now-hudT>(dim?1000:250)){hudT=now;hud(s||planeState())}
+    if(dim){}else if(v3)state3(s||planeState());else if(winOn)skyState(s||planeState());
   }else{if(followOn)setFollow(false)}
   if(mode==='home'&&!F&&!sel&&now-lastInteract>4000&&!map.isMoving()){
-    const c=map.getCenter();map.jumpTo({center:[c.lng+dt*2.2,c.lat]});
+    // turn gently at 30 frames, rest after a minute alone or while another page covers the globe
+    if(now-lastInteract<64000&&['shopView','logView','apSheet','settingsSheet','milesSheet','foodSheet','privSheet','wallView'].every(i=>$(i).hidden)){spin+=dt;if(spin>.032){const c=map.getCenter();map.jumpTo({center:[c.lng+spin*2.2,c.lat]});spin=0}}
   }
   if(sel&&now-selT>1000){selT=now;renderCard()}
   refreshNight();
@@ -2401,6 +2447,7 @@ function skyState(s,azAt){
   }
 }
 function overLand(lon,lat){if(!worldTopo)return false;const d=landMask(360,180),x=((Math.floor(lon+180)%360)+360)%360,y=Math.max(0,Math.min(179,Math.floor(90-lat)));return d[(y*360+x)*4+3]>110}
+const frameGap=now=>now-touchAt<2500||SK.flash>.05||SK.alt<3.2||SK.met?30:62;
 function skyMove(dt){
   SK.flash*=Math.pow(.02,dt);if(F.paused)return;
   if(SK.storm>.4&&Math.random()<dt*.22*SK.storm)SK.flash=.35+.5*Math.random();
@@ -2409,9 +2456,9 @@ function skyMove(dt){
 function drawSky(now){
   if(!winOn||mode!=='flight'&&mode!=='replay'||!gl||!F){skyRun=false;return}
   requestAnimationFrame(drawSky);
-  if(SK.last&&now-SK.last<30)return;                       // 30 frames a second is plenty and kinder to the battery
+  if(dim||SK.last&&now-SK.last<frameGap(now))return;       // fewer frames at cruise is kinder to the battery
   const dt=SK.last?Math.min(.2,(now-SK.last)/1000):0;SK.last=now;
-  SK.n++;if(dt>.055&&dt<.19)SK.slow++;if(SK.n>=60){if(SK.slow>35&&SK.q>.6)SK.q*=.75;SK.n=SK.slow=0}
+  SK.n++;if(dt>(frameGap(now)>40?.1:.055)&&dt<.19)SK.slow++;if(SK.n>=60){if(SK.slow>35&&SK.q>.6)SK.q*=.75;SK.n=SK.slow=0}
   skyMove(dt);
   const c=$('sky'),dpr=Math.min(SK.q,devicePixelRatio||1),w=c.clientWidth*dpr|0,h=c.clientHeight*dpr|0;if(!w||!h)return;
   if(c.width!==w||c.height!==h){c.width=w;c.height=h;gl.viewport(0,0,w,h)}
@@ -2530,8 +2577,8 @@ const hexv=h=>hex3(h).map(x=>x/255);
 function draw3(now){
   if(!v3||mode!=='flight'&&mode!=='replay'||!F||!g3){V3.run=false;return}
   requestAnimationFrame(draw3);
-  if(V3.last&&now-V3.last<30||V3.A===undefined)return;
-  const dt=V3.last?Math.min(.2,(now-V3.last)/1000):0;V3.last=now;V3.n++;if(dt>.055&&dt<.19)V3.slow++;if(V3.n>=60){if(V3.slow>35&&V3.q>.5)V3.q*=.8;V3.n=V3.slow=0}
+  if(dim||V3.last&&now-V3.last<frameGap(now)||V3.A===undefined)return;
+  const dt=V3.last?Math.min(.2,(now-V3.last)/1000):0;V3.last=now;V3.n++;if(dt>(frameGap(now)>40?.1:.055)&&dt<.19)V3.slow++;if(V3.n>=60){if(V3.slow>35&&V3.q>.5)V3.q*=.8;V3.n=V3.slow=0}
   skyMove(dt);
   const cock=v3==='cock',c=$('sky3'),cw=c.clientWidth,ch=c.clientHeight;if(!cw||!ch)return;
   const k=Math.min(V3.q,devicePixelRatio||1),w=cw*k|0,h=ch*k|0,{g,u}=g3;if(c.width!==w||c.height!==h){c.width=w;c.height=h}
@@ -2884,7 +2931,7 @@ $('testToggle').onclick=()=>{
   if(Date.now()-testArm>4000){testArm=Date.now();$('testToggle').textContent='한 번 더 누르면 끝나요';setTimeout(()=>{if(testArm&&Date.now()-testArm>=3900)drawTest()},4000);return}
   stopTest();
 };
-$('goSettings').onclick=()=>{drawTest();$('settingsSheet').hidden=false};
+$('goSettings').onclick=()=>{drawTest();drawDimBtn();$('settingsSheet').hidden=false};
 $('settingsClose').onclick=()=>{$('settingsSheet').hidden=true};
 $('scHow').onclick=e=>{e.preventDefault();e.stopPropagation();$('scSheet').hidden=false};
 $('scClose').onclick=()=>$('scSheet').hidden=true;
@@ -2892,7 +2939,7 @@ $('scClose').onclick=()=>$('scSheet').hidden=true;
 /* ---------- start ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 loadStyles().then(()=>{
-  map=new maplibregl.Map({container:'map',style:BASE[curStyle],center:AP[S.city].ll,zoom:1.7,maxPitch:75,attributionControl:{compact:true},
+  map=new maplibregl.Map({container:'map',style:BASE[curStyle],center:AP[S.city].ll,zoom:1.7,maxPitch:75,pixelRatio:Math.min(2,devicePixelRatio||1),attributionControl:{compact:true},
     localIdeographFontFamily:"'Pretendard Variable','Apple SD Gothic Neo','Malgun Gothic',sans-serif",fadeDuration:150});
   map.on('style.load',addOverlays);map.on('click',tapMap);
   ['dragstart','zoomstart','rotatestart','pitchstart'].forEach(ev=>map.on(ev,e=>{if(e.originalEvent)lastInteract=performance.now()}));
