@@ -23,12 +23,14 @@
   --yellow:#ffd60a; --visited:#ff9f43; --sky:#64d2ff; --green:#30d158; --red:#ff6b5a;
   --f:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"JetBrains Mono","Pretendard Variable",Pretendard,"Apple SD Gothic Neo",ui-monospace,"SF Mono",Menlo,monospace;
-  --st:max(env(safe-area-inset-top,0px),var(--stmin,28px)); --sb:max(env(safe-area-inset-bottom,0px),var(--sbmin,0px)); --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
+  --st:max(env(safe-area-inset-top,0px),var(--stmin,28px)); --sb:max(env(safe-area-inset-bottom,0px) - 22px,var(--sbmin,0px)); /* the home bar is thin: 22px closer to the edge still clears it */ --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
   color-scheme:dark;
 }
 /* Installed app: keep content clear of the status bar, camera hole and gesture bar */
-@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:12px;--sbmin:16px}}
-:root.app{--stmin:12px;--sbmin:16px}
+@media (display-mode: fullscreen), (display-mode: standalone){:root{--stmin:12px;--sbmin:10px}}
+:root.app{--stmin:12px;--sbmin:10px}
+/* added to the home screen with an older setting: iOS already leaves an empty strip below, so add nothing */
+:root.oldicon{--sb:0px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden;background:#000;color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased}
@@ -51,7 +53,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-of
 .col.r{right:calc(16px + var(--sr));top:calc(14px + var(--st))}
 
 /* sheets */
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) max(10px, calc(var(--sb) - 20px)) calc(12px + var(--sl))}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 calc(12px + var(--sr)) max(6px, calc(var(--sb) - 6px)) calc(12px + var(--sl))}
 .sheet>.in{max-width:520px;margin:0 auto;background:var(--sheet);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid var(--line);border-radius:26px;padding:18px;display:grid;gap:14px;max-height:56vh;overflow:auto}
 #home>.in{max-height:60vh}
 #toSeat{position:sticky;bottom:0;z-index:2}#toSeat[disabled]{opacity:1;background:#4a4a4f;color:#98989f}
@@ -154,7 +156,7 @@ body:has(#offer:not([hidden])) #infoCard,body:has(#excuse:not([hidden])) #infoCa
 .good[aria-pressed="true"]{box-shadow:0 0 0 2px var(--yellow) inset;background:rgba(255,214,10,.12)}.good[aria-pressed="true"] em{color:var(--yellow)}
 .good:focus-visible,.spd:focus-visible{outline:2px solid #fff}
 /* replay */
-#replayBar{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:0 calc(12px + var(--sr)) max(10px,calc(var(--sb) - 14px)) calc(12px + var(--sl))}
+#replayBar{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:0 calc(12px + var(--sr)) max(6px,calc(var(--sb) - 6px)) calc(12px + var(--sl))}
 #replayBar .in{max-width:520px;margin:0 auto;box-sizing:border-box;padding:14px 16px;border-radius:24px;background:var(--sheet);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--line);display:grid;gap:10px}
 .spds{display:grid;grid-template-columns:48px 1fr 1fr 1fr;gap:8px}
 .spd{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:10px 4px;border-radius:999px;background:rgba(255,255,255,.1);font-size:14px;white-space:nowrap}
@@ -704,7 +706,8 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
     <p style="margin:0"><b style="color:#fff">지도와 글꼴을 불러올 때</b><br>GitHub Pages, OpenFreeMap, Esri, unpkg, jsDelivr, Google Fonts에 접속해요. 이때 인터넷 주소(IP) 같은 접속 정보가 그 회사들에 전달될 수 있고, 각 회사의 방침을 따라요.</p>
     <p style="margin:0"><b style="color:#fff">알림과 단축어</b><br>알림은 허락했을 때만, 이 기기 안에서 보내요. 아이폰 단축어를 켜면 비행 시간(분) 숫자 하나만 단축어 앱에 넘겨요.</p>
     <p style="margin:0"><b style="color:#fff">배경화면 만들기와 공유</b><br>이미지는 기기 안에서 만들고, 직접 공유할 때만 밖으로 나가요.</p>
-    <span class="lbl">2026년 11월 24일부터 · 비행, 날씨, 전광판은 게임 속 정보예요.</span>
+    <p style="margin:0"><b style="color:#fff">기록 옮기기</b><br>기록 파일은 직접 저장을 누를 때만 기기 안에서 만들고, 고른 곳에만 저장돼요.</p>
+    <span class="lbl">2026년 11월 25일부터 · 비행, 날씨, 전광판은 게임 속 정보예요.</span>
   </div>
 </div></div>
 
@@ -733,8 +736,33 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <button class="pill dark sm" id="logOpen">내 비행 기록과 비행기 도감</button>
   <button class="pill dark sm" id="foodOpen2">음식 도감</button>
   <button class="pill dark sm" id="privOpen">개인정보 안내</button>
+  <button class="pill dark sm" id="bakOpen">기록 옮기기</button>
+  <button class="pill dark sm" id="gapOpen">화면 아래가 비어 보일 때</button>
   <button class="pill dark sm" id="goInstall" style="color:var(--yellow)">앱으로 설치</button>
-  <div class="mono" style="text-align:center;font-size:11px;color:#8a8a91;margin-top:2px">몰입 비행 v2.7.2 · 2026.11.25</div>
+  <div class="mono" style="text-align:center;font-size:11px;color:#8a8a91;margin-top:2px">몰입 비행 v2.7.3 · 2026.11.25</div>
+</div></div>
+
+<div class="sheet" id="bakSheet" hidden style="z-index:18"><div class="in" style="max-height:78vh">
+  <div class="row sp"><h2>기록 옮기기</h2><button class="ghost" id="bakClose">닫기</button></div>
+  <span class="lbl">아이콘을 지우면 기록도 같이 지워져요. 먼저 파일로 저장해 두면 다시 추가한 뒤에 그대로 불러올 수 있어요.</span>
+  <button class="pill dark sm" id="bakSave">기록 파일로 저장</button>
+  <button class="pill dark sm" id="bakLoad">저장한 기록 불러오기</button>
+  <input type="file" id="bakFile" accept=".txt,.json,text/plain,application/json" hidden>
+  <span class="lbl" id="bakInfo" role="status"></span>
+</div></div>
+
+<div class="sheet" id="gapSheet" hidden style="z-index:17"><div class="in" style="max-height:78vh">
+  <div class="row sp"><h2>화면 아래가 비어 보일 때</h2><button class="ghost" id="gapClose">닫기</button></div>
+  <span class="lbl" id="gapWhy"></span>
+  <button class="pill dark sm" id="gapFix">화면 다시 맞추기</button>
+  <div class="steps">
+    <div><b>기록 옮기기</b>에서 기록을 파일로 저장해요. 아이콘을 지우면 기록도 지워져서 꼭 먼저 해야 해요.</div>
+    <div>홈 화면에서 몰입 비행 아이콘을 길게 눌러 지워요.</div>
+    <div>Safari에서 앱 주소를 열고 공유에서 <b>홈 화면에 추가</b>를 눌러요.</div>
+    <div>새 아이콘으로 열고 <b>저장한 기록 불러오기</b>를 눌러요.</div>
+  </div>
+  <button class="pill dark sm" id="gapBak">기록 옮기기</button>
+  <div class="mono" id="gapNums" style="font-size:11px;line-height:1.7;color:#8a8a91;white-space:pre-line"></div>
 </div></div>
 
 <div class="sheet" id="installSheet" hidden style="z-index:17"><div class="in">
@@ -2252,7 +2280,7 @@ function loop(now){
   }else{if(followOn)setFollow(false)}
   if(mode==='home'&&!F&&!sel&&now-lastInteract>4000&&!map.isMoving()){
     // turn gently at 30 frames, rest after a minute alone or while another page covers the globe
-    if(now-lastInteract<64000&&['shopView','logView','apSheet','settingsSheet','milesSheet','foodSheet','privSheet','wallView'].every(i=>$(i).hidden)){spin+=dt;if(spin>.032){const c=map.getCenter();map.jumpTo({center:[c.lng+spin*2.2,c.lat]});spin=0}}
+    if(now-lastInteract<64000&&['shopView','logView','apSheet','settingsSheet','milesSheet','foodSheet','privSheet','wallView','bakSheet','gapSheet'].every(i=>$(i).hidden)){spin+=dt;if(spin>.032){const c=map.getCenter();map.jumpTo({center:[c.lng+spin*2.2,c.lat]});spin=0}}
   }
   if(sel&&now-selT>1000){selT=now;renderCard()}
   refreshNight();
@@ -2915,6 +2943,89 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 addEventListener('appinstalled',()=>{installEvt=null;$('goInstall').hidden=true;$('installSheet').hidden=true;toast('앱이 설치됐어요. 홈 화면에서 열어 보세요')});
 if(isStandalone())$('goInstall').hidden=true;
 const SHARE_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+/* ---------- keep the screen glued to the bottom edge ----------
+   iOS reads the status bar setting only when the icon is added. Icons added before v1.2.1 draw under the status bar
+   and lose the same height at the bottom; no code can draw there, so the app explains it.
+   The other cause is a viewport left shifted or short after the keyboard closes: put it back. */
+const inset=(()=>{const p=document.createElement('div');p.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)';document.body.append(p);return()=>{const c=getComputedStyle(p);return[parseFloat(c.paddingTop)||0,parseFloat(c.paddingBottom)||0]}})();
+let fullH=0,fullW=0,fitT=0,nudgeT=-1e9;
+const typing=()=>{const a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/^(range|checkbox|file)$/.test(a.type)};
+const oldIcon=()=>isIOS&&isStandalone()&&innerHeight>innerWidth&&inset()[0]>20&&screen.height-innerHeight>20;
+function shifted(){const v=window.visualViewport;return scrollY!==0||document.body.scrollTop!==0||!!v&&Math.abs(v.scale-1)<.01&&(v.offsetTop>1||innerHeight-v.height>1)||fullW===innerWidth&&fullH-innerHeight>8}
+function fitScreen(force){
+  document.documentElement.classList.toggle('oldicon',oldIcon());
+  if(typing())return;
+  if(!S.gapTold&&mode==='home'&&oldIcon()){S.gapTold=true;save();toast('화면 아래가 비어 있으면 설정의 안내를 봐 주세요')}
+  if(innerWidth!==fullW){fullW=innerWidth;fullH=0}
+  if(force||shifted()){
+    scrollTo(0,0);document.body.scrollTop=0;
+    const now=performance.now();
+    // rewriting the viewport line makes iOS measure the screen again; at most once every few seconds
+    if(isIOS&&(force||shifted())&&now-nudgeT>4000){
+      nudgeT=now;const m=document.querySelector('meta[name=viewport]'),c=m.content;m.content=c.replace('viewport-fit=cover','viewport-fit=auto');
+      requestAnimationFrame(()=>{m.content=c;setTimeout(()=>{scrollTo(0,0);if(mapReady)map.resize()},250)});
+    }
+  }
+  fullH=Math.max(fullH,innerHeight);
+}
+const fitSoon=ms=>{clearTimeout(fitT);fitT=setTimeout(()=>fitScreen(false),ms)};
+document.addEventListener('focusout',()=>fitSoon(450));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fitSoon(350)});
+addEventListener('pageshow',()=>fitSoon(350));addEventListener('orientationchange',()=>fitSoon(500));addEventListener('resize',()=>fitSoon(350));
+fitSoon(350);
+function drawGap(){
+  const o=oldIcon(),[t,b]=inset(),v=window.visualViewport;
+  $('gapWhy').textContent=o?'아이콘이 예전 설정으로 추가돼 있어요. 아이폰은 이 설정을 추가할 때 한 번만 읽어서, 아래 순서로 다시 추가해야 빈 곳이 없어져요.':'먼저 화면 다시 맞추기를 눌러 보세요. 그래도 비어 있으면 이 화면을 찍어 두고, 아래 순서로 아이콘을 다시 추가해 주세요.';
+  $('gapNums').textContent=`화면 ${screen.width}×${screen.height} · 앱 ${innerWidth}×${innerHeight} · 모자란 높이 ${screen.height-innerHeight}\n안전 여백 위 ${t} 아래 ${b} · 밀림 ${Math.round(scrollY)} · 보이는 곳 ${v?Math.round(v.offsetTop)+'부터 '+Math.round(v.height):'-'}\n${isStandalone()?'앱으로 열림':'브라우저로 열림'}${isIOS&&isStandalone()?o?' · 예전 아이콘':' · 지금 아이콘':''}`;
+}
+$('gapOpen').onclick=()=>{drawGap();$('gapSheet').hidden=false};
+$('gapClose').onclick=()=>{$('gapSheet').hidden=true};
+$('gapFix').onclick=()=>{fitScreen(true);setTimeout(drawGap,600);toast('화면을 다시 맞췄어요')};
+$('gapBak').onclick=$('bakOpen').onclick=()=>{bakIdle();$('bakInfo').textContent='';$('bakSheet').hidden=false};
+$('bakClose').onclick=()=>{bakIdle();$('bakSheet').hidden=true};
+
+/* ---------- carry the records over to a new icon ---------- */
+const BAK=['mf-v2','mf-real'];
+let bakPick=null,bakT=0;
+function bakIdle(){clearTimeout(bakT);bakPick=null;$('bakLoad').textContent='저장한 기록 불러오기'}
+function bakText(){save();const o={app:'molip-flight',v:1,at:new Date().toISOString(),data:{}};for(const k of BAK){const r=localStorage.getItem(k);if(r)o.data[k]=JSON.parse(r)}return JSON.stringify(o)}
+$('bakSave').onclick=async()=>{
+  let file;try{const d=new Date();file=new File([bakText()],`molip-flight-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.txt`,{type:'text/plain'})}catch(e){$('bakInfo').textContent='기록을 읽지 못했어요.';return}
+  if(isIOS&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file]});$('bakInfo').textContent='저장한 곳에 파일이 있는지 꼭 확인한 뒤에 아이콘을 지워 주세요. ‘파일에 저장’을 고르면 찾기 쉬워요.'}catch(e){$('bakInfo').textContent='아직 저장하지 않았어요.'}
+    return;
+  }
+  const a=document.createElement('a'),u=URL.createObjectURL(file);a.href=u;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(u),4000);$('bakInfo').textContent='받은 파일이 있는지 꼭 확인해 주세요.';
+};
+/* a record file holds plain numbers and names: anything that looks like markup is refused */
+function bakRead(text){
+  const o=JSON.parse(text);if(!o||o.app!=='molip-flight'||!o.data||typeof o.data!=='object')return null;
+  const bad=/[<>"`]/,clean=(x,d)=>d>9?false:typeof x==='string'?!bad.test(x):x&&typeof x==='object'?Object.entries(x).every(([k,v])=>!bad.test(k)&&k!=='__proto__'&&clean(v,d+1)):true;
+  const out={};
+  for(const k of BAK){const x=o.data[k];if(x===undefined)continue;if(!x||!AP[x.city]||!Array.isArray(x.visited)||!Array.isArray(x.tickets)||!Number.isFinite(x.miles)||!clean(x,0))return null;out[k]=x}
+  return out['mf-v2']&&(!out['mf-v2'].test||out['mf-real'])?out:null;
+}
+$('bakLoad').onclick=()=>{
+  if(S.live||F&&F.status==='flying'){$('bakInfo').textContent='비행이 끝난 뒤에 불러올 수 있어요.';return}
+  if(!bakPick){$('bakFile').value='';$('bakFile').click();return}
+  const d=bakPick;bakIdle();
+  // what was here stays in mf-before, so nothing is ever lost by loading the wrong file
+  const now=BAK.map(k=>[k,localStorage.getItem(k)]);
+  try{
+    const old=localStorage.getItem('mf-before');if(old)localStorage.setItem('mf-before-old',old);
+    localStorage.setItem('mf-before',JSON.stringify(Object.fromEntries(now)));
+    localStorage.setItem('mf-v2',JSON.stringify({...d['mf-v2'],live:null}));
+    if(d['mf-real'])localStorage.setItem('mf-real',JSON.stringify(d['mf-real']));else localStorage.removeItem('mf-real');
+  }catch(e){try{for(const [k,v] of now)if(v!==null)localStorage.setItem(k,v)}catch(_){}$('bakInfo').textContent='저장 공간이 모자라 불러오지 못했어요.';return}
+  save=()=>{};location.reload();
+};
+$('bakFile').onchange=async()=>{
+  const f=$('bakFile').files[0];if(!f)return;let d=null;try{if(f.size<3e6)d=bakRead(await f.text())}catch(e){}
+  if(!d){bakIdle();$('bakInfo').textContent='몰입 비행 기록 파일이 아니에요.';return}
+  bakIdle();bakPick=d;const r=d['mf-real']||d['mf-v2'];
+  $('bakInfo').textContent=`이 파일: 비행 ${+r.flights||0}번, 티켓 ${r.tickets.length}장, ${fmtMi(r.miles)}마일. 지금 기록은 이 파일의 기록으로 바뀌어요.`;
+  $('bakLoad').textContent='한 번 더 누르면 바꿔요';bakT=setTimeout(bakIdle,10000);
+};
 $('goInstall').onclick=async()=>{
   if(installEvt){installEvt.prompt();const r=await installEvt.userChoice.catch(()=>null);installEvt=null;if(r&&r.outcome==='accepted')return}
   const inApp=/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
