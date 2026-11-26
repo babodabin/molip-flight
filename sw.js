@@ -1,7 +1,7 @@
 // App files: network first so new versions show up right away, cache as fallback.
 // Libraries, fonts and map styles live in their own cache, so an app update never throws them away.
 // Map tiles are left to the browser's own cache.
-const CACHE = 'molip-v28', LIB = 'molip-libs-1';
+const CACHE = 'molip-v29', LIB = 'molip-libs-1';
 const SHELL = ['./', 'index.html', 'manifest.json', 'world.json', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 const NEED = [
   'https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js',

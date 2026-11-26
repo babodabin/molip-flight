@@ -721,13 +721,13 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
   <div class="mrules">
     <div><span>도착</span><span>보증금 전부 + 20%</span></div>
     <div><span>회항</span><span>보증금 절반을 잃음</span></div>
-    <div><span>비즈니스 · 좌석 값 100</span><span>도착하면 +25%</span></div>
-    <div><span>1등석 · 좌석 값 300</span><span>도착하면 +30%</span></div>
+    <div><span>비즈니스 · 좌석 값 1분에 0.5</span><span>도착하면 +27%</span></div>
+    <div><span>1등석 · 좌석 값 1분에 1.5</span><span>도착하면 +40%</span></div>
     <div><span>출발 1분 안에 취소</span><span>전부 돌려받음</span></div>
     <div><span>마일이 부족할 때</span><span>1시간까지 무료</span></div>
     <div><span>앱이 꺼졌을 때</span><span>다시 열면 이어서 비행</span></div>
   </div>
-  <span class="lbl">1시간 안에 갈 공항이 없는 곳에서는 가장 가까운 공항까지 무료예요. 좌석 값은 도착해도 돌려받지 않아요. 무료 비행은 일반석만 탈 수 있어요.</span>
+  <span class="lbl">1시간 안에 갈 공항이 없는 곳에서는 가장 가까운 공항까지 무료예요. 좌석 값은 도착해도 돌려받지 않지만, 항공사처럼 좋은 좌석일수록 보너스가 커서 어떤 길이로 타도 조금 더 남아요. 무료 비행은 일반석만 탈 수 있어요.</span>
 </div></div>
 
 <!-- INSTALL GUIDE -->
@@ -1086,6 +1086,7 @@ function typeFor(om){const km=om*R,r=Math.random();if(r<.014)return 'gold';if(r<
 
 /* ---------- version and update log: the newest row is the app version ---------- */
 const CHANGES=[
+  ['2.7.5','2026.11.26','1등석·비즈니스를 항공사처럼: 보너스 1등석 40%·비즈니스 27%, 좌석 값은 비행 시간에 비례해서 어떤 길이로 타도 손해 없이'],
   ['2.7.4','2026.11.26','출시 전 점검: 업데이트 기록 보기, 깨진 기록은 바로 전 기록으로 되찾기, 앱을 닫는 순간에도 비행 저장, 마일이 모자라면 일반석으로, 작은 버튼 키우기, 지도 출처 글자 흔들림 없애기, 가만히 둔 홈 화면은 쉬기'],
   ['2.7.3','2026.11.25','화면을 아래로 더 내림, 화면 아래 빈 공간 안내, 기록을 파일로 옮기기'],
   ['2.7.2','2026.11.25','업데이트 직후 인터넷이 끊겨도 열리게'],
@@ -1155,13 +1156,15 @@ const price=m=>m*10,fmtMi=n=>Math.round(n).toLocaleString('en-US'),CANCEL_MS=600
 function freeMax(){const from=AP[S.city];return Math.max(60,Math.min(...AIRPORTS.filter(a=>a!==from).map(a=>flightMin(from,a)).filter(m=>m>=30)))}
 function maxMin(){return Math.max(freeMax(),Math.floor(S.miles/10))}
 function stakeFor(m){return S.miles>=price(m)?price(m):0}
-/* better seats cost a fee that never comes back, and pay a bigger bonus; free flights are economy only */
-const CLASS={first:{n:'1등석',fee:300,rate:.3},biz:{n:'비즈니스',fee:100,rate:.25},eco:{n:'일반석',fee:0,rate:.2}};
-const clsOf=k=>CLASS[k]||CLASS.eco,bonusFor=(m,k)=>Math.round(price(m)*clsOf(k).rate);
+/* like airlines: better seats earn more (business 1.35x, first 2x the economy bonus).
+   The seat costs miles per minute and never comes back, so a better seat pays off a little at any length.
+   Per minute: economy +2, business +2.7-0.5 = +2.2, first +4-1.5 = +2.5. Free flights are economy only. */
+const CLASS={first:{n:'1등석',fee:1.5,rate:.4},biz:{n:'비즈니스',fee:.5,rate:.27},eco:{n:'일반석',fee:0,rate:.2}};
+const clsOf=k=>CLASS[k]||CLASS.eco,bonusFor=(m,k)=>Math.round(price(m)*clsOf(k).rate),feeFor=(m,k)=>Math.round(m*clsOf(k).fee);
 function seatBlock(m,k){
-  const c=clsOf(k);if(!c.fee)return '';const st=stakeFor(m);
+  const c=clsOf(k);if(!c.fee)return '';const st=stakeFor(m),fee=feeFor(m,k);
   if(!st)return `무료 비행은 일반석만 탈 수 있어요`;
-  return S.miles<st+c.fee?`${c.n}은 ${fmtMi(st+c.fee-S.miles)}마일이 더 필요해요`:'';
+  return S.miles<st+fee?`${c.n}은 ${fmtMi(st+fee-S.miles)}마일이 더 필요해요`:'';
 }
 let prevAt=0;
 function save(){try{
@@ -1480,7 +1483,7 @@ function buildSeats(){
   P.cabins.forEach((cab,ci)=>{
     const groups=cab.c.split(' '),lux=cab.k!=='eco',sw=lux?'minmax(0,40px)':'minmax(0,34px)',aisle=lux?'34px':'20px';
     const cols=groups.map(g=>`repeat(${g.length},${sw})`).join(' '+aisle+' ');
-    h+=(ci?service:'')+`<section class="cabin ${cab.k}" data-cabin="${cab.k}" style="--cols:${cols};--gap:${lux?'6px':'3px'};--pitch:${lux?'12px':'7px'}"><div class="cabname"><b>${cab.n}</b><span>${groups.map(g=>g.length).join('-')}${lux?` · ${CLASS[cab.k].fee}마일 · 보너스 ${CLASS[cab.k].rate*100}%`:''}</span></div>${lux&&seatBlock(plan.min,cab.k)?`<div class="cabname" style="margin-top:-6px">${seatBlock(plan.min,cab.k)}</div>`:''}`;
+    h+=(ci?service:'')+`<section class="cabin ${cab.k}" data-cabin="${cab.k}" style="--cols:${cols};--gap:${lux?'6px':'3px'};--pitch:${lux?'12px':'7px'}"><div class="cabname"><b>${cab.n}</b><span>${groups.map(g=>g.length).join('-')}${lux?` · 1분에 ${CLASS[cab.k].fee}마일 · 보너스 ${Math.round(CLASS[cab.k].rate*100)}%`:''}</span></div>${lux&&seatBlock(plan.min,cab.k)?`<div class="cabname" style="margin-top:-6px">${seatBlock(plan.min,cab.k)}</div>`:''}`;
     h+='<div class="srow" aria-hidden="true">'+groups.map(g=>[...g].map(l=>`<span class="ch">${l}</span>`).join('')).join('<span></span>')+'</div>';
     for(let r=cab.a;r<=cab.b;r++){
       if(cab.mid===r)h+=service;
@@ -1515,7 +1518,7 @@ function renderSeats(){
   const b=plan.seat&&$('fuse').querySelector(`[data-seat="${plan.seat}"]`);
   if(b){b.classList.add('sel');b.setAttribute('aria-pressed','true');b.style.setProperty('--sc',sc?sc.c:'#fff');b.innerHTML=sc?icon(sc,'#000'):''}
   const pc=clsOf(plan.cls);
-  $('fcSeat').textContent='좌석 '+[plan.seat||'',...(plan.seat&&pc.fee?[pc.n]:[]),...planSeatInfo()].join(' · ')+(plan.seat&&pc.fee?` · 좌석 값 ${pc.fee}마일, 도착 보너스 +${fmtMi(bonusFor(plan.min,plan.cls))}`:'');
+  $('fcSeat').textContent='좌석 '+[plan.seat||'',...(plan.seat&&pc.fee?[pc.n]:[]),...planSeatInfo()].join(' · ')+(plan.seat&&pc.fee?` · 좌석 값 ${feeFor(plan.min,plan.cls)}마일, 도착 보너스 +${fmtMi(bonusFor(plan.min,plan.cls))}`:'');
   $('chips').innerHTML=SCEN.map(s=>`<button class="chip" data-scen="${s.id}" style="--c:${s.c}" aria-pressed="${plan.scen===s.id}">${icon(s)}${s.n}</button>`).join('');
   $('chips').querySelectorAll('[data-scen]').forEach(b=>b.onclick=()=>{plan.scen=b.dataset.scen;renderSeats();setTimeout(()=>$('focusCard').hidden=true,350)});
   $('toPass').disabled=!(plan.seat&&plan.scen);
@@ -1673,13 +1676,13 @@ function board(){
   const pr=S.prefs||{};$('optStrict').checked=!!pr.strict;$('optWarn').checked=pr.warn!==false;$('optSc').checked=isIOS&&!!pr.sc;$('optMeal').checked=pr.meal!==false;F.restK=REST[pr.restK]?pr.restK:'mid';drawRest();$('optScRow').hidden=!isIOS;$('dndNote').hidden=isIOS;
   const st=stakeFor(r.min);
   const rc=clsOf(r.cls);
-  $('readyMiles').innerHTML=st?`보증금 <b>${fmtMi(st)}마일</b>을 걸어요. 도착하면 <b>${fmtMi(st+bonusFor(r.min,r.cls))}마일</b>을 받아요.<br>${rc.fee?`${rc.n} 좌석 값은 <b>${rc.fee}마일</b>이고 돌려받지 않아요.<br>`:''}회항하면 보증금 절반을 잃어요. 1분 안 취소는 무료예요.`:`보증금 없는 <b>무료 비행</b>이에요. 도착하면 <b>${fmtMi(price(r.min)*.2)}마일</b>을 받아요.`;
+  $('readyMiles').innerHTML=st?`보증금 <b>${fmtMi(st)}마일</b>을 걸어요. 도착하면 <b>${fmtMi(st+bonusFor(r.min,r.cls))}마일</b>을 받아요.<br>${rc.fee?`${rc.n} 좌석 값은 <b>${feeFor(r.min,r.cls)}마일</b>이고 돌려받지 않아요.<br>`:''}회항하면 보증금 절반을 잃어요. 1분 안 취소는 무료예요.`:`보증금 없는 <b>무료 비행</b>이에요. 도착하면 <b>${fmtMi(price(r.min)*.2)}마일</b>을 받아요.`;
   show('ready');
 }
 $('go').onclick=()=>{
   if(!F||F.status!=='taxi')return;
   if(seatBlock(F.min,F.cls)){F.cls='eco';const t=S.tickets.find(x=>x.no===F.no&&x.status==='flying');if(t)t.cls='eco'}
-  F.stake=stakeFor(F.min);F.fee=clsOf(F.cls).fee;S.miles-=F.stake+F.fee;
+  F.stake=stakeFor(F.min);F.fee=feeFor(F.min,F.cls);S.miles-=F.stake+F.fee;
   hudT1=hudD1='left';ac();F.status='flying';touchAt=performance.now();F.depUTC=Date.now();F.lastWall=Date.now();view='chase';northUp=false;
   const useSc=isIOS&&$('optSc').checked;
   F.strict=$('optStrict').checked;F.warnOn=$('optWarn').checked;F.mealOn=$('optMeal').checked;F.svc=0;F.offer=null;F.foods=[];F.rest=0;S.prefs={strict:F.strict,warn:F.warnOn,sc:useSc,meal:F.mealOn,restK:F.restK};snap();
